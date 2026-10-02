@@ -39,6 +39,18 @@ async function syncRecentOrdersFromShopify(admin: any, shop: string) {
                 key
                 value
               }
+              lineItems(first: 20) {
+                edges {
+                  node {
+                    id
+                    title
+                    customAttributes {
+                      key
+                      value
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -56,11 +68,20 @@ async function syncRecentOrdersFromShopify(admin: any, shop: string) {
         value: attr.value,
       }));
 
+      const lineItems = (node.lineItems?.edges || []).map((le: any) => ({
+        title: le.node.title,
+        properties: (le.node.customAttributes || []).map((attr: any) => ({
+          name: attr.key,
+          value: attr.value,
+        })),
+      }));
+
       await handleOrderCreate(shop, {
         id: orderId,
         name: node.name,
         note: node.note,
         note_attributes: noteAttributes,
+        line_items: lineItems,
       });
     }
   } catch (err) {

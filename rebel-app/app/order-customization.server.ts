@@ -28,9 +28,9 @@ export async function handleOrderCreate(shop: string, order: any) {
     }
 
     // Fallback: look for individual Custom Image attributes
-    if (imageUrls.length === 0) {
-      for (const attr of attributes) {
-        if (/^Custom Image \d+/i.test(attr.name) && attr.value && attr.value.startsWith("http")) {
+    for (const attr of attributes) {
+      if (/^Custom Image \d+/i.test(attr.name) && attr.value && attr.value.startsWith("http")) {
+        if (!imageUrls.includes(attr.value)) {
           imageUrls.push(attr.value);
         }
       }
@@ -45,7 +45,30 @@ export async function handleOrderCreate(shop: string, order: any) {
         a.name === "special_instructions"
     );
 
-    const specialRequest = (specialRequestAttr?.value || note || "").trim();
+    let specialRequest = (specialRequestAttr?.value || note || "").trim();
+
+    // ALSO: Extract images & text from line item properties (Product Page Customizer)
+    const lineItems = order.line_items || order.lineItems || [];
+    for (const item of lineItems) {
+      const props = item.properties || item.customAttributes || [];
+      for (const p of props) {
+        const key = p.name || p.key || "";
+        const val = typeof p.value === "string" ? p.value.trim() : "";
+        if (!val) continue;
+
+        if (val.startsWith("http://") || val.startsWith("https://")) {
+          if (!imageUrls.includes(val)) {
+            imageUrls.push(val);
+          }
+        } else if (/enter text|custom text|customization/i.test(key)) {
+          if (!specialRequest) {
+            specialRequest = val;
+          } else if (!specialRequest.includes(val)) {
+            specialRequest += ` | ${val}`;
+          }
+        }
+      }
+    }
 
     // Only save if there's actual custom data
     if (!specialRequest && imageUrls.length === 0) {
