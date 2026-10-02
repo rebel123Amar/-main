@@ -1,7 +1,7 @@
 {% comment %}
   Rebel Custom App — Product Page Customizer Snippet (Mosambi Media Style)
   Usage:
-    {% render 'product-customizer', app_url: 'https://separation-merchants-lectures-airfare.trycloudflare.com' %}
+    {% render 'product-customizer', app_url: 'https://main-pink-phi.vercel.app' %}
   Place this snippet directly inside the Product Form (right above the 'Add to cart' / Buy buttons) in:
   - sections/main-product.liquid
   - or snippets/buy-buttons.liquid
@@ -359,7 +359,7 @@
 
 <div
   class="rebel-product-customizer"
-  data-app-url="{{ app_url | default: 'https://separation-merchants-lectures-airfare.trycloudflare.com' }}"
+  data-app-url="{{ app_url | default: 'https://main-pink-phi.vercel.app' }}"
   data-product-title="{{ product.title | escape }}"
   data-shop="{{ shop.permanent_domain | escape }}"
 >
@@ -432,7 +432,7 @@
   if (window.__REBEL_PC_SNIPPET_LOADED__) return;
   window.__REBEL_PC_SNIPPET_LOADED__ = true;
 
-  const DEFAULT_APP_URL = "https://separation-merchants-lectures-airfare.trycloudflare.com";
+  const DEFAULT_APP_URL = "https://main-pink-phi.vercel.app";
   const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
   const ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".webp"];
   const MAX_SIZE_MB = 10;

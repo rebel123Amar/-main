@@ -6,7 +6,7 @@
 {% endcomment %}
 
 <script>
-  window.__REBEL_APP_URL__ = {{ block.settings.app_url | default: 'https://separation-merchants-lectures-airfare.trycloudflare.com' | json }};
+  window.__REBEL_APP_URL__ = {{ block.settings.app_url | default: 'https://main-pink-phi.vercel.app' | json }};
 </script>
 
 {% schema %}
@@ -20,7 +20,7 @@
       "type": "text",
       "id": "app_url",
       "label": "App Backend URL",
-      "default": "https://separation-merchants-lectures-airfare.trycloudflare.com"
+      "default": "https://main-pink-phi.vercel.app"
     }
   ]
 }

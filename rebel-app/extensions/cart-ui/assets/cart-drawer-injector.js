@@ -12,7 +12,7 @@
   if (window.__REBEL_INJECTOR_INITIALIZED__) return;
   window.__REBEL_INJECTOR_INITIALIZED__ = true;
 
-  const DEFAULT_APP_URL = "https://separation-merchants-lectures-airfare.trycloudflare.com";
+  const DEFAULT_APP_URL = "https://main-pink-phi.vercel.app";
   const MAX_FILES = 5;
   const MAX_SIZE_MB = 10;
   const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
