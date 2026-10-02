@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "71e800405c3122df8cf8c81daaa6b6b6"
-application_url = "http://localhost:3000"
+application_url = "https://main-pink-phi.vercel.app"
 embedded = true
 name = "rebel-custom-app"
 
@@ -14,8 +14,8 @@ scopes = "read_customers,read_metaobject_definitions,read_metaobjects,read_order
 [auth]
 redirect_urls = [
   "https://shopify.dev/apps/default-app-home/api/auth",
-  "http://localhost:3000/auth/callback",
-  "http://localhost:3000/auth/shopify/callback"
+  "https://main-pink-phi.vercel.app/auth/callback",
+  "https://main-pink-phi.vercel.app/auth/shopify/callback"
 ]
 
 [build]
