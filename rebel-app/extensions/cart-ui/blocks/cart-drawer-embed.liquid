@@ -1,0 +1,27 @@
+{% comment %}
+  Rebel Custom App — Cart Drawer Embed
+  Target: body (Loads globally on all storefront pages)
+  Automatically injects "Customize Your Order" (Instructions & Photo Upload)
+  into the slide-out Cart Drawer above the Checkout CTA.
+{% endcomment %}
+
+<script>
+  window.__REBEL_APP_URL__ = {{ block.settings.app_url | default: 'https://separation-merchants-lectures-airfare.trycloudflare.com' | json }};
+</script>
+
+{% schema %}
+{
+  "name": "Rebel Cart Drawer",
+  "target": "body",
+  "javascript": "cart-drawer-injector.js",
+  "stylesheet": "cart-customization.css",
+  "settings": [
+    {
+      "type": "text",
+      "id": "app_url",
+      "label": "App Backend URL",
+      "default": "https://separation-merchants-lectures-airfare.trycloudflare.com"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,44 @@
+{
+  "name": "rebel-custom-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "shopify app dev",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "setup": "prisma generate && prisma db push",
+    "docker-start": "npx prisma migrate deploy && node build/server/index.js",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.11.0",
+    "@remix-run/node": "^2.8.1",
+    "@remix-run/react": "^2.8.1",
+    "@remix-run/serve": "^2.8.1",
+    "@shopify/app-bridge-react": "^4.1.6",
+    "@shopify/polaris": "^12.9.0",
+    "@shopify/shopify-app-remix": "^3.1.0",
+    "@shopify/shopify-app-session-storage-prisma": "^5.0.5",
+    "@supabase/supabase-js": "^2.117.2",
+    "isbot": "^4.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sharp": "^0.33.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.8.1",
+    "@shopify/cli": "^3.60.0",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@types/uuid": "^9.0.8",
+    "prisma": "^5.11.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.8",
+    "vite-tsconfig-paths": "^4.3.2"
+  },
+  "workspaces": [
+    "extensions/*"
+  ]
+}

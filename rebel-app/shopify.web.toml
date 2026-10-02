@@ -1,0 +1,7 @@
+type = "frontend"
+roles = ["frontend", "backend"]
+port = 3000
+
+[commands]
+dev = "npx vite dev"
+build = "npx remix vite:build"

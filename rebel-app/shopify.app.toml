@@ -1,0 +1,29 @@
+name = "rebel-custom-app"
+client_id = "71e800405c3122df8cf8c81daaa6b6b6"
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = true
+
+[access_scopes]
+scopes = "read_orders,write_orders,read_products,write_products,read_customers,write_metaobject_definitions,write_metaobjects,read_metaobject_definitions,read_metaobjects"
+
+[auth]
+redirect_urls = [
+  "https://YOUR_APP_URL/auth/callback",
+  "https://YOUR_APP_URL/auth/shopify/callback",
+  "https://YOUR_APP_URL/exitiframe",
+]
+
+[webhooks]
+api_version = "2024-10"
+
+  [[webhooks.subscriptions]]
+  topics = ["orders/create"]
+  uri = "/api/webhooks"
+
+[pos]
+embedded = false
+
+[[extensions]]
+type = "theme"
+name = "cart-ui"
+handle = "cart-ui"

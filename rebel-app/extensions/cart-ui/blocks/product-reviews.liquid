@@ -1,0 +1,228 @@
+{% comment %}
+  Product Reviews App Block
+  - Shows star rating summary
+  - Lists approved reviews with media
+  - Review submission form with star picker, media upload
+  - Instagram link at bottom
+  - Spam prevention: honeypot field + rate-limit on server
+  
+  Place in: Online Store → Themes → Customize → Product page → Add block → Product Reviews
+{% endcomment %}
+
+{{ 'product-reviews.css' | asset_url | stylesheet_tag }}
+
+{%- assign product_id = product.id | append: '' -%}
+{%- assign product_handle = product.handle -%}
+
+<div
+  class="rebel-reviews"
+  id="rebel-reviews"
+  data-product-id="{{ product_id }}"
+  data-product-handle="{{ product_handle }}"
+  data-shop="{{ shop.permanent_domain }}"
+  data-app-url="{{ block.settings.app_url }}"
+  data-per-page="{{ block.settings.reviews_per_page | default: 5 }}"
+>
+
+  {%- comment -%} Section Heading {%- endcomment -%}
+  <div class="rebel-reviews__header">
+    <h2 class="rebel-reviews__title">Customer Reviews</h2>
+    <button class="rebel-reviews__write-btn" id="rebel-write-review-btn" type="button">
+      Write a Review
+    </button>
+  </div>
+
+  {%- comment -%} Rating Summary (populated by JS) {%- endcomment -%}
+  <div class="rebel-reviews__summary" id="rebel-rating-summary" style="display:none;">
+    <div class="rebel-reviews__avg-score" id="rebel-avg-score">—</div>
+    <div class="rebel-reviews__avg-stars" id="rebel-avg-stars"></div>
+    <div class="rebel-reviews__avg-count" id="rebel-avg-count"></div>
+    <div class="rebel-reviews__rating-bars" id="rebel-rating-bars"></div>
+  </div>
+
+  {%- comment -%} Review Submission Form {%- endcomment -%}
+  <div class="rebel-reviews__form-wrap" id="rebel-form-wrap" style="display:none;">
+    <form class="rebel-reviews__form" id="rebel-review-form" novalidate>
+
+      {%- comment -%} Honeypot — hidden, only bots fill this {%- endcomment -%}
+      <input type="text" name="website" class="rebel-reviews__honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <h3 class="rebel-reviews__form-title">Write Your Review</h3>
+
+      {%- comment -%} Star Rating Picker {%- endcomment -%}
+      <div class="rebel-reviews__field">
+        <label class="rebel-reviews__field-label">Your Rating <span class="rebel-reviews__required">*</span></label>
+        <div class="rebel-reviews__star-picker" id="rebel-star-picker" role="radiogroup" aria-label="Select rating">
+          {%- for i in (1..5) -%}
+            <button
+              type="button"
+              class="rebel-reviews__star-btn"
+              data-value="{{ i }}"
+              aria-label="{{ i }} star{% if i > 1 %}s{% endif %}"
+            >★</button>
+          {%- endfor -%}
+        </div>
+        <input type="hidden" name="rating" id="rebel-rating-input" value="" />
+        <p class="rebel-reviews__field-error" id="rebel-rating-error" style="display:none;">Please select a rating.</p>
+      </div>
+
+      {%- comment -%} Name {%- endcomment -%}
+      <div class="rebel-reviews__field">
+        <label class="rebel-reviews__field-label" for="rebel-name">
+          Name <span class="rebel-reviews__required">*</span>
+        </label>
+        <input
+          type="text"
+          id="rebel-name"
+          name="authorName"
+          class="rebel-reviews__input"
+          placeholder="Your name"
+          maxlength="100"
+          required
+        />
+        <p class="rebel-reviews__field-error" id="rebel-name-error" style="display:none;">Please enter your name.</p>
+      </div>
+
+      {%- comment -%} Email {%- endcomment -%}
+      <div class="rebel-reviews__field">
+        <label class="rebel-reviews__field-label" for="rebel-email">
+          Email <span class="rebel-reviews__required">*</span>
+          <span class="rebel-reviews__hint">(not displayed publicly)</span>
+        </label>
+        <input
+          type="email"
+          id="rebel-email"
+          name="authorEmail"
+          class="rebel-reviews__input"
+          placeholder="your@email.com"
+          required
+        />
+        <p class="rebel-reviews__field-error" id="rebel-email-error" style="display:none;">Please enter a valid email.</p>
+      </div>
+
+      {%- comment -%} Review Title {%- endcomment -%}
+      <div class="rebel-reviews__field">
+        <label class="rebel-reviews__field-label" for="rebel-title">Review Title</label>
+        <input
+          type="text"
+          id="rebel-title"
+          name="title"
+          class="rebel-reviews__input"
+          placeholder="Summarize your experience"
+          maxlength="200"
+        />
+      </div>
+
+      {%- comment -%} Review Body {%- endcomment -%}
+      <div class="rebel-reviews__field">
+        <label class="rebel-reviews__field-label" for="rebel-body">
+          Review <span class="rebel-reviews__required">*</span>
+        </label>
+        <textarea
+          id="rebel-body"
+          name="reviewBody"
+          class="rebel-reviews__textarea"
+          placeholder="Tell others about your experience with this product…"
+          rows="4"
+          maxlength="2000"
+          required
+        ></textarea>
+        <p class="rebel-reviews__field-error" id="rebel-body-error" style="display:none;">Please write a review.</p>
+      </div>
+
+      {%- comment -%} Media Upload {%- endcomment -%}
+      <div class="rebel-reviews__field" id="rebel-review-upload-wrap">
+        <label class="rebel-reviews__field-label">
+          Photos / Videos
+          <span class="rebel-reviews__hint">(optional — max 5 files, 10MB each)</span>
+        </label>
+        <div class="rebel-reviews__upload-area" id="rebel-review-upload-area">
+          <input
+            type="file"
+            id="rebel-review-files"
+            class="rebel-reviews__file-input"
+            accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
+            multiple
+          />
+          <div class="rebel-reviews__upload-placeholder">
+            <span>📷</span>
+            <span>Tap to add photos or videos</span>
+          </div>
+        </div>
+        <div class="rebel-reviews__media-previews" id="rebel-review-previews"></div>
+        <div class="rebel-reviews__upload-status" id="rebel-review-upload-status" style="display:none;">
+          <span class="rebel-reviews__spinner"></span>
+          <span>Uploading media…</span>
+        </div>
+      </div>
+
+      {%- comment -%} Submit {%- endcomment -%}
+      <div class="rebel-reviews__form-footer">
+        <button type="submit" class="rebel-reviews__submit-btn" id="rebel-submit-btn">
+          Submit Review
+        </button>
+        <button type="button" class="rebel-reviews__cancel-btn" id="rebel-cancel-btn">
+          Cancel
+        </button>
+      </div>
+
+      <div class="rebel-reviews__form-msg" id="rebel-form-msg" style="display:none;"></div>
+    </form>
+  </div>
+
+  {%- comment -%} Reviews List (populated by JS) {%- endcomment -%}
+  <div class="rebel-reviews__list" id="rebel-reviews-list">
+    <div class="rebel-reviews__loading" id="rebel-reviews-loading">
+      <span class="rebel-reviews__spinner"></span> Loading reviews…
+    </div>
+  </div>
+
+  {%- comment -%} Load More {%- endcomment -%}
+  <div class="rebel-reviews__load-more-wrap" id="rebel-load-more-wrap" style="display:none;">
+    <button class="rebel-reviews__load-more" id="rebel-load-more" type="button">
+      Load More Reviews
+    </button>
+  </div>
+
+  {%- comment -%} Instagram Link — always shown below reviews {%- endcomment -%}
+  <div class="rebel-reviews__instagram" id="rebel-instagram-link" style="display:none;">
+    <span class="rebel-reviews__instagram-icon">📸</span>
+    To check all reviews kindly visit our Instagram highlight
+    <a href="#" id="rebel-ig-url" target="_blank" rel="noopener noreferrer">'Reviews'</a>
+  </div>
+
+</div>
+
+<script
+  src="{{ 'product-reviews.js' | asset_url }}"
+  defer
+  data-app-url="{{ block.settings.app_url }}"
+  data-shop="{{ shop.permanent_domain }}"
+  data-product-id="{{ product_id }}"
+  data-product-handle="{{ product_handle }}"
+></script>
+
+{% schema %}
+{
+  "name": "Product Reviews",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "app_url",
+      "label": "App URL",
+      "default": "https://orders-taken-canberra-ten.trycloudflare.com",
+      "info": "Your deployed Rebel app URL (e.g. https://rebel-app.railway.app)"
+    },
+    {
+      "type": "range",
+      "id": "reviews_per_page",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "default": 5,
+      "label": "Reviews per page"
+    }
+  ]
+}
+{% endschema %}

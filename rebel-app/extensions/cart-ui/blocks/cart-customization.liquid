@@ -1,0 +1,213 @@
+{% comment %}
+  Rebel Custom App — Cart Customization Block
+  - Restricted strictly to the Cart page (Dawn theme compatible)
+  - Title: "Customize Your Order"
+  - Special Instructions textarea with live persistence
+  - Multi-image upload (JPG, JPEG, PNG, WEBP) with previews and remove
+  - Safe, reversible Theme App Extension (never modifies theme core code)
+  - Fully compatible with Shopify Basic plan
+{% endcomment %}
+
+{%- if template.name == 'cart' or request.page_type == 'cart' -%}
+  {{ 'cart-customization.css' | asset_url | stylesheet_tag }}
+
+  {%- assign saved_note = cart.attributes['Special Instructions'] | default: cart.attributes._rebel_special_request | default: cart.note | escape -%}
+  {%- assign max_images = block.settings.max_images | default: 5 -%}
+  {%- assign max_size_mb = block.settings.max_size_mb | default: 10 -%}
+
+  <div
+    class="rebel-cart-custom"
+    id="rebel-cart-customization"
+    data-max-files="{{ max_images }}"
+    data-max-size-mb="{{ max_size_mb }}"
+    data-app-url="{% if block.settings.app_url != blank and block.settings.app_url contains 'trycloudflare' %}{{ block.settings.app_url | escape }}{% else %}https://docs-data-motivation-getting.trycloudflare.com{% endif %}"
+    data-shop="{{ shop.permanent_domain | escape }}"
+  >
+    <!-- Section Header: Customize Your Order -->
+    <div class="rebel-cart-custom__header">
+      <div class="rebel-cart-custom__header-main">
+        <div class="rebel-cart-custom__title-row">
+          <span class="rebel-cart-custom__icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+          </span>
+          <h3 class="rebel-cart-custom__title">
+            {{ block.settings.heading | default: "Customize Your Order" }}
+          </h3>
+        </div>
+        {%- if block.settings.subheading != blank -%}
+          <p class="rebel-cart-custom__subtitle">{{ block.settings.subheading }}</p>
+        {%- endif -%}
+      </div>
+      <div class="rebel-cart-custom__desktop-badge" aria-hidden="true">
+        <span class="rebel-cart-custom__badge-dot"></span>
+        <span>Personalization & Artwork</span>
+      </div>
+    </div>
+
+    <!-- Responsive Body: 1-col on mobile, 2-col side-by-side on desktop -->
+    <div class="rebel-cart-custom__body">
+      <!-- Special Instructions Section -->
+      <div class="rebel-cart-custom__section">
+        <div class="rebel-cart-custom__label-row">
+          <label class="rebel-cart-custom__label" for="rebel-special-request">
+            {{ block.settings.instructions_label | default: "Special Instructions" }}
+          </label>
+          <span class="rebel-cart-custom__optional">(Optional)</span>
+        </div>
+
+        <textarea
+          id="rebel-special-request"
+          class="rebel-cart-custom__textarea"
+          name="attributes[Special Instructions]"
+          placeholder="{{ block.settings.instructions_placeholder | default: 'Add personalization details, gift notes, engraving requests, or specific instructions...' }}"
+          rows="3"
+          maxlength="1000"
+        >{{ saved_note }}</textarea>
+
+        <div class="rebel-cart-custom__textarea-footer">
+          <span class="rebel-cart-custom__save-status" id="rebel-save-status">Saved</span>
+          <div class="rebel-cart-custom__char-count">
+            <span id="rebel-char-count">0</span>/1000
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Upload Section -->
+      <div class="rebel-cart-custom__section">
+        <div class="rebel-cart-custom__label-row">
+          <label class="rebel-cart-custom__label">
+            {{ block.settings.upload_label | default: "Upload Reference Images" }}
+            <span class="rebel-cart-custom__required-star" aria-hidden="true">*</span>
+          </label>
+          <span class="rebel-cart-custom__required-tag" id="rebel-image-count-hint">
+            Required · Max {{ max_images }} images
+          </span>
+        </div>
+
+        <!-- Drag & Drop Upload Box -->
+        <div class="rebel-cart-custom__upload-area" id="rebel-upload-drop" tabindex="0" role="button" aria-label="Upload reference images">
+          <input
+            type="file"
+            id="rebel-file-input"
+            class="rebel-cart-custom__file-input"
+            accept="image/jpeg,image/png,image/webp,image/jpg"
+            multiple
+            aria-label="Choose reference images"
+          />
+          <div class="rebel-cart-custom__upload-placeholder" id="rebel-upload-placeholder">
+            <div class="rebel-cart-custom__upload-icon-wrap" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <div class="rebel-cart-custom__upload-text">
+              <span class="rebel-cart-custom__upload-main">
+                <strong>Click to upload</strong> or drag & drop images
+              </span>
+              <span class="rebel-cart-custom__upload-sub">
+                JPG, JPEG, PNG, or WEBP (Max {{ max_size_mb }}MB each)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Helpful Error Banner -->
+        <div class="rebel-cart-custom__error-box" id="rebel-error-box" style="display: none;" role="alert">
+          <span class="rebel-cart-custom__error-icon" aria-hidden="true">⚠️</span>
+          <span class="rebel-cart-custom__error-text" id="rebel-error-text"></span>
+          <button type="button" class="rebel-cart-custom__error-close" id="rebel-error-close" aria-label="Dismiss error">✕</button>
+        </div>
+
+        <!-- Upload Progress Indicator -->
+        <div class="rebel-cart-custom__upload-status" id="rebel-upload-status" style="display: none;">
+          <span class="rebel-cart-custom__spinner" aria-hidden="true"></span>
+          <span id="rebel-upload-status-text">Uploading reference images...</span>
+        </div>
+
+        <!-- Previews Container -->
+        <div class="rebel-cart-custom__previews-wrap" id="rebel-previews-wrap" style="display: none;">
+          <div class="rebel-cart-custom__previews-header">
+            <span class="rebel-cart-custom__previews-title" id="rebel-previews-count">Attached Images (0)</span>
+            <span class="rebel-cart-custom__previews-hint">Click ✕ to remove any image</span>
+          </div>
+          <div class="rebel-cart-custom__previews" id="rebel-previews"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.__REBEL_APP_URL__ = "https://docs-data-motivation-getting.trycloudflare.com";
+  </script>
+  <script src="{{ 'cart-customization.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart Customization",
+  "target": "section",
+  "templates": ["cart"],
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Customize Your Order"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Add personalized instructions and reference images for your items"
+    },
+    {
+      "type": "text",
+      "id": "instructions_label",
+      "label": "Special Instructions Label",
+      "default": "Special Instructions"
+    },
+    {
+      "type": "text",
+      "id": "instructions_placeholder",
+      "label": "Special Instructions Placeholder",
+      "default": "Add personalization details, gift notes, engraving requests, or specific instructions..."
+    },
+    {
+      "type": "text",
+      "id": "upload_label",
+      "label": "Upload Field Label",
+      "default": "Upload Reference Images"
+    },
+    {
+      "type": "range",
+      "id": "max_images",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Maximum Images Allowed",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "max_size_mb",
+      "min": 2,
+      "max": 25,
+      "step": 1,
+      "label": "Max Size Per File (MB)",
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "app_url",
+      "label": "App Backend URL",
+      "default": "https://docs-data-motivation-getting.trycloudflare.com",
+      "info": "The deployed Rebel Custom App backend URL"
+    }
+  ]
+}
+{% endschema %}

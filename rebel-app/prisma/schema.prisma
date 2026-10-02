@@ -1,0 +1,79 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // Change to "postgresql" for production
+  url      = env("DATABASE_URL")
+}
+
+// Shopify app session storage (required by @shopify/shopify-app-session-storage-prisma)
+model Session {
+  id          String    @id
+  shop        String
+  state       String
+  isOnline    Boolean   @default(false)
+  scope       String?
+  expires     DateTime?
+  accessToken String
+  userId      BigInt?
+  firstName   String?
+  lastName    String?
+  email       String?
+  accountOwner Boolean  @default(false)
+  locale      String?
+  collaborator Boolean? @default(false)
+  emailVerified Boolean? @default(false)
+}
+
+// Product reviews
+model Review {
+  id          String   @id @default(cuid())
+  shopDomain  String
+  productId   String
+  productHandle String  @default("")
+  authorName  String
+  authorEmail String
+  rating      Int      // 1–5
+  title       String   @default("")
+  body        String
+  status      String   @default("pending") // pending | approved | rejected
+  mediaUrls   String   @default("[]") // JSON array of S3 URLs
+  ipAddress   String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([shopDomain, productId, status])
+  @@index([shopDomain, status])
+}
+
+// Order custom requests & uploaded image references
+model OrderCustomization {
+  id          String   @id @default(cuid())
+  shopDomain  String
+  orderId     String
+  orderName   String   @default("")
+  specialRequest String @default("")
+  imageUrls   String   @default("[]") // JSON array of S3 URLs
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([shopDomain, orderId])
+  @@index([shopDomain])
+}
+
+// App settings per shop
+model AppSettings {
+  id                  String   @id @default(cuid())
+  shopDomain          String   @unique
+  instagramUrl        String   @default("https://www.instagram.com/")
+  autoApproveReviews  Boolean  @default(false)
+  reviewsPerPage      Int      @default(5)
+  allowMediaUploads   Boolean  @default(true)
+  maxUploadSizeMb     Int      @default(10)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}

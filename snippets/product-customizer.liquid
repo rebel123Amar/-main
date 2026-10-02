@@ -1,0 +1,942 @@
+{% comment %}
+  Rebel Custom App — Product Page Customizer Snippet (Mosambi Media Style)
+  Usage:
+    {% render 'product-customizer', app_url: 'https://separation-merchants-lectures-airfare.trycloudflare.com' %}
+  Place this snippet directly inside the Product Form (right above the 'Add to cart' / Buy buttons) in:
+  - sections/main-product.liquid
+  - or snippets/buy-buttons.liquid
+{% endcomment %}
+
+<style>
+.rebel-product-customizer {
+  display: block;
+  width: 100%;
+  margin: 18px 0 16px;
+  font-family: inherit;
+  color: #111827;
+  box-sizing: border-box;
+}
+.rebel-pc-field-group {
+  margin-bottom: 16px;
+}
+.rebel-pc-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+.rebel-pc-label span.req {
+  color: #ef4444;
+  margin-left: 3px;
+}
+.rebel-pc-label span.counter {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+}
+.rebel-pc-input-text {
+  width: 100%;
+  height: 44px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.rebel-pc-input-text:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 1px #111827;
+}
+.rebel-pc-dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  background-color: #f3f4f6;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.rebel-pc-dropzone:hover {
+  background-color: #ebeef2;
+  border-color: #9ca3af;
+}
+.rebel-pc-dropzone.dragover {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  border-style: solid;
+}
+.rebel-pc-dropzone.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+.rebel-pc-dropzone input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.rebel-pc-dropzone-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #4b5563;
+  pointer-events: none;
+}
+.rebel-pc-dropzone-content .browse-link {
+  color: #111827;
+  font-weight: 500;
+  text-decoration: underline;
+}
+.rebel-pc-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+.rebel-pc-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.rebel-pc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.rebel-pc-thumb .remove-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+  z-index: 5;
+}
+.rebel-pc-thumb .remove-btn:hover {
+  background: #dc2626;
+}
+.rebel-pc-thumb .uploading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+.rebel-pc-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #111827;
+  border-radius: 50%;
+  animation: rebelSpin 0.7s linear infinite;
+}
+@keyframes rebelSpin {
+  to { transform: rotate(360deg); }
+}
+.rebel-pc-error-banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.4;
+  animation: rebelShake 0.4s ease-in-out;
+}
+@keyframes rebelShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.rebel-pc-status {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.rebel-property-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  font-size: 13px !important;
+  margin-left: 2px !important;
+}
+.rebel-slide-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+  backdrop-filter: blur(2px);
+}
+.rebel-slide-drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.rebel-slide-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 999999;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.rebel-slide-drawer.active {
+  transform: translateX(0);
+}
+.rebel-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f2f4;
+}
+.rebel-drawer-head h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+.rebel-drawer-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rebel-drawer-close-btn:hover {
+  color: #111827;
+}
+.rebel-drawer-items-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+.rebel-drawer-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.rebel-drawer-item-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  background: #f9fafb;
+}
+.rebel-drawer-item-details {
+  flex: 1;
+  font-size: 13px;
+}
+.rebel-drawer-item-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 2px;
+}
+.rebel-drawer-item-price {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+.rebel-drawer-item-prop {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 3px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+.rebel-drawer-item-prop strong {
+  color: #1f2937;
+  font-weight: 500;
+}
+.rebel-drawer-footer {
+  padding: 18px 20px 24px;
+  border-top: 1px solid #f1f2f4;
+  background: #fafafa;
+}
+.rebel-drawer-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 14px;
+}
+.rebel-drawer-checkout-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #111827;
+  color: #ffffff !important;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none !important;
+  box-sizing: border-box;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.rebel-drawer-checkout-btn:hover {
+  background: #000000;
+}
+</style>
+
+<div
+  class="rebel-product-customizer"
+  data-app-url="{{ app_url | default: 'https://separation-merchants-lectures-airfare.trycloudflare.com' }}"
+  data-product-title="{{ product.title | escape }}"
+  data-shop="{{ shop.permanent_domain | escape }}"
+>
+  <div class="rebel-pc-error-banner" role="alert">
+    <span class="rebel-pc-error-text"></span>
+  </div>
+
+  <div class="rebel-pc-status" role="status">
+    <div class="rebel-pc-spinner"></div>
+    <span class="rebel-pc-status-text">Uploading photos...</span>
+  </div>
+
+  <!-- 1. Enter Text -->
+  <div class="rebel-pc-field-group rebel-pc-text-group">
+    <label class="rebel-pc-label" for="rebel-pc-text-input">
+      <span>Enter Text<span class="req" style="display:none;">*</span></span>
+    </label>
+    <input
+      type="text"
+      id="rebel-pc-text-input"
+      class="rebel-pc-input-text"
+      placeholder="Enter Text"
+      autocomplete="off"
+    />
+  </div>
+
+  <!-- 2. Select (4-6) Images -->
+  <div class="rebel-pc-field-group">
+    <label class="rebel-pc-label">
+      <span>Select (4-6) Images<span class="req">*</span></span>
+      <span class="counter" id="rebel-pc-collage-counter">(0 selected)</span>
+    </label>
+    <div class="rebel-pc-dropzone" id="rebel-pc-collage-drop" tabindex="0" role="button">
+      <input
+        type="file"
+        id="rebel-pc-collage-input"
+        accept="image/jpeg,image/png,image/webp,image/jpg"
+        multiple
+        aria-label="Upload collage images"
+      />
+      <div class="rebel-pc-dropzone-content">
+        <span>Drag & Drop your files or <span class="browse-link">Browse</span></span>
+      </div>
+    </div>
+    <div class="rebel-pc-thumbnails" id="rebel-pc-collage-thumbs"></div>
+  </div>
+
+  <!-- 3. Select 1 Pop-Out Image -->
+  <div class="rebel-pc-field-group">
+    <label class="rebel-pc-label">
+      <span>Select 1 Pop-Out Image<span class="req">*</span></span>
+    </label>
+    <div class="rebel-pc-dropzone" id="rebel-pc-popout-drop" tabindex="0" role="button">
+      <input
+        type="file"
+        id="rebel-pc-popout-input"
+        accept="image/jpeg,image/png,image/webp,image/jpg"
+        aria-label="Upload pop-out image"
+      />
+      <div class="rebel-pc-dropzone-content">
+        <span>Drag & Drop your files or <span class="browse-link">Browse</span></span>
+      </div>
+    </div>
+    <div class="rebel-pc-thumbnails" id="rebel-pc-popout-thumbs"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  if (window.__REBEL_PC_SNIPPET_LOADED__) return;
+  window.__REBEL_PC_SNIPPET_LOADED__ = true;
+
+  const DEFAULT_APP_URL = "https://separation-merchants-lectures-airfare.trycloudflare.com";
+  const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+  const ALLOWED_EXT = [".jpg", ".jpeg", ".png", ".webp"];
+  const MAX_SIZE_MB = 10;
+
+  function getBackendUrl() {
+    let url = window.__REBEL_APP_URL__ || DEFAULT_APP_URL;
+    const container = document.querySelector(".rebel-product-customizer");
+    if (container && container.dataset.appUrl) {
+      url = container.dataset.appUrl;
+    }
+    return (url || "").trim().replace(/\/$/, "");
+  }
+
+  let collageImages = [];
+  let popoutImage = null;
+  let isSubmitting = false;
+
+  function init() {
+    const container = document.querySelector(".rebel-product-customizer");
+    if (!container) return;
+
+    setupCollage(container);
+    setupPopout(container);
+    setupActionInterception(container);
+    setupDrawerLinks();
+    setupHeaderCartInterceptor();
+  }
+
+  function setupHeaderCartInterceptor() {
+    document.addEventListener("click", function(e) {
+      const cartTrigger = e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon");
+      if (!cartTrigger) return;
+      const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
+      if (!dawnDrawer) {
+        e.preventDefault(); e.stopPropagation();
+        renderRebelSlideDrawer();
+      }
+    }, true);
+  }
+
+  function setupCollage(container) {
+    const drop = container.querySelector("#rebel-pc-collage-drop");
+    const input = container.querySelector("#rebel-pc-collage-input");
+    if (!drop || !input) return;
+
+    ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("dragover"); }));
+    ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("dragover"); }));
+
+    drop.addEventListener("drop", e => {
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length > 0) handleCollage(files, container);
+    });
+
+    input.addEventListener("change", e => {
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) handleCollage(files, container);
+      e.target.value = "";
+    });
+  }
+
+  function handleCollage(files, container) {
+    clearErr(container);
+    if (collageImages.length + files.length > 6) {
+      showErr(container, "Maximum 6 images allowed for collage.");
+      return;
+    }
+    for (const f of files) {
+      const ext = (f.name.substring(f.name.lastIndexOf(".")) || "").toLowerCase();
+      const mime = (f.type || "").toLowerCase();
+      if (!ALLOWED_MIME.includes(mime) && !ALLOWED_EXT.includes(ext)) {
+        showErr(container, `"${f.name}" is not supported (JPG, PNG, WEBP only).`);
+        return;
+      }
+    }
+    files.forEach(f => {
+      const item = {
+        id: "c-" + Math.random().toString(36).substring(2, 8),
+        file: f,
+        url: null,
+        preview: URL.createObjectURL(f),
+        uploading: true
+      };
+      collageImages.push(item);
+      renderCollage(container);
+      uploadFile(item, container, () => renderCollage(container));
+    });
+    renderCollage(container);
+  }
+
+  function renderCollage(container) {
+    const thumbWrap = container.querySelector("#rebel-pc-collage-thumbs");
+    const counter = container.querySelector("#rebel-pc-collage-counter");
+    if (counter) counter.textContent = `(${collageImages.length} selected)`;
+    if (!thumbWrap) return;
+    thumbWrap.innerHTML = "";
+    collageImages.forEach(img => {
+      const div = document.createElement("div");
+      div.className = "rebel-pc-thumb";
+      div.innerHTML = `
+        <img src="${img.preview}" />
+        <button type="button" class="remove-btn">×</button>
+        ${img.uploading ? '<div class="uploading-overlay"><div class="rebel-pc-spinner"></div></div>' : ""}
+      `;
+      div.querySelector(".remove-btn").addEventListener("click", e => {
+        e.stopPropagation();
+        collageImages = collageImages.filter(x => x.id !== img.id);
+        renderCollage(container);
+      });
+      thumbWrap.appendChild(div);
+    });
+  }
+
+  function setupPopout(container) {
+    const drop = container.querySelector("#rebel-pc-popout-drop");
+    const input = container.querySelector("#rebel-pc-popout-input");
+    if (!drop || !input) return;
+
+    ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("dragover"); }));
+    ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("dragover"); }));
+
+    drop.addEventListener("drop", e => {
+      const files = Array.from(e.dataTransfer?.files || []);
+      if (files.length > 0) handlePopout(files[0], container);
+    });
+
+    input.addEventListener("change", e => {
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) handlePopout(files[0], container);
+      e.target.value = "";
+    });
+  }
+
+  function handlePopout(file, container) {
+    clearErr(container);
+    const item = {
+      id: "p-" + Math.random().toString(36).substring(2, 8),
+      file: file,
+      url: null,
+      preview: URL.createObjectURL(file),
+      uploading: true
+    };
+    popoutImage = item;
+    renderPopout(container);
+    uploadFile(item, container, () => renderPopout(container));
+  }
+
+  function renderPopout(container) {
+    const thumbWrap = container.querySelector("#rebel-pc-popout-thumbs");
+    if (!thumbWrap) return;
+    thumbWrap.innerHTML = "";
+    if (!popoutImage) return;
+
+    const div = document.createElement("div");
+    div.className = "rebel-pc-thumb";
+    div.innerHTML = `
+      <img src="${popoutImage.preview}" />
+      <button type="button" class="remove-btn">×</button>
+      ${popoutImage.uploading ? '<div class="uploading-overlay"><div class="rebel-pc-spinner"></div></div>' : ""}
+    `;
+    div.querySelector(".remove-btn").addEventListener("click", e => {
+      e.stopPropagation();
+      popoutImage = null;
+      renderPopout(container);
+    });
+    thumbWrap.appendChild(div);
+  }
+
+  async function uploadFile(item, container, cb) {
+    try {
+      const formData = new FormData();
+      formData.append("files", item.file);
+      const res = await fetch(`${getBackendUrl()}/api/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.success && data.urls && data.urls[0]) {
+        item.url = data.urls[0];
+        item.uploading = false;
+      } else {
+        item.uploading = false;
+        showErr(container, data.error || "Upload failed");
+      }
+    } catch (_) {
+      item.uploading = false;
+      showErr(container, "Server connection failed");
+    } finally {
+      if (cb) cb();
+    }
+  }
+
+  function setupActionInterception(container) {
+    function handleActionClick(e) {
+      if (!document.contains(container)) return;
+
+      const buyBtn = e.target.closest(
+        ".shopify-payment-button__button, .shopify-payment-button button, [data-testid='Checkout-button'], .shopify-payment-button, [data-shopify='payment-button'], button[name='checkout']"
+      );
+      const addBtn = e.target.closest(
+        'button[name="add"], #ProductSubmitButton, .product-form__submit, form[action*="/cart/add"] button[type="submit"], form[action*="/cart/add"] [type="submit"]'
+      );
+      if (!buyBtn && !addBtn) return;
+
+      const isBuyNow = Boolean(buyBtn);
+      const actionBtn = buyBtn || addBtn;
+      const actionLabel = isBuyNow ? "buying now" : "adding to cart";
+
+      if (collageImages.length === 0) {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        showErr(container, `⚠️ Please select your (4-6) images before ${actionLabel}.`);
+        container.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      if (!popoutImage) {
+        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+        showErr(container, `⚠️ Please select 1 Pop-Out image before ${actionLabel}.`);
+        container.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      doExecuteAction(container, actionBtn, isBuyNow);
+    }
+
+    document.addEventListener("click", handleActionClick, true);
+
+    function guardButtons() {
+      document.querySelectorAll(".shopify-payment-button").forEach(btn => {
+        if (!btn.__rebelGuarded) {
+          btn.__rebelGuarded = true;
+          btn.addEventListener("click", handleActionClick, true);
+        }
+      });
+    }
+    guardButtons();
+    if (window.MutationObserver) {
+      new MutationObserver(() => guardButtons()).observe(document.body, { childList: true, subtree: true });
+    }
+
+    document.addEventListener("submit", function(e) {
+      const form = e.target.closest("form[action*='/cart/add']");
+      if (!form || !document.contains(container)) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      if (collageImages.length === 0) {
+        showErr(container, "⚠️ Please select your (4-6) images before adding to cart.");
+        container.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+      if (!popoutImage) {
+        showErr(container, "⚠️ Please select 1 Pop-Out image before adding to cart.");
+        container.scrollIntoView({ behavior: "smooth", block: "center" });
+        return false;
+      }
+
+      const actionBtn = form.querySelector('[type="submit"], button[name="add"]') || form;
+      doExecuteAction(container, actionBtn, false);
+      return false;
+    }, true);
+  }
+
+  function setupHeaderCartInterceptor() {
+    document.addEventListener("click", function(e) {
+      const cartTrigger = e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon");
+      if (!cartTrigger || cartTrigger.closest(".rebel-slide-drawer")) return;
+      const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
+      if (!dawnDrawer) {
+        e.preventDefault();
+        e.stopPropagation();
+        renderRebelSlideDrawer();
+      }
+    }, true);
+  }
+
+  async function doExecuteAction(container, actionBtn, isBuyNow) {
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    const still = collageImages.some(x => x.uploading) || (popoutImage && popoutImage.uploading);
+    if (still) {
+      showStat(container, "Uploading photos to cloud... Please wait");
+      await new Promise(r => {
+        const iv = setInterval(() => {
+          if (!collageImages.some(x => x.uploading) && (!popoutImage || !popoutImage.uploading)) {
+            clearInterval(iv); r();
+          }
+        }, 250);
+      });
+      clearStat(container);
+    }
+
+    const oldText = actionBtn.innerHTML;
+    actionBtn.disabled = true;
+    actionBtn.innerHTML = `<span>${isBuyNow ? "Preparing checkout..." : "Adding to cart..."}</span>`;
+
+    try {
+      const form = document.querySelector('form[action*="/cart/add"]');
+      let variantId = form?.querySelector('input[name="id"]')?.value;
+      if (!variantId) {
+        const p = new URLSearchParams(window.location.search);
+        variantId = p.get("variant") || window.ShopifyAnalytics?.meta?.selectedVariantId;
+      }
+
+      const qty = parseInt(form?.querySelector('input[name="quantity"], .quantity__input')?.value, 10) || 1;
+      const textVal = container.querySelector("#rebel-pc-text-input")?.value?.trim() || "";
+      const productTitle = container.dataset.productTitle || "POP UP FRAME";
+
+      const properties = {};
+      if (textVal) properties["Enter Text"] = textVal;
+
+      collageImages.forEach((img, idx) => {
+        if (img.url) properties[`${productTitle}_${idx + 1}`] = img.url;
+      });
+      if (popoutImage && popoutImage.url) {
+        properties["upload - Single Pop Out Image_1"] = popoutImage.url;
+      }
+
+      if (form) {
+        form.querySelectorAll(".rebel-prop-hidden").forEach(x => x.remove());
+        for (const [k, v] of Object.entries(properties)) {
+          const hid = document.createElement("input");
+          hid.type = "hidden"; hid.name = `properties[${k}]`; hid.value = v; hid.className = "rebel-prop-hidden";
+          form.appendChild(hid);
+        }
+      }
+
+      const res = await fetch((window.Shopify?.routes?.root || "/") + "cart/add.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ id: variantId, quantity: qty, properties: properties, sections: isBuyNow ? "" : "cart-drawer,cart-icon-bubble" })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        if (isBuyNow) {
+          window.location.href = (window.Shopify?.routes?.root || "/") + "checkout";
+          return;
+        }
+        await openCartSidebar(data);
+      } else {
+        showErr(container, data.description || "Could not process order. Please try again.");
+      }
+    } catch (_) {
+      showErr(container, "Order process failed. Please try again.");
+    } finally {
+      isSubmitting = false;
+      actionBtn.disabled = false;
+      actionBtn.innerHTML = oldText;
+    }
+  }
+
+  async function openCartSidebar(cartData) {
+    const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
+    if (dawnDrawer) {
+      try {
+        if (typeof dawnDrawer.renderContents === "function") {
+          dawnDrawer.renderContents(cartData);
+        } else if (cartData?.sections && cartData.sections["cart-drawer"]) {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(cartData.sections["cart-drawer"], "text/html");
+          const newContent = doc.querySelector("#CartDrawer") || doc.querySelector("cart-drawer");
+          if (newContent) dawnDrawer.innerHTML = newContent.innerHTML;
+        }
+      } catch (_) {}
+
+      if (typeof dawnDrawer.open === "function") {
+        dawnDrawer.open();
+      } else {
+        dawnDrawer.classList.add("animate", "active");
+        document.body.classList.add("overflow-hidden");
+      }
+      document.dispatchEvent(new CustomEvent("cart:updated", { detail: { cart: cartData } }));
+      document.dispatchEvent(new CustomEvent("cart-drawer:open"));
+      setTimeout(formatLinks, 150);
+      setTimeout(formatLinks, 500);
+      return;
+    }
+    await renderRebelSlideDrawer();
+  }
+
+  async function renderRebelSlideDrawer() {
+    let overlay = document.querySelector(".rebel-slide-drawer-overlay");
+    let drawer = document.querySelector(".rebel-slide-drawer");
+
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "rebel-slide-drawer-overlay";
+      document.body.appendChild(overlay);
+      overlay.addEventListener("click", () => {
+        overlay.classList.remove("active");
+        drawer?.classList.remove("active");
+        document.body.classList.remove("overflow-hidden");
+      });
+    }
+
+    if (!drawer) {
+      drawer = document.createElement("div");
+      drawer.className = "rebel-slide-drawer";
+      document.body.appendChild(drawer);
+    }
+
+    try {
+      const res = await fetch((window.Shopify?.routes?.root || "/") + "cart.js");
+      const cart = await res.json();
+
+      let itemsHtml = "";
+      (cart.items || []).forEach((item) => {
+        let propsHtml = "";
+        if (item.properties) {
+          for (const [k, v] of Object.entries(item.properties)) {
+            if (!v || k.startsWith("_")) continue;
+            let valHtml = v;
+            if (typeof v === "string" && (v.startsWith("http://") || v.startsWith("https://"))) {
+              valHtml = `<a href="${v}" target="_blank" class="rebel-property-link" title="View Image">🔗</a>`;
+            }
+            propsHtml += `<div class="rebel-drawer-item-prop"><strong>${k}:</strong> ${valHtml}</div>`;
+          }
+        }
+
+        const priceFormatted = (item.final_line_price / 100).toFixed(2);
+        const itemImg = item.image || item.featured_image?.url || "";
+
+        itemsHtml += `
+          <div class="rebel-drawer-item">
+            ${itemImg ? `<img src="${itemImg}" class="rebel-drawer-item-img" alt="${item.title}" />` : ""}
+            <div class="rebel-drawer-item-details">
+              <div class="rebel-drawer-item-title">${item.product_title || item.title}</div>
+              ${item.variant_title ? `<div style="font-size: 12px; color: #6b7280; margin-bottom: 2px;">${item.variant_title}</div>` : ""}
+              <div class="rebel-drawer-item-price">Rs. ${priceFormatted} (Qty: ${item.quantity})</div>
+              ${propsHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      const totalFormatted = (cart.total_price / 100).toFixed(2);
+
+      drawer.innerHTML = `
+        <div class="rebel-drawer-head">
+          <h3>Your Cart (${cart.item_count || 0})</h3>
+          <button type="button" class="rebel-drawer-close-btn" aria-label="Close cart">✕</button>
+        </div>
+        <div class="rebel-drawer-items-list">
+          ${itemsHtml || '<p style="text-align:center; color:#6b7280; padding: 40px 0;">Your cart is empty</p>'}
+        </div>
+        <div class="rebel-drawer-footer">
+          <div class="rebel-drawer-subtotal">
+            <span>Estimated Total</span>
+            <span>Rs. ${totalFormatted}</span>
+          </div>
+          <a href="${(window.Shopify?.routes?.root || '/') + 'checkout'}" class="rebel-drawer-checkout-btn">
+            Proceed to Checkout
+          </a>
+        </div>
+      `;
+
+      drawer.querySelector(".rebel-drawer-close-btn")?.addEventListener("click", () => {
+        overlay.classList.remove("active");
+        drawer.classList.remove("active");
+        document.body.classList.remove("overflow-hidden");
+      });
+
+      requestAnimationFrame(() => {
+        overlay.classList.add("active");
+        drawer.classList.add("active");
+        document.body.classList.add("overflow-hidden");
+      });
+
+      document.querySelectorAll(".cart-count-bubble, [data-cart-count]").forEach((el) => {
+        el.textContent = cart.item_count;
+        el.classList.remove("hidden");
+      });
+    } catch (e) {
+      console.error("[Drawer Render Error]", e);
+    }
+  }
+
+  function formatLinks() {
+    const drawer = document.querySelector("cart-drawer, #CartDrawer");
+    if (!drawer) return;
+    drawer.querySelectorAll(".product-option dd, .cart-item__details dd").forEach(dd => {
+      const text = dd.textContent.trim();
+      const a = dd.querySelector("a");
+      if (a) {
+        const href = a.getAttribute("href") || "";
+        if (href.startsWith("http://") || href.startsWith("https://")) {
+          a.innerHTML = "🔗"; a.className = "link rebel-property-link"; a.style.color = "#2563eb"; a.style.textDecoration = "underline";
+        }
+      } else if (text.startsWith("http://") || text.startsWith("https://")) {
+        dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" style="color: #2563eb; text-decoration: underline;">🔗</a>`;
+      }
+    });
+  }
+
+  function setupDrawerLinks() {
+    ["cart:updated", "cart-drawer:open"].forEach(ev => document.addEventListener(ev, () => setTimeout(formatLinks, 100)));
+  }
+
+  function showErr(c, m) { const b = c.querySelector(".rebel-pc-error-banner"); if (b) { b.textContent = m; b.style.display = "flex"; } }
+  function clearErr(c) { const b = c.querySelector(".rebel-pc-error-banner"); if (b) b.style.display = "none"; }
+  function showStat(c, m) { const s = c.querySelector(".rebel-pc-status"); const t = c.querySelector(".rebel-pc-status-text"); if (s && t) { t.textContent = m; s.style.display = "flex"; } }
+  function clearStat(c) { const s = c.querySelector(".rebel-pc-status"); if (s) s.style.display = "none"; }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>

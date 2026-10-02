@@ -1,0 +1,415 @@
+/* ==========================================================================
+   Rebel Gifts — Product Page Customizer Styles
+   Matching Mosambi Media "POP UP FRAME" customization UI
+   ========================================================================== */
+
+.rebel-product-customizer {
+  display: block;
+  width: 100%;
+  margin: 18px 0 16px;
+  font-family: inherit;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.rebel-pc-field-group {
+  margin-bottom: 16px;
+}
+
+.rebel-pc-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.rebel-pc-label span.req {
+  color: #ef4444;
+  margin-left: 3px;
+}
+
+.rebel-pc-label span.counter {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+}
+
+/* Text Input */
+.rebel-pc-input-text {
+  width: 100%;
+  height: 44px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.rebel-pc-input-text:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 1px #111827;
+}
+
+/* Upload Dropzone Area */
+.rebel-pc-dropzone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  background-color: #f3f4f6;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.rebel-pc-dropzone:hover {
+  background-color: #ebeef2;
+  border-color: #9ca3af;
+}
+
+.rebel-pc-dropzone.dragover {
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  border-style: solid;
+}
+
+.rebel-pc-dropzone.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+.rebel-pc-dropzone input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.rebel-pc-dropzone-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #4b5563;
+  pointer-events: none;
+}
+
+.rebel-pc-dropzone-content .browse-link {
+  color: #111827;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+/* Thumbnails Grid */
+.rebel-pc-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.rebel-pc-thumb {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.rebel-pc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.rebel-pc-thumb .remove-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+  z-index: 5;
+}
+
+.rebel-pc-thumb .remove-btn:hover {
+  background: #dc2626;
+}
+
+.rebel-pc-thumb .uploading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+
+.rebel-pc-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #111827;
+  border-radius: 50%;
+  animation: rebelSpin 0.7s linear infinite;
+}
+
+@keyframes rebelSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error Notification */
+.rebel-pc-error-banner {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.4;
+  animation: rebelShake 0.4s ease-in-out;
+}
+
+@keyframes rebelShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+/* Status / Uploading message */
+.rebel-pc-status {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+/* Links in Cart Drawer */
+.rebel-property-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: #2563eb !important;
+  text-decoration: underline !important;
+  font-size: 13px !important;
+  margin-left: 2px !important;
+  cursor: pointer !important;
+}
+
+.rebel-property-link:hover {
+  color: #1d4ed8 !important;
+}
+
+/* ==========================================================================
+   Rebel Gifts — Fallback Slide-Out Cart Drawer Sidebar
+   Ensures sidebar ALWAYS opens even if Theme Settings is set to Page/Notification
+   ========================================================================== */
+
+.rebel-slide-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+  backdrop-filter: blur(2px);
+}
+
+.rebel-slide-drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.rebel-slide-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 420px;
+  max-width: 90vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 999999;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.rebel-slide-drawer.active {
+  transform: translateX(0);
+}
+
+.rebel-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid #f1f2f4;
+}
+
+.rebel-drawer-head h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rebel-drawer-close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #4b5563;
+  padding: 4px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.rebel-drawer-close-btn:hover {
+  color: #111827;
+}
+
+.rebel-drawer-items-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.rebel-drawer-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.rebel-drawer-item-img {
+  width: 70px;
+  height: 70px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  background: #f9fafb;
+}
+
+.rebel-drawer-item-details {
+  flex: 1;
+  font-size: 13px;
+}
+
+.rebel-drawer-item-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.rebel-drawer-item-price {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.rebel-drawer-item-prop {
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 3px;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.rebel-drawer-item-prop strong {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.rebel-drawer-footer {
+  padding: 18px 20px 24px;
+  border-top: 1px solid #f1f2f4;
+  background: #fafafa;
+}
+
+.rebel-drawer-subtotal {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 14px;
+}
+
+.rebel-drawer-checkout-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: #111827;
+  color: #ffffff !important;
+  text-align: center;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none !important;
+  box-sizing: border-box;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.rebel-drawer-checkout-btn:hover {
+  background: #000000;
+}
+

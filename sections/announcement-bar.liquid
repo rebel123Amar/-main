@@ -1,0 +1,350 @@
+{% doc %}
+  @prompt
+    Create a Shopify announcement bar section with the following exact specifications:
+    
+    - Full-width horizontal announcement bar.
+    - Background: pure black (#000000).
+    - Text: white, bold, clean and easy to read.
+    - Font size around 14–16px on desktop.
+    - Single horizontal line, center-align all content vertically.
+    - Add a glowing white 4-point sparkle/star icon (✦) between every message.
+    - Keep equal spacing between each message and sparkle.
+    - The announcement bar should continuously auto-scroll/marquee from right to left.
+    - Animation should be smooth, seamless, and loop infinitely with no visible gap when the animation restarts.
+    - Hide the scrollbar.
+    - On mobile, keep the same single-line horizontal scrolling behavior.
+    - Do not wrap the text into multiple lines.
+    - Pause animation on hover.
+    
+    ANNOUNCEMENT TEXT (each editable from Theme Editor as separate text settings):
+    1. "Trusted by 5L+ Happy Customers"
+    2. "Unique Personalized Gifts"
+    3. "Estimated Delivery 5-7 Working Days"
+    4. "Free shipping above order ₹699"
+    
+    Each message separated by a glowing white 4-point sparkle ✦.
+    
+    Technical requirements:
+    - Use Shopify Liquid, HTML, CSS and vanilla JavaScript only.
+    - No external libraries.
+    - Fully responsive.
+    - Do not affect other sections of the Shopify theme.
+    - Make the marquee smooth and lightweight using CSS animation (translateX).
+    - Duplicate the content block to create a seamless infinite loop with no gap.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-announcement-bar-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.background_color }};
+    overflow: hidden;
+    position: relative;
+    padding: {{ block.settings.bar_height }}px 0;
+  }
+
+  .ai-announcement-bar-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: ai-scroll-{{ ai_gen_id }} {{ block.settings.scroll_speed }}s linear infinite;
+  }
+
+  .ai-announcement-bar-{{ ai_gen_id }}:hover .ai-announcement-bar-wrapper-{{ ai_gen_id }} {
+    animation-play-state: paused;
+  }
+
+  .ai-announcement-bar-content-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    gap: {{ block.settings.message_spacing }}px;
+  }
+
+  .ai-announcement-bar-message-{{ ai_gen_id }} {
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: {{ block.settings.font_weight }};
+    letter-spacing: 0.5px;
+  }
+
+  .ai-announcement-bar-sparkle-{{ ai_gen_id }} {
+    color: {{ block.settings.sparkle_color }};
+    font-size: {{ block.settings.sparkle_size }}px;
+    display: inline-block;
+    animation: ai-sparkle-glow-{{ ai_gen_id }} 2s ease-in-out infinite;
+  }
+
+  @keyframes ai-scroll-{{ ai_gen_id }} {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes ai-sparkle-glow-{{ ai_gen_id }} {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 8px {{ block.settings.sparkle_glow_color }}, 0 0 12px {{ block.settings.sparkle_glow_color }};
+    }
+    50% {
+      opacity: 0.8;
+      text-shadow: 0 0 4px {{ block.settings.sparkle_glow_color }}, 0 0 6px {{ block.settings.sparkle_glow_color }};
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-announcement-bar-message-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size_mobile }}px;
+    }
+
+    .ai-announcement-bar-sparkle-{{ ai_gen_id }} {
+      font-size: {{ block.settings.sparkle_size_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<announcement-bar-{{ ai_gen_id }} class="ai-announcement-bar-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-announcement-bar-wrapper-{{ ai_gen_id }}">
+    <div class="ai-announcement-bar-content-{{ ai_gen_id }}">
+      {% if block.settings.message_1 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_1 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_2 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_2 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_3 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_3 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_4 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_4 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+    </div>
+    <div class="ai-announcement-bar-content-{{ ai_gen_id }}">
+      {% if block.settings.message_1 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_1 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_2 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_2 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_3 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_3 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+      {% if block.settings.message_4 != blank %}
+        <span class="ai-announcement-bar-message-{{ ai_gen_id }}">{{ block.settings.message_4 }}</span>
+      {% endif %}
+      <span class="ai-announcement-bar-sparkle-{{ ai_gen_id }}">✦</span>
+    </div>
+  </div>
+</announcement-bar-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class AnnouncementBar{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.adjustScrollSpeed();
+      }
+
+      adjustScrollSpeed() {
+        const content = this.querySelector('.ai-announcement-bar-content-{{ ai_gen_id }}');
+        if (!content) return;
+
+        const contentWidth = content.offsetWidth;
+        const wrapper = this.querySelector('.ai-announcement-bar-wrapper-{{ ai_gen_id }}');
+        
+        if (wrapper && contentWidth > 0) {
+          const speed = {{ block.settings.scroll_speed }};
+          wrapper.style.animationDuration = speed + 's';
+        }
+      }
+    }
+
+    customElements.define('announcement-bar-{{ ai_gen_id }}', AnnouncementBar{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Messages"
+    },
+    {
+      "type": "text",
+      "id": "message_1",
+      "label": "Message 1",
+      "default": "Trusted by 5L+ Happy Customers"
+    },
+    {
+      "type": "text",
+      "id": "message_2",
+      "label": "Message 2",
+      "default": "Unique Personalized Gifts"
+    },
+    {
+      "type": "text",
+      "id": "message_3",
+      "label": "Message 3",
+      "default": "Estimated Delivery 5-7 Working Days"
+    },
+    {
+      "type": "text",
+      "id": "message_4",
+      "label": "Message 4",
+      "default": "Free shipping above order ₹699"
+    },
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size (desktop)",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "font_size_mobile",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Font size (mobile)",
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Bar padding",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Sparkle"
+    },
+    {
+      "type": "color",
+      "id": "sparkle_color",
+      "label": "Sparkle color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "sparkle_glow_color",
+      "label": "Sparkle glow color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "sparkle_size",
+      "min": 12,
+      "max": 28,
+      "step": 2,
+      "unit": "px",
+      "label": "Sparkle size (desktop)",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "sparkle_size_mobile",
+      "min": 10,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "label": "Sparkle size (mobile)",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "s",
+      "label": "Scroll speed",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "message_spacing",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Message spacing",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement bar"
+    }
+  ]
+}
+{% endschema %}
