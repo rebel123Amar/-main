@@ -1869,62 +1869,115 @@
                 loadCartData();
               }
 
-              // ================= SMART "BUY IT NOW" SAFEGUARD =================
-              function setupBuyNowSafeguard() {
+              // ================= REDIRECT CARD "ADD TO CART" TO PRODUCT PAGE =================
+              function setupProductCardRedirect() {
+                function findProductUrl(element) {
+                  if (!element) return null;
+                  const container = element.closest(
+                    ".card-wrapper, .card, .product-card, .product-item, .grid__item, .collection-product, [data-product-id], quick-add-modal, .quick-add, .product-form, .product-grid-item"
+                  );
+                  let productUrl = null;
+                  if (container) {
+                    const link = container.querySelector('a[href*="/products/"]');
+                    if (link && link.href) productUrl = link.href;
+                  }
+                  if (!productUrl) {
+                    const form = element.closest("form[action*='/cart/add']");
+                    if (form) {
+                      const parent = form.closest(".card, .card-wrapper, .grid__item, div");
+                      const link = parent?.querySelector('a[href*="/products/"]');
+                      if (link && link.href) productUrl = link.href;
+                    }
+                  }
+                  if (!productUrl) {
+                    let el = element;
+                    while (el && el !== document.body) {
+                      if (el.tagName === "A" && el.href && el.href.includes("/products/")) {
+                        productUrl = el.href;
+                        break;
+                      }
+                      const innerLink = el.querySelector && el.querySelector('a[href*="/products/"]');
+                      if (innerLink && innerLink.href) {
+                        productUrl = innerLink.href;
+                        break;
+                      }
+                      el = el.parentElement;
+                    }
+                  }
+                  if (productUrl) {
+                    const variantInput =
+                      (container && container.querySelector('input[name="id"]')) ||
+                      (element.form && element.form.querySelector('input[name="id"]')) ||
+                      element.closest("form")?.querySelector('input[name="id"]');
+                    if (variantInput && variantInput.value && !productUrl.includes("variant=")) {
+                      const sep = productUrl.includes("?") ? "&" : "?";
+                      productUrl += `${sep}variant=${variantInput.value}`;
+                    }
+                  }
+                  return productUrl;
+                }
+
+                function isMainProductCustomizerAction(target) {
+                  const customizer = document.querySelector(".rebel-product-customizer");
+                  if (!customizer) return false;
+                  if (customizer.contains(target)) return true;
+                  const mainSection = customizer.closest(
+                    "product-info, .product, .product-section, .product-single, #MainProduct, main"
+                  );
+                  if (mainSection && mainSection.contains(target)) return true;
+                  const mainForm = document.querySelector(
+                    "product-info form[action*='/cart/add'], .product form[action*='/cart/add'], #product-form"
+                  );
+                  if (mainForm && mainForm.contains(target)) return true;
+                  return false;
+                }
+
                 document.addEventListener(
                   "click",
                   function (e) {
-                    const buyBtn = e.target.closest(
-                      ".shopify-payment-button__button, [data-testid='Checkout-button'], .shopify-payment-button button"
+                    const target = e.target;
+                    if (!target || isMainProductCustomizerAction(target)) return;
+                    if (target.closest("cart-drawer, #CartDrawer, .rebel-slide-drawer, #cart, .cart, .cart__items")) return;
+
+                    const actionBtn = target.closest(
+                      'button[name="add"], .quick-add__submit, .card__add-to-cart, [data-action="add-to-cart"], .product-form__submit, form[action*="/cart/add"] button, form[action*="/cart/add"] [type="submit"], .shopify-payment-button__button, [data-testid="Checkout-button"]'
                     );
-                    if (!buyBtn) return;
+                    if (!actionBtn) return;
 
-                    e.preventDefault();
-                    e.stopPropagation();
+                    const productUrl = findProductUrl(actionBtn);
+                    if (productUrl) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.stopImmediatePropagation();
+                      actionBtn.disabled = true;
+                      actionBtn.innerHTML = "<span>Opening Product...</span>";
+                      window.location.href = productUrl;
+                      return false;
+                    }
+                  },
+                  true
+                );
 
-                    const form = buyBtn.closest("form[action*='/cart/add']") || document.querySelector("form[action*='/cart/add']");
-                    if (!form) return;
+                document.addEventListener(
+                  "submit",
+                  function (e) {
+                    const form = e.target.closest("form[action*='/cart/add']");
+                    if (!form || isMainProductCustomizerAction(form)) return;
+                    if (form.closest("cart-drawer, #CartDrawer, .rebel-slide-drawer, #cart, .cart, .cart__items")) return;
 
-                    const originalText = buyBtn.textContent;
-                    buyBtn.disabled = true;
-                    buyBtn.textContent = "Opening Customization...";
-
-                    const formData = new FormData(form);
-
-                    fetch("/cart/add.js", {
-                      method: "POST",
-                      body: formData,
-                    })
-                      .then(function (res) { return res.json(); })
-                      .then(function () {
-                        buyBtn.disabled = false;
-                        buyBtn.textContent = originalText;
-
-                        const drawerEl = document.querySelector("cart-drawer");
-                        if (drawerEl && typeof drawerEl.open === "function") {
-                          drawerEl.open();
-                        } else {
-                          const icon = document.querySelector("#cart-icon-bubble");
-                          if (icon) icon.click();
-                        }
-
-                        setTimeout(function () {
-                          const customBox = document.getElementById("rebel-cart-custom-drawer");
-                          if (customBox) {
-                            customBox.scrollIntoView({ behavior: "smooth", block: "center" });
-                            customBox.classList.add("rebel-highlight-pulse");
-                            setTimeout(function () {
-                              customBox.classList.remove("rebel-highlight-pulse");
-                            }, 2500);
-                          }
-                        }, 350);
-                      })
-                      .catch(function (err) {
-                        console.warn("Buy Now intercept failed:", err);
-                        buyBtn.disabled = false;
-                        buyBtn.textContent = originalText;
-                        form.submit();
-                      });
+                    const productUrl = findProductUrl(form);
+                    if (productUrl) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      e.stopImmediatePropagation();
+                      const btn = form.querySelector('[type="submit"], button[name="add"]') || form;
+                      if (btn && btn !== form) {
+                        btn.disabled = true;
+                        btn.innerHTML = "<span>Opening Product...</span>";
+                      }
+                      window.location.href = productUrl;
+                      return false;
+                    }
                   },
                   true
                 );
@@ -1933,11 +1986,11 @@
               if (document.readyState === "loading") {
                 document.addEventListener("DOMContentLoaded", function () {
                   setupDrawerCustomization();
-                  setupBuyNowSafeguard();
+                  setupProductCardRedirect();
                 });
               } else {
                 setupDrawerCustomization();
-                setupBuyNowSafeguard();
+                setupProductCardRedirect();
               }
 
               // Sync on Dawn AJAX cart events
