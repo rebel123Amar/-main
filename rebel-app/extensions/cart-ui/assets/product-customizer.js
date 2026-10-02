@@ -373,10 +373,8 @@
     }
 
     guardPaymentButtons();
-    if (window.MutationObserver) {
-      const observer = new MutationObserver(() => guardPaymentButtons());
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
+    setTimeout(guardPaymentButtons, 800);
+    setTimeout(guardPaymentButtons, 2000);
 
     // Intercept form submission
     document.addEventListener(
@@ -445,9 +443,11 @@
 
   async function waitForUploads() {
     return new Promise((resolve) => {
+      let elapsed = 0;
       const interval = setInterval(() => {
+        elapsed += 250;
         const still = collageImages.some((x) => x.uploading) || (popoutImage && popoutImage.uploading);
-        if (!still) {
+        if (!still || elapsed > 30000) {
           clearInterval(interval);
           resolve();
         }
@@ -709,43 +709,49 @@
     }
   }
 
-  // 9. Format Cart Drawer Property Links to display 🔗 like in Image 2
+  // 9. Format Cart Drawer Property Links safely without recursive DOM loops
+  let isFormattingLinks = false;
   function formatDrawerPropertyLinks() {
-    const drawer = document.querySelector("cart-drawer, #CartDrawer");
+    if (isFormattingLinks) return;
+    const drawer = document.querySelector("cart-drawer, #CartDrawer, .rebel-slide-drawer");
     if (!drawer) return;
 
-    const propertyValues = drawer.querySelectorAll(".product-option dd, .cart-item__details dd");
-    propertyValues.forEach((dd) => {
-      const text = dd.textContent.trim();
-      const existingLink = dd.querySelector("a");
+    isFormattingLinks = true;
+    try {
+      const propertyValues = drawer.querySelectorAll(".product-option dd, .cart-item__details dd");
+      propertyValues.forEach((dd) => {
+        if (dd.dataset.rebelFormatted === "true") return;
+        const text = dd.textContent.trim();
+        const existingLink = dd.querySelector("a");
 
-      if (existingLink) {
-        const href = existingLink.getAttribute("href") || "";
-        if (href.startsWith("http://") || href.startsWith("https://")) {
-          existingLink.innerHTML = "🔗";
-          existingLink.title = "View Image";
-          existingLink.className = "link rebel-property-link";
-          existingLink.style.color = "#2563eb";
-          existingLink.style.textDecoration = "underline";
+        if (existingLink) {
+          const href = existingLink.getAttribute("href") || "";
+          if (href.startsWith("http://") || href.startsWith("https://")) {
+            if (existingLink.textContent !== "🔗") {
+              existingLink.textContent = "🔗";
+              existingLink.title = "View Image";
+              existingLink.className = "link rebel-property-link";
+              existingLink.style.color = "#2563eb";
+              existingLink.style.textDecoration = "underline";
+            }
+            dd.dataset.rebelFormatted = "true";
+          }
+        } else if (text.startsWith("http://") || text.startsWith("https://")) {
+          dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
+          dd.dataset.rebelFormatted = "true";
         }
-      } else if (text.startsWith("http://") || text.startsWith("https://")) {
-        dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
-      }
-    });
+      });
+    } finally {
+      setTimeout(() => {
+        isFormattingLinks = false;
+      }, 100);
+    }
   }
 
   function setupCartDrawerLinkFormatter() {
-    // Observe drawer for new cart additions
-    const cartDrawer = document.querySelector("cart-drawer, #CartDrawer");
-    if (cartDrawer && window.MutationObserver) {
-      const observer = new MutationObserver(() => {
-        formatDrawerPropertyLinks();
-      });
-      observer.observe(cartDrawer, { childList: true, subtree: true });
-    }
-
     document.addEventListener("cart:updated", () => setTimeout(formatDrawerPropertyLinks, 100));
     document.addEventListener("cart-drawer:open", () => setTimeout(formatDrawerPropertyLinks, 100));
+    document.addEventListener("DOMContentLoaded", () => setTimeout(formatDrawerPropertyLinks, 500));
   }
 
   // Helper UI methods

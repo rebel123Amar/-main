@@ -914,29 +914,43 @@
     );
   }
 
+  let isFormattingDrawerLinks = false;
   function formatDrawerPropertyLinks() {
-    const drawer = document.querySelector("cart-drawer, #CartDrawer");
+    if (isFormattingDrawerLinks) return;
+    const drawer = document.querySelector("cart-drawer, #CartDrawer, .rebel-slide-drawer");
     if (!drawer) return;
 
-    const propertyValues = drawer.querySelectorAll(".product-option dd, .cart-item__details dd");
-    propertyValues.forEach((dd) => {
-      const text = dd.textContent.trim();
-      const existingLink = dd.querySelector("a");
+    isFormattingDrawerLinks = true;
+    try {
+      const propertyValues = drawer.querySelectorAll(".product-option dd, .cart-item__details dd");
+      propertyValues.forEach((dd) => {
+        if (dd.dataset.rebelFormatted === "true") return;
+        const text = dd.textContent.trim();
+        const existingLink = dd.querySelector("a");
 
-      if (existingLink) {
-        const href = existingLink.getAttribute("href") || "";
-        if (href.startsWith("http://") || href.startsWith("https://")) {
-          existingLink.innerHTML = "🔗";
-          existingLink.title = "View Image";
-          existingLink.className = "link rebel-property-link";
-          existingLink.style.color = "#2563eb";
-          existingLink.style.textDecoration = "underline";
-          existingLink.style.fontSize = "13px";
+        if (existingLink) {
+          const href = existingLink.getAttribute("href") || "";
+          if (href.startsWith("http://") || href.startsWith("https://")) {
+            if (existingLink.textContent !== "🔗") {
+              existingLink.textContent = "🔗";
+              existingLink.title = "View Image";
+              existingLink.className = "link rebel-property-link";
+              existingLink.style.color = "#2563eb";
+              existingLink.style.textDecoration = "underline";
+              existingLink.style.fontSize = "13px";
+            }
+            dd.dataset.rebelFormatted = "true";
+          }
+        } else if (text.startsWith("http://") || text.startsWith("https://")) {
+          dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
+          dd.dataset.rebelFormatted = "true";
         }
-      } else if (text.startsWith("http://") || text.startsWith("https://")) {
-        dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
-      }
-    });
+      });
+    } finally {
+      setTimeout(function () {
+        isFormattingDrawerLinks = false;
+      }, 100);
+    }
   }
 
   function init() {
@@ -960,12 +974,28 @@
     });
   });
 
-  // Observe DOM for Cart Drawer appearing dynamically
-  const observer = new MutationObserver(function () {
-    if (document.querySelector("cart-drawer") && !document.getElementById("rebel-injected-customization")) {
-      injectDrawerCustomization();
+  // Observe DOM ONLY for Cart Drawer appearing dynamically (no infinite loop)
+  const observer = new MutationObserver(function (mutations) {
+    let hasCartDrawerAdded = false;
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (
+          node.nodeType === 1 &&
+          (node.tagName === "CART-DRAWER" ||
+            node.id === "CartDrawer" ||
+            (node.querySelector && node.querySelector("cart-drawer, #CartDrawer")))
+        ) {
+          hasCartDrawerAdded = true;
+          break;
+        }
+      }
+      if (hasCartDrawerAdded) break;
     }
-    formatDrawerPropertyLinks();
+
+    if (hasCartDrawerAdded && !document.getElementById("rebel-injected-customization")) {
+      injectDrawerCustomization();
+      setTimeout(formatDrawerPropertyLinks, 150);
+    }
   });
 
   observer.observe(document.body, { childList: true, subtree: true });

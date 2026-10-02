@@ -63,12 +63,12 @@
     if (
       !appUrl ||
       appUrl.includes("your-app-url.com") ||
-      appUrl.includes("orders-taken-canberra-ten") ||
+      appUrl.includes("trycloudflare") ||
       (window.location.protocol === "https:" && appUrl.startsWith("http://"))
     ) {
       appUrl =
         window.__REBEL_APP_URL__ ||
-        "https://docs-data-motivation-getting.trycloudflare.com";
+        "https://main-pink-phi.vercel.app";
     }
 
     const textarea = document.getElementById("rebel-special-request");

@@ -20,7 +20,7 @@
     id="rebel-cart-customization"
     data-max-files="{{ max_images }}"
     data-max-size-mb="{{ max_size_mb }}"
-    data-app-url="{% if block.settings.app_url != blank and block.settings.app_url contains 'trycloudflare' %}{{ block.settings.app_url | escape }}{% else %}https://docs-data-motivation-getting.trycloudflare.com{% endif %}"
+    data-app-url="{{ block.settings.app_url | default: 'https://main-pink-phi.vercel.app' | escape }}"
     data-shop="{{ shop.permanent_domain | escape }}"
   >
     <!-- Section Header: Customize Your Order -->
@@ -142,7 +142,7 @@
   </div>
 
   <script>
-    window.__REBEL_APP_URL__ = "https://docs-data-motivation-getting.trycloudflare.com";
+    window.__REBEL_APP_URL__ = "https://main-pink-phi.vercel.app";
   </script>
   <script src="{{ 'cart-customization.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
@@ -205,7 +205,7 @@
       "type": "text",
       "id": "app_url",
       "label": "App Backend URL",
-      "default": "https://docs-data-motivation-getting.trycloudflare.com",
+      "default": "https://main-pink-phi.vercel.app",
       "info": "The deployed Rebel Custom App backend URL"
     }
   ]

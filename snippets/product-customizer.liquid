@@ -665,9 +665,8 @@
       });
     }
     guardButtons();
-    if (window.MutationObserver) {
-      new MutationObserver(() => guardButtons()).observe(document.body, { childList: true, subtree: true });
-    }
+    setTimeout(guardButtons, 800);
+    setTimeout(guardButtons, 2000);
 
     document.addEventListener("submit", function(e) {
       const form = e.target.closest("form[action*='/cart/add']");
@@ -715,8 +714,12 @@
     if (still) {
       showStat(container, "Uploading photos to cloud... Please wait");
       await new Promise(r => {
+        let elapsed = 0;
         const iv = setInterval(() => {
+          elapsed += 250;
           if (!collageImages.some(x => x.uploading) && (!popoutImage || !popoutImage.uploading)) {
+            clearInterval(iv); r();
+          } else if (elapsed > 30000) {
             clearInterval(iv); r();
           }
         }, 250);
@@ -910,21 +913,33 @@
     }
   }
 
+  let isFormattingLinks = false;
   function formatLinks() {
-    const drawer = document.querySelector("cart-drawer, #CartDrawer");
+    if (isFormattingLinks) return;
+    const drawer = document.querySelector("cart-drawer, #CartDrawer, .rebel-slide-drawer");
     if (!drawer) return;
-    drawer.querySelectorAll(".product-option dd, .cart-item__details dd").forEach(dd => {
-      const text = dd.textContent.trim();
-      const a = dd.querySelector("a");
-      if (a) {
-        const href = a.getAttribute("href") || "";
-        if (href.startsWith("http://") || href.startsWith("https://")) {
-          a.innerHTML = "🔗"; a.className = "link rebel-property-link"; a.style.color = "#2563eb"; a.style.textDecoration = "underline";
+    isFormattingLinks = true;
+    try {
+      drawer.querySelectorAll(".product-option dd, .cart-item__details dd").forEach(dd => {
+        if (dd.dataset.rebelFormatted === "true") return;
+        const text = dd.textContent.trim();
+        const a = dd.querySelector("a");
+        if (a) {
+          const href = a.getAttribute("href") || "";
+          if (href.startsWith("http://") || href.startsWith("https://")) {
+            if (a.textContent !== "🔗") {
+              a.textContent = "🔗"; a.className = "link rebel-property-link"; a.style.color = "#2563eb"; a.style.textDecoration = "underline";
+            }
+            dd.dataset.rebelFormatted = "true";
+          }
+        } else if (text.startsWith("http://") || text.startsWith("https://")) {
+          dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" style="color: #2563eb; text-decoration: underline;">🔗</a>`;
+          dd.dataset.rebelFormatted = "true";
         }
-      } else if (text.startsWith("http://") || text.startsWith("https://")) {
-        dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" style="color: #2563eb; text-decoration: underline;">🔗</a>`;
-      }
-    });
+      });
+    } finally {
+      setTimeout(() => { isFormattingLinks = false; }, 100);
+    }
   }
 
   function setupDrawerLinks() {

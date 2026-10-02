@@ -17,8 +17,8 @@
   if (!block) return;
 
   let APP_URL = block.dataset.appUrl || "";
-  if (!APP_URL || APP_URL.includes("your-app-url.com")) {
-    APP_URL = "https://orders-taken-canberra-ten.trycloudflare.com";
+  if (!APP_URL || APP_URL.includes("your-app-url.com") || APP_URL.includes("trycloudflare")) {
+    APP_URL = "https://main-pink-phi.vercel.app";
   }
   const SHOP = block.dataset.shop || "";
   const PRODUCT_ID = block.dataset.productId || "";
