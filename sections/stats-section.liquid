@@ -1,0 +1,219 @@
+{% doc %}
+  @prompt
+    Create Mosambi Media's signature "Stats" Social Proof section for Shopify:
+    - Vertical rotated typography title "Stats" with accent highlight border.
+    - Responsive counter/stats columns (e.g. 1 Million+ Memories Shared, 100+ Customised Products, 100K Plus followers on Instagram).
+    - Fully editable via Shopify Theme Customizer.
+{% enddoc %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+
+{% style %}
+  #rebel-stats-{{ sec_id }} {
+    background-color: {{ section.settings.bg_color }};
+    padding: {{ section.settings.padding_vertical }}px 0;
+    font-family: inherit;
+  }
+
+  .rebel-stats__container {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  .rebel-stats__vertical-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 80px;
+    letter-spacing: 1px;
+    color: {{ section.settings.accent_color }};
+    border-left: 8px solid {{ section.settings.accent_color }};
+    padding-right: 0px;
+    margin-right: 24px;
+    user-select: none;
+  }
+
+  .rebel-stats__columns {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .rebel-stats__block {
+    flex: 1;
+    text-align: center;
+    min-width: 180px;
+  }
+
+  .rebel-stats__number {
+    font-size: 54px;
+    font-weight: 800;
+    color: {{ section.settings.accent_color }};
+    line-height: 1.1;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .rebel-stats__text {
+    font-size: 15px;
+    font-weight: 600;
+    color: {{ section.settings.text_color }};
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  @media (max-width: 768px) {
+    .rebel-stats__container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .rebel-stats__vertical-title {
+      writing-mode: horizontal-tb;
+      transform: none;
+      border-left: none;
+      border-bottom: 4px solid {{ section.settings.accent_color }};
+      font-size: 36px;
+      line-height: 1.2;
+      padding-bottom: 8px;
+      margin-bottom: 24px;
+      margin-right: 0;
+    }
+
+    .rebel-stats__columns {
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .rebel-stats__number {
+      font-size: 42px;
+    }
+  }
+{% endstyle %}
+
+<section id="rebel-stats-{{ sec_id }}" class="rebel-stats" aria-label="Store Statistics">
+  <div class="rebel-stats__container">
+    {%- if section.settings.title != blank -%}
+      <div class="rebel-stats__vertical-title">
+        <span>{{ section.settings.title | escape }}</span>
+      </div>
+    {%- endif -%}
+
+    <div class="rebel-stats__columns">
+      {%- for block in section.blocks -%}
+        <div class="rebel-stats__block" {{ block.shopify_attributes }}>
+          <div class="rebel-stats__number">{{ block.settings.number | escape }}</div>
+          <p class="rebel-stats__text">{{ block.settings.label | escape }}</p>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Stats (Mosambi Style)",
+  "tag": "section",
+  "class": "rebel-stats-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Side Title",
+      "default": "Stats"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#f4f3ec"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Numbers & Title)",
+      "default": "#d0cf59"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#181818"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max Container Width (px)",
+      "min": 1000,
+      "max": 1500,
+      "step": 50,
+      "default": 1300
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Padding Top/Bottom (px)",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "default": 45
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat Counter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Statistic Number",
+          "default": "1 Million+"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Description Label",
+          "default": "Memories Shared"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stats (Mosambi Style)",
+      "blocks": [
+        {
+          "type": "stat",
+          "settings": {
+            "number": "1 Million+",
+            "label": "Memories Shared"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "100+",
+            "label": "Customised Products"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "number": "100K+",
+            "label": "Followers on Instagram"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

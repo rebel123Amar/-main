@@ -1,0 +1,1281 @@
+{% doc %}
+  @prompt
+    Create a high-converting, premium Testimonials section for Shopify (Mosambi Media style):
+    - Star ratings, Verified Buyer badge, customer quote, author name, location, and customer photo.
+    - Responsive carousel slider with touch-swipe & desktop arrows, plus grid option.
+    - Overall rating summary header (e.g. 4.9/5 from 5,000+ happy customers).
+    - Signature Mosambi Media Instagram highlight callout banner at the bottom.
+    - Fully editable via Shopify Theme Customizer with rich block settings & realistic presets.
+{% enddoc %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+
+{% style %}
+  #rebel-testimonials-{{ sec_id }} {
+    --sec-bg: {{ section.settings.bg_color }};
+    --card-bg: {{ section.settings.card_bg }};
+    --text-primary: {{ section.settings.text_color }};
+    --text-muted: {{ section.settings.text_muted }};
+    --accent-color: {{ section.settings.accent_color }};
+    --star-color: {{ section.settings.star_color }};
+    --card-radius: {{ section.settings.card_radius }}px;
+    --card-border: {{ section.settings.card_border_color }};
+    --padding-top: {{ section.settings.padding_top }}px;
+    --padding-bottom: {{ section.settings.padding_bottom }}px;
+    
+    background-color: var(--sec-bg);
+    color: var(--text-primary);
+    padding: var(--padding-top) 0 var(--padding-bottom) 0;
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+  }
+
+  .rebel-testi__container {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+
+  /* Header */
+  .rebel-testi__header {
+    text-align: center;
+    margin-bottom: 36px;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .rebel-testi__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: {{ section.settings.badge_bg }};
+    color: {{ section.settings.badge_text }};
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 50px;
+    margin-bottom: 14px;
+  }
+
+  .rebel-testi__badge-icon {
+    font-size: 13px;
+    color: var(--star-color);
+  }
+
+  .rebel-testi__title {
+    font-size: {{ section.settings.title_size_desktop }}px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 12px 0;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+  }
+
+  .rebel-testi__subtitle {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    margin: 0 0 16px 0;
+  }
+
+  /* Rating Summary Bar */
+  .rebel-testi__summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 8px 18px;
+    border-radius: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .rebel-testi__summary-stars {
+    color: var(--star-color);
+    letter-spacing: 2px;
+    font-size: 16px;
+    display: inline-block;
+  }
+
+  .rebel-testi__summary-score {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-primary);
+  }
+
+  .rebel-testi__summary-divider {
+    width: 4px;
+    height: 4px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    opacity: 0.5;
+  }
+
+  .rebel-testi__summary-count {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  /* Carousel / Track */
+  .rebel-testi__slider-wrapper {
+    position: relative;
+    margin-top: 10px;
+  }
+
+  .rebel-testi__track-wrap {
+    overflow: hidden;
+    border-radius: var(--card-radius);
+    padding: 10px 4px 18px 4px;
+  }
+
+  .rebel-testi__track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .rebel-testi__track:active {
+    cursor: grabbing;
+  }
+
+  /* Testimonial Card */
+  .rebel-testi__card {
+    flex: 0 0 calc((100% - (({{ section.settings.columns_desktop }} - 1) * 20px)) / {{ section.settings.columns_desktop }});
+    box-sizing: border-box;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 24px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+  }
+
+  .rebel-testi__card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Card Header: Stars & Verified Badge */
+  .rebel-testi__card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .rebel-testi__stars {
+    color: var(--star-color);
+    font-size: 15px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+
+  .rebel-testi__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #0b8a36;
+    background: #edf9f0;
+    padding: 3px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.2px;
+  }
+
+  .rebel-testi__verified-icon {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
+  }
+
+  /* Review Title & Body */
+  .rebel-testi__card-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    line-height: 1.35;
+    color: var(--text-primary);
+  }
+
+  .rebel-testi__card-quote {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    opacity: 0.9;
+    margin: 0 0 16px 0;
+    flex-grow: 1;
+  }
+
+  /* Attached Customer Photo */
+  .rebel-testi__attached-photo {
+    margin-bottom: 16px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 160px;
+    background: #f0f0f0;
+    cursor: pointer;
+  }
+
+  .rebel-testi__attached-photo img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .rebel-testi__attached-photo:hover img {
+    transform: scale(1.04);
+  }
+
+  .rebel-testi__photo-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.65);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 7px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* Card Footer: Author info & Product tag */
+  .rebel-testi__card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    margin-top: auto;
+  }
+
+  .rebel-testi__author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rebel-testi__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: {{ section.settings.avatar_bg }};
+    color: {{ section.settings.avatar_text }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .rebel-testi__author-info {
+    line-height: 1.3;
+  }
+
+  .rebel-testi__author-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .rebel-testi__author-meta {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .rebel-testi__product-tag {
+    font-size: 11px;
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    text-decoration: none;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
+
+  .rebel-testi__product-tag:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.08);
+  }
+
+  /* Slider Arrows & Dots */
+  .rebel-testi__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+  }
+
+  .rebel-testi__arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+
+  .rebel-testi__arrow:hover {
+    background: var(--text-primary);
+    color: #ffffff;
+    border-color: var(--text-primary);
+    transform: scale(1.05);
+  }
+
+  .rebel-testi__arrow:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .rebel-testi__dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rebel-testi__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.15);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.25s ease;
+  }
+
+  .rebel-testi__dot.active {
+    width: 24px;
+    border-radius: 10px;
+    background: var(--text-primary);
+  }
+
+  /* Mosambi Style Instagram Highlights Banner */
+  .rebel-testi__ig-banner {
+    margin-top: 42px;
+    background: linear-gradient(135deg, #fdf8eb 0%, #fef3e3 50%, #fbf1ef 100%);
+    border: 1px solid rgba(229, 168, 35, 0.25);
+    border-radius: calc(var(--card-radius) + 2px);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  }
+
+  .rebel-testi__ig-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .rebel-testi__ig-icon-wrap {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(220, 39, 67, 0.25);
+  }
+
+  .rebel-testi__ig-icon-wrap svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  .rebel-testi__ig-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 3px 0;
+  }
+
+  .rebel-testi__ig-text {
+    font-size: 13px;
+    color: #555555;
+    margin: 0;
+  }
+
+  .rebel-testi__ig-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #111111;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 25px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .rebel-testi__ig-btn:hover {
+    background: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Lightbox Modal */
+  .rebel-testi__lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .rebel-testi__lightbox.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .rebel-testi__lightbox img {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  .rebel-testi__lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Responsive Breakpoints */
+  @media (max-width: 1024px) {
+    .rebel-testi__card {
+      flex: 0 0 calc((100% - (({{ section.settings.columns_tablet }} - 1) * 16px)) / {{ section.settings.columns_tablet }});
+    }
+  }
+
+  @media (max-width: 768px) {
+    .rebel-testi__title {
+      font-size: {{ section.settings.title_size_mobile }}px;
+    }
+
+    .rebel-testi__card {
+      flex: 0 0 85%;
+      padding: 20px 18px;
+    }
+
+    .rebel-testi__ig-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    .rebel-testi__ig-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+{% endstyle %}
+
+<section
+  id="rebel-testimonials-{{ sec_id }}"
+  class="rebel-testi"
+  aria-label="Customer Testimonials"
+>
+  <div class="rebel-testi__container">
+    
+    {%- comment -%} Header Section {%- endcomment -%}
+    <div class="rebel-testi__header">
+      {%- if section.settings.kicker_text != blank -%}
+        <div class="rebel-testi__badge">
+          <span class="rebel-testi__badge-icon">✦</span>
+          <span>{{ section.settings.kicker_text | escape }}</span>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.title != blank -%}
+        <h2 class="rebel-testi__title">{{ section.settings.title | escape }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.subtitle != blank -%}
+        <p class="rebel-testi__subtitle">{{ section.settings.subtitle | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.show_rating_summary -%}
+        <div class="rebel-testi__summary">
+          <span class="rebel-testi__summary-stars">★★★★★</span>
+          <span class="rebel-testi__summary-score">{{ section.settings.rating_score | default: "4.9 / 5.0" }}</span>
+          <span class="rebel-testi__summary-divider"></span>
+          <span class="rebel-testi__summary-count">{{ section.settings.rating_reviews_count | default: "5,000+ Happy Customers" }}</span>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Testimonials Carousel {%- endcomment -%}
+    <div class="rebel-testi__slider-wrapper" id="rebel-testi-wrap-{{ sec_id }}">
+      <div class="rebel-testi__track-wrap" id="rebel-testi-track-wrap-{{ sec_id }}">
+        <div class="rebel-testi__track" id="rebel-testi-track-{{ sec_id }}">
+          
+          {%- for block in section.blocks -%}
+            {%- assign rating_num = block.settings.rating | default: 5 | plus: 0 -%}
+            
+            <div class="rebel-testi__card" {{ block.shopify_attributes }}>
+              
+              {%- comment -%} Top: Star rating & Verified Buyer {%- endcomment -%}
+              <div class="rebel-testi__card-top">
+                <div class="rebel-testi__stars" aria-label="{{ rating_num }} out of 5 stars">
+                  {%- for i in (1..5) -%}
+                    {%- if i <= rating_num -%}★{%- else -%}☆{%- endif -%}
+                  {%- endfor -%}
+                </div>
+
+                {%- if block.settings.verified_buyer -%}
+                  <span class="rebel-testi__verified">
+                    <svg class="rebel-testi__verified-icon" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                    Verified Buyer
+                  </span>
+                {%- endif -%}
+              </div>
+
+              {%- comment -%} Review Title {%- endcomment -%}
+              {%- if block.settings.title != blank -%}
+                <h3 class="rebel-testi__card-title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+
+              {%- comment -%} Review Body Quote {%- endcomment -%}
+              {%- if block.settings.review != blank -%}
+                <p class="rebel-testi__card-quote">“{{ block.settings.review | escape }}”</p>
+              {%- endif -%}
+
+              {%- comment -%} Customer Photo / Unboxing image {%- endcomment -%}
+              {%- if block.settings.customer_image != blank -%}
+                <div class="rebel-testi__attached-photo" data-full-src="{{ block.settings.customer_image | image_url: width: 1200 }}">
+                  <img
+                    src="{{ block.settings.customer_image | image_url: width: 400 }}"
+                    alt="{{ block.settings.author_name | escape }} review photo"
+                    loading="lazy"
+                    width="400"
+                    height="160"
+                  />
+                  <div class="rebel-testi__photo-badge">
+                    <span>📷 Customer Photo</span>
+                  </div>
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Card Footer: Author + Purchased Product {%- endcomment -%}
+              <div class="rebel-testi__card-footer">
+                <div class="rebel-testi__author">
+                  <div class="rebel-testi__avatar">
+                    {%- assign author_initial = block.settings.author_name | slice: 0, 1 | default: 'U' -%}
+                    {{ author_initial }}
+                  </div>
+                  <div class="rebel-testi__author-info">
+                    <div class="rebel-testi__author-name">{{ block.settings.author_name | default: "Verified Customer" }}</div>
+                    {%- if block.settings.location != blank -%}
+                      <div class="rebel-testi__author-meta">{{ block.settings.location | escape }}</div>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+                {%- if block.settings.product_tag != blank -%}
+                  {%- if block.settings.product_url != blank -%}
+                    <a href="{{ block.settings.product_url }}" class="rebel-testi__product-tag" title="{{ block.settings.product_tag }}">
+                      {{ block.settings.product_tag | escape }}
+                    </a>
+                  {%- else -%}
+                    <span class="rebel-testi__product-tag" title="{{ block.settings.product_tag }}">
+                      {{ block.settings.product_tag | escape }}
+                    </span>
+                  {%- endif -%}
+                {%- endif -%}
+              </div>
+
+            </div>
+          {%- endfor -%}
+
+        </div>
+      </div>
+
+      {%- comment -%} Controls {%- endcomment -%}
+      <div class="rebel-testi__nav">
+        <button
+          type="button"
+          class="rebel-testi__arrow"
+          id="rebel-testi-prev-{{ sec_id }}"
+          aria-label="Previous Testimonial"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
+        <div class="rebel-testi__dots" id="rebel-testi-dots-{{ sec_id }}"></div>
+
+        <button
+          type="button"
+          class="rebel-testi__arrow"
+          id="rebel-testi-next-{{ sec_id }}"
+          aria-label="Next Testimonial"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {%- comment -%} Mosambi Style Instagram Highlights Callout {%- endcomment -%}
+    {%- if section.settings.show_instagram_banner -%}
+      <div class="rebel-testi__ig-banner">
+        <div class="rebel-testi__ig-left">
+          <div class="rebel-testi__ig-icon-wrap" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </div>
+          <div>
+            <h4 class="rebel-testi__ig-title">{{ section.settings.ig_banner_title | default: "Want to see more customer love?" }}</h4>
+            <p class="rebel-testi__ig-text">{{ section.settings.ig_banner_text | default: "To check all verified reviews & unboxing videos kindly visit our Instagram highlight 'Reviews'" }}</p>
+          </div>
+        </div>
+
+        <a
+          href="{{ section.settings.ig_link | default: 'https://www.instagram.com' }}"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="rebel-testi__ig-btn"
+        >
+          <span>{{ section.settings.ig_button_text | default: "View on Instagram" }}</span>
+          <span>↗</span>
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+
+  {%- comment -%} Photo Lightbox Modal {%- endcomment -%}
+  <div class="rebel-testi__lightbox" id="rebel-testi-lightbox-{{ sec_id }}" role="dialog" aria-modal="true" aria-label="Photo Preview">
+    <button class="rebel-testi__lightbox-close" id="rebel-testi-lb-close-{{ sec_id }}" aria-label="Close Preview">✕</button>
+    <img id="rebel-testi-lb-img-{{ sec_id }}" src="" alt="Enlarged review photo" />
+  </div>
+</section>
+
+<script>
+  (function() {
+    const secId = "{{ sec_id }}";
+    const track = document.getElementById("rebel-testi-track-" + secId);
+    const wrap = document.getElementById("rebel-testi-track-wrap-" + secId);
+    const prevBtn = document.getElementById("rebel-testi-prev-" + secId);
+    const nextBtn = document.getElementById("rebel-testi-next-" + secId);
+    const dotsContainer = document.getElementById("rebel-testi-dots-" + secId);
+    const cards = track ? Array.from(track.querySelectorAll(".rebel-testi__card")) : [];
+
+    if (!track || cards.length === 0) return;
+
+    let currentIndex = 0;
+    const totalCards = cards.length;
+    let autoplayTimer = null;
+    const isAutoplay = {{ section.settings.autoplay | default: false }};
+    const autoplaySpeed = {{ section.settings.autoplay_speed | default: 5 }} * 1000;
+
+    function getVisibleCardsCount() {
+      const w = window.innerWidth;
+      if (w <= 768) return 1;
+      if (w <= 1024) return {{ section.settings.columns_tablet | default: 2 }};
+      return {{ section.settings.columns_desktop | default: 3 }};
+    }
+
+    function getMaxIndex() {
+      const visible = getVisibleCardsCount();
+      return Math.max(0, totalCards - visible);
+    }
+
+    function buildDots() {
+      if (!dotsContainer) return;
+      dotsContainer.innerHTML = "";
+      const maxIdx = getMaxIndex();
+      for (let i = 0; i <= maxIdx; i++) {
+        const dot = document.createElement("button");
+        dot.className = "rebel-testi__dot" + (i === currentIndex ? " active" : "");
+        dot.setAttribute("aria-label", "Go to slide " + (i + 1));
+        dot.addEventListener("click", () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function updateDots() {
+      if (!dotsContainer) return;
+      const dots = dotsContainer.querySelectorAll(".rebel-testi__dot");
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle("active", idx === currentIndex);
+      });
+    }
+
+    function updateArrows() {
+      const maxIdx = getMaxIndex();
+      if (prevBtn) prevBtn.disabled = currentIndex === 0;
+      if (nextBtn) nextBtn.disabled = currentIndex >= maxIdx;
+    }
+
+    function goToSlide(index) {
+      const maxIdx = getMaxIndex();
+      currentIndex = Math.min(Math.max(0, index), maxIdx);
+
+      const card = cards[0];
+      if (!card) return;
+      const cardRect = card.getBoundingClientRect();
+      const style = window.getComputedStyle(track);
+      const gap = parseFloat(style.gap) || 20;
+      const step = cardRect.width + gap;
+
+      track.style.transform = "translateX(-" + (currentIndex * step) + "px)";
+      updateDots();
+      updateArrows();
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        goToSlide(currentIndex - 1);
+        resetAutoplay();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        const maxIdx = getMaxIndex();
+        if (currentIndex >= maxIdx) {
+          goToSlide(0);
+        } else {
+          goToSlide(currentIndex + 1);
+        }
+        resetAutoplay();
+      });
+    }
+
+    // Touch & Drag Swipe support
+    let startX = 0;
+    let isDragging = false;
+    let currentTranslate = 0;
+
+    track.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+      pauseAutoplay();
+    }, { passive: true });
+
+    track.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+    }, { passive: true });
+
+    track.addEventListener("touchend", (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      const endX = e.changedTouches[0].clientX;
+      const diff = startX - endX;
+      if (Math.abs(diff) > 40) {
+        if (diff > 0) {
+          goToSlide(currentIndex + 1);
+        } else {
+          goToSlide(currentIndex - 1);
+        }
+      }
+      resetAutoplay();
+    });
+
+    // Autoplay
+    function startAutoplay() {
+      if (!isAutoplay) return;
+      autoplayTimer = setInterval(() => {
+        const maxIdx = getMaxIndex();
+        if (currentIndex >= maxIdx) {
+          goToSlide(0);
+        } else {
+          goToSlide(currentIndex + 1);
+        }
+      }, autoplaySpeed);
+    }
+
+    function pauseAutoplay() {
+      if (autoplayTimer) clearInterval(autoplayTimer);
+    }
+
+    function resetAutoplay() {
+      pauseAutoplay();
+      startAutoplay();
+    }
+
+    wrap.addEventListener("mouseenter", pauseAutoplay);
+    wrap.addEventListener("mouseleave", startAutoplay);
+
+    // Lightbox
+    const lightbox = document.getElementById("rebel-testi-lightbox-" + secId);
+    const lbImg = document.getElementById("rebel-testi-lb-img-" + secId);
+    const lbClose = document.getElementById("rebel-testi-lb-close-" + secId);
+
+    track.querySelectorAll(".rebel-testi__attached-photo").forEach(photo => {
+      photo.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const fullSrc = photo.getAttribute("data-full-src");
+        if (fullSrc && lightbox && lbImg) {
+          lbImg.src = fullSrc;
+          lightbox.classList.add("active");
+          pauseAutoplay();
+        }
+      });
+    });
+
+    if (lbClose) {
+      lbClose.addEventListener("click", () => {
+        lightbox.classList.remove("active");
+        startAutoplay();
+      });
+    }
+    if (lightbox) {
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox) {
+          lightbox.classList.remove("active");
+          startAutoplay();
+        }
+      });
+    }
+
+    // Init & Resize
+    buildDots();
+    goToSlide(0);
+    startAutoplay();
+
+    let resizeDebounce;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeDebounce);
+      resizeDebounce = setTimeout(() => {
+        buildDots();
+        goToSlide(currentIndex);
+      }, 150);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Testimonials (Mosambi)",
+  "tag": "section",
+  "class": "rebel-testimonials-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
+    {
+      "type": "text",
+      "id": "kicker_text",
+      "label": "Top Badge / Kicker",
+      "default": "Trusted by 50,000+ Happy Customers"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Main Heading",
+      "default": "What Our Customers Are Saying"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subheading",
+      "default": "Every custom gift tells a special story. Read genuine experiences from our wonderful customers across India."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_summary",
+      "label": "Show Overall Rating Badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "rating_score",
+      "label": "Rating Score",
+      "default": "4.9 / 5.0"
+    },
+    {
+      "type": "text",
+      "id": "rating_reviews_count",
+      "label": "Reviews Count / Social Proof",
+      "default": "5,000+ Verified Reviews"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Visible Cards (Desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "columns_tablet",
+      "label": "Visible Cards (Tablet)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Max Container Width (px)",
+      "min": 1000,
+      "max": 1600,
+      "step": 50,
+      "default": 1300
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card Border Radius (px)",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Slider Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable Auto-play",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay Speed (seconds)",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Colors & Styling"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section Background",
+      "default": "#faf9f5"
+    },
+    {
+      "type": "color",
+      "id": "card_bg",
+      "label": "Card Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card Border Color",
+      "default": "#edebe4"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#181818"
+    },
+    {
+      "type": "color",
+      "id": "text_muted",
+      "label": "Muted Text Color",
+      "default": "#6b6b6b"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Rating Color",
+      "default": "#e5a823"
+    },
+    {
+      "type": "color",
+      "id": "badge_bg",
+      "label": "Badge Background",
+      "default": "#f0ede1"
+    },
+    {
+      "type": "color",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "#2b2b2b"
+    },
+    {
+      "type": "color",
+      "id": "avatar_bg",
+      "label": "Avatar Circle Background",
+      "default": "#d0cf59"
+    },
+    {
+      "type": "color",
+      "id": "avatar_text",
+      "label": "Avatar Circle Text",
+      "default": "#181818"
+    },
+    {
+      "type": "header",
+      "content": "Instagram Banner (Mosambi Style)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_instagram_banner",
+      "label": "Show Instagram Highlight Banner",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "ig_banner_title",
+      "label": "Instagram Banner Title",
+      "default": "Want to see more verified reviews?"
+    },
+    {
+      "type": "textarea",
+      "id": "ig_banner_text",
+      "label": "Instagram Banner Text",
+      "default": "To check all 10,000+ reviews & customer unboxing stories, visit our Instagram highlight 'Reviews'"
+    },
+    {
+      "type": "text",
+      "id": "ig_button_text",
+      "label": "Instagram Button Text",
+      "default": "Visit Instagram Highlight"
+    },
+    {
+      "type": "url",
+      "id": "ig_link",
+      "label": "Instagram Profile / Highlight Link"
+    },
+    {
+      "type": "header",
+      "content": "Typography & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "title_size_desktop",
+      "label": "Title Size Desktop (px)",
+      "min": 24,
+      "max": 54,
+      "step": 2,
+      "default": 34
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "label": "Title Size Mobile (px)",
+      "min": 20,
+      "max": 36,
+      "step": 2,
+      "default": 26
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top (px)",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "default": 55
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom (px)",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "default": 55
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial Card",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Rating (1 - 5)",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "verified_buyer",
+          "label": "Verified Buyer Badge",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Review Headline",
+          "default": "The quality exceeded my expectations!"
+        },
+        {
+          "type": "textarea",
+          "id": "review",
+          "label": "Review Quote",
+          "default": "I ordered the Pop Up Frame for our 1st anniversary and my partner was genuinely moved to tears. The photo cutouts and pop-up 3D effect are stunning!"
+        },
+        {
+          "type": "text",
+          "id": "author_name",
+          "label": "Customer Name",
+          "default": "Rhea S."
+        },
+        {
+          "type": "text",
+          "id": "location",
+          "label": "City / Location",
+          "default": "Mumbai, Maharashtra"
+        },
+        {
+          "type": "image_picker",
+          "id": "customer_image",
+          "label": "Customer Unboxing Photo (optional)"
+        },
+        {
+          "type": "text",
+          "id": "product_tag",
+          "label": "Product Purchased Label",
+          "default": "POP UP FRAME"
+        },
+        {
+          "type": "url",
+          "id": "product_url",
+          "label": "Product Link (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials (Mosambi Style)",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "verified_buyer": true,
+            "title": "Brought tears of joy!",
+            "review": "I ordered the Pop Up Frame for our 2nd anniversary. The 3D pop-out effect with our favorite memory looked mesmerizing in person. Delivery took just 4 days!",
+            "author_name": "Aarav Sharma",
+            "location": "Delhi, NCR",
+            "product_tag": "POP UP FRAME"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "verified_buyer": true,
+            "title": "Super premium quality ✨",
+            "review": "Ordered the 10 Mini Memoroids pack for my best friend's birthday. The print sharpness, thick card material and vibrant colors are top notch. Worth every rupee!",
+            "author_name": "Pooja V.",
+            "location": "Bangalore, KA",
+            "product_tag": "MINI MEMOROIDS"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "verified_buyer": true,
+            "title": "Best customized gift website ❤️",
+            "review": "The photo customizer was super easy to use on my phone. Got constant WhatsApp updates on my order status. Everyone at home fell in love with it.",
+            "author_name": "Sneha Patel",
+            "location": "Ahmedabad, GJ",
+            "product_tag": "POP UP FRAME"
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "rating": 5,
+            "verified_buyer": true,
+            "title": "Surpassed all expectations!",
+            "review": "Was skeptical about ordering personalized gifts online, but Mosambi/Rebel delivered beyond expectations. Safely bubble wrapped, arrived in pristine condition.",
+            "author_name": "Karan Malhotra",
+            "location": "Pune, MH",
+            "product_tag": "COLLAGE FRAME"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
