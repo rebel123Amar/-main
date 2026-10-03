@@ -1008,6 +1008,35 @@
         } else if (text.startsWith("http://") || text.startsWith("https://")) {
           dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
           dd.dataset.rebelFormatted = "true";
+        } else if (text === "🔗") {
+          const dt = dd.previousElementSibling || dd.closest(".product-option")?.querySelector("dt");
+          const propName = dt ? dt.textContent.replace(/:$/, "").trim() : "";
+          const hiddenKey = "_" + propName;
+          let targetUrl = window._rebelLastUploadedProperties?.[hiddenKey] || "";
+          if (!targetUrl && window._rebelCartData?.items) {
+            for (const it of window._rebelCartData.items) {
+              if (it.properties && it.properties[hiddenKey]) {
+                targetUrl = it.properties[hiddenKey];
+                break;
+              }
+            }
+          }
+          if (targetUrl && (targetUrl.startsWith("http://") || targetUrl.startsWith("https://"))) {
+            dd.innerHTML = `<a href="${targetUrl}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
+            dd.dataset.rebelFormatted = "true";
+          } else if (!window._rebelFetchingCart) {
+            window._rebelFetchingCart = true;
+            fetch((window.Shopify?.routes?.root || "/") + "cart.js")
+              .then((r) => r.json())
+              .then((c) => {
+                window._rebelCartData = c;
+                window._rebelFetchingCart = false;
+                formatDrawerPropertyLinks();
+              })
+              .catch(() => {
+                window._rebelFetchingCart = false;
+              });
+          }
         }
       });
     } finally {

@@ -546,20 +546,25 @@
       if (enableImages) {
         if (maxImages === 1 && collageImages.length === 1) {
           if (collageImages[0].url) {
-            properties[`${productTitle} Photo`] = collageImages[0].url;
+            properties[`${productTitle} Photo`] = "🔗";
+            properties[`_${productTitle} Photo`] = collageImages[0].url;
           }
         } else {
           collageImages.forEach((img, idx) => {
             if (img.url) {
-              properties[`${productTitle}_${idx + 1}`] = img.url;
+              properties[`${productTitle}_${idx + 1}`] = "🔗";
+              properties[`_${productTitle}_${idx + 1}`] = img.url;
             }
           });
         }
       }
 
       if (enablePopout && popoutImage && popoutImage.url) {
-        properties["upload - Single Pop Out Image_1"] = popoutImage.url;
+        properties["upload - Single Pop Out Image_1"] = "🔗";
+        properties["_upload - Single Pop Out Image_1"] = popoutImage.url;
       }
+
+      window._rebelLastUploadedProperties = properties;
 
       // Sync into hidden form inputs as fallback
       syncHiddenFormInputs(form, properties);
@@ -582,6 +587,7 @@
       const cartData = await addRes.json();
 
       if (addRes.ok) {
+        window._rebelCartData = cartData;
         if (isBuyNow) {
           // USER REQUEST: After selecting images, go directly to checkout!
           window.location.href = (window.Shopify?.routes?.root || "/") + "checkout";
@@ -673,8 +679,11 @@
           for (const [k, v] of Object.entries(item.properties)) {
             if (!v || k.startsWith("_")) continue;
             let valHtml = v;
+            const hiddenUrl = item.properties["_" + k];
             if (typeof v === "string" && (v.startsWith("http://") || v.startsWith("https://"))) {
               valHtml = `<a href="${v}" target="_blank" class="rebel-property-link" title="View Image">🔗</a>`;
+            } else if (hiddenUrl && typeof hiddenUrl === "string" && (hiddenUrl.startsWith("http://") || hiddenUrl.startsWith("https://"))) {
+              valHtml = `<a href="${hiddenUrl}" target="_blank" class="rebel-property-link" title="View Image">🔗</a>`;
             }
             propsHtml += `<div class="rebel-drawer-item-prop"><strong>${k}:</strong> ${valHtml}</div>`;
           }
@@ -769,6 +778,35 @@
         } else if (text.startsWith("http://") || text.startsWith("https://")) {
           dd.innerHTML = `<a href="${text}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
           dd.dataset.rebelFormatted = "true";
+        } else if (text === "🔗") {
+          const dt = dd.previousElementSibling || dd.closest(".product-option")?.querySelector("dt");
+          const propName = dt ? dt.textContent.replace(/:$/, "").trim() : "";
+          const hiddenKey = "_" + propName;
+          let targetUrl = window._rebelLastUploadedProperties?.[hiddenKey] || "";
+          if (!targetUrl && window._rebelCartData?.items) {
+            for (const it of window._rebelCartData.items) {
+              if (it.properties && it.properties[hiddenKey]) {
+                targetUrl = it.properties[hiddenKey];
+                break;
+              }
+            }
+          }
+          if (targetUrl && (targetUrl.startsWith("http://") || targetUrl.startsWith("https://"))) {
+            dd.innerHTML = `<a href="${targetUrl}" target="_blank" class="link rebel-property-link" title="View Image" style="color: #2563eb; text-decoration: underline; font-size: 13px;">🔗</a>`;
+            dd.dataset.rebelFormatted = "true";
+          } else if (!window._rebelFetchingCart) {
+            window._rebelFetchingCart = true;
+            fetch((window.Shopify?.routes?.root || "/") + "cart.js")
+              .then((r) => r.json())
+              .then((c) => {
+                window._rebelCartData = c;
+                window._rebelFetchingCart = false;
+                formatDrawerPropertyLinks();
+              })
+              .catch(() => {
+                window._rebelFetchingCart = false;
+              });
+          }
         }
       });
     } finally {

@@ -922,7 +922,24 @@
                                   <div class="product-option">
                                     <dt>{{ property.first }}:</dt>
                                     <dd>
-                                      {%- if property.last contains 'http://' or property.last contains 'https://' or property.last contains '/uploads/' -%}
+                                      {%- assign hidden_prop_key = '_' | append: property.first -%}
+                                      {%- assign hidden_img_url = '' -%}
+                                      {%- for p in item.properties -%}
+                                        {%- if p.first == hidden_prop_key -%}
+                                          {%- assign hidden_img_url = p.last -%}
+                                          {%- break -%}
+                                        {%- endif -%}
+                                      {%- endfor -%}
+                                      {%- if hidden_img_url != blank -%}
+                                        <a
+                                          href="{{ hidden_img_url }}"
+                                          class="link rebel-property-link"
+                                          target="_blank"
+                                          aria-describedby="a11y-new-window-message"
+                                          title="View Image"
+                                          style="color: #2563eb; text-decoration: underline; font-weight: 500; font-size: 13px;"
+                                        >🔗</a>
+                                      {%- elsif property.last contains 'http://' or property.last contains 'https://' or property.last contains '/uploads/' -%}
                                         <a
                                           href="{{ property.last }}"
                                           class="link rebel-property-link"
