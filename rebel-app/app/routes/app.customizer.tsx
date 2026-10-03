@@ -485,7 +485,7 @@ export default function CustomizerPage() {
       case "custom":
         return <Badge tone="attention">⚙️ Custom Setup</Badge>;
       default:
-        return <Badge tone="subdued">⚪ Unconfigured (Theme Default)</Badge>;
+        return <Badge>⚪ Unconfigured (Theme Default)</Badge>;
     }
   };
 

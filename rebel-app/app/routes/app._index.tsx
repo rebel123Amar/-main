@@ -7,6 +7,7 @@ import {
   Card,
   Text,
   BlockStack,
+  InlineStack,
   InlineGrid,
   Badge,
   Button,
