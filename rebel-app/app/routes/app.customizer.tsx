@@ -138,6 +138,34 @@ const PRESETS: Record<string, Partial<CustomizerConfig>> = {
     enablePopout: false,
     popoutRequired: false,
   },
+  "10-photos": {
+    enabled: true,
+    preset: "10-photos",
+    enableText: true,
+    textLabel: "Enter Name / Title",
+    textPlaceholder: "e.g. Memories 2026",
+    textRequired: false,
+    enablePhotos: true,
+    photosLabel: "Select 10 Photos",
+    minPhotos: 10,
+    maxPhotos: 10,
+    enablePopout: false,
+    popoutRequired: false,
+  },
+  "20-photos": {
+    enabled: true,
+    preset: "20-photos",
+    enableText: true,
+    textLabel: "Enter Name / Title",
+    textPlaceholder: "e.g. Photobook Album",
+    textRequired: false,
+    enablePhotos: true,
+    photosLabel: "Select 20 Photos",
+    minPhotos: 20,
+    maxPhotos: 20,
+    enablePopout: false,
+    popoutRequired: false,
+  },
   disabled: {
     enabled: false,
     preset: "disabled",
@@ -720,6 +748,20 @@ export default function CustomizerPage() {
                         onChange={() => handlePresetChange("no-text")}
                       />
                       <RadioButton
+                        label="📚 10 Photos (Album)"
+                        checked={config.preset === "10-photos"}
+                        id="preset-10-photos"
+                        name="preset"
+                        onChange={() => handlePresetChange("10-photos")}
+                      />
+                      <RadioButton
+                        label="📸 20 Photos (Photobook)"
+                        checked={config.preset === "20-photos"}
+                        id="preset-20-photos"
+                        name="preset"
+                        onChange={() => handlePresetChange("20-photos")}
+                      />
+                      <RadioButton
                         label="⚙️ Custom Setup"
                         checked={config.preset === "custom"}
                         id="preset-custom"
@@ -789,51 +831,75 @@ export default function CustomizerPage() {
 
                         <InlineStack gap="400" wrap={false}>
                           <div style={{ flex: 1 }}>
-                            <BlockStack gap="100">
-                              <Text as="p" variant="bodyMd">
-                                Min Photos Required: <strong>{config.minPhotos}</strong>
-                              </Text>
-                              <RangeSlider
-                                label=""
-                                value={config.minPhotos}
-                                onChange={(val) =>
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    minPhotos: Number(val),
-                                    maxPhotos: Math.max(Number(val), prev.maxPhotos),
-                                  }))
-                                }
-                                min={1}
-                                max={10}
-                                step={1}
-                                output
-                              />
-                            </BlockStack>
+                            <TextField
+                              label="Minimum Photos Required (Manual Input)"
+                              type="number"
+                              min={1}
+                              value={String(config.minPhotos)}
+                              onChange={(val) => {
+                                const n = Math.max(1, parseInt(val) || 1);
+                                setConfig((prev) => ({
+                                  ...prev,
+                                  preset: "custom",
+                                  minPhotos: n,
+                                  maxPhotos: Math.max(n, prev.maxPhotos),
+                                }));
+                              }}
+                              autoComplete="off"
+                              helpText="Customer ko kam se kam itni photos upload karni padengi"
+                            />
                           </div>
 
                           <div style={{ flex: 1 }}>
-                            <BlockStack gap="100">
-                              <Text as="p" variant="bodyMd">
-                                Max Photos Allowed: <strong>{config.maxPhotos}</strong>
-                              </Text>
-                              <RangeSlider
-                                label=""
-                                value={config.maxPhotos}
-                                onChange={(val) =>
-                                  setConfig((prev) => ({
-                                    ...prev,
-                                    maxPhotos: Number(val),
-                                    minPhotos: Math.min(Number(val), prev.minPhotos),
-                                  }))
-                                }
-                                min={1}
-                                max={10}
-                                step={1}
-                                output
-                              />
-                            </BlockStack>
+                            <TextField
+                              label="Maximum Photos Allowed (Manual Input)"
+                              type="number"
+                              min={1}
+                              value={String(config.maxPhotos)}
+                              onChange={(val) => {
+                                const n = Math.max(1, parseInt(val) || 1);
+                                setConfig((prev) => ({
+                                  ...prev,
+                                  preset: "custom",
+                                  maxPhotos: n,
+                                  minPhotos: Math.min(n, prev.minPhotos),
+                                }));
+                              }}
+                              autoComplete="off"
+                              helpText="Admin kitni bhi limit daal sakta hai: 2, 4, 10, 20, 25, 30, 50 etc."
+                            />
                           </div>
                         </InlineStack>
+
+                        {/* Quick Count Selection Buttons */}
+                        <BlockStack gap="100">
+                          <Text variant="bodyXs" tone="subdued" as="span">
+                            ⚡ Quick Limit Fill (Click to apply):
+                          </Text>
+                          <InlineStack gap="200" wrap>
+                            {[1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 50].map((num) => (
+                              <Button
+                                key={String(num)}
+                                size="slim"
+                                variant={config.maxPhotos === num ? "primary" : "secondary"}
+                                onClick={() => {
+                                  setConfig((prev) => ({
+                                    ...prev,
+                                    preset: "custom",
+                                    minPhotos: num === 1 ? 1 : Math.min(prev.minPhotos, num),
+                                    maxPhotos: num,
+                                    photosLabel:
+                                      num === 1
+                                        ? "Upload Your Photo (1 Image)"
+                                        : `Upload (${num === prev.minPhotos ? num : prev.minPhotos + '-' + num}) Photos`,
+                                  }));
+                                }}
+                              >
+                                {`${num} ${num === 1 ? "Photo" : "Photos"}`}
+                              </Button>
+                            ))}
+                          </InlineStack>
+                        </BlockStack>
 
                         <Text as="p" variant="bodyXs" tone="subdued">
                           💡 Note: If Max Photos is set to 1, selecting a new image automatically replaces the previous one without needing to delete it first!
