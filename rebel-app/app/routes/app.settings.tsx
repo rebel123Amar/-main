@@ -114,6 +114,27 @@ export default function SettingsPage() {
           </Layout.Section>
         )}
 
+        {/* Product Customizer Management */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="300">
+              <InlineStack align="space-between" blockAlign="center">
+                <BlockStack gap="100">
+                  <Text variant="headingMd" as="h2">
+                    🎨 Product Customizer Configuration
+                  </Text>
+                  <Text as="p" variant="bodySm" tone="subdued">
+                    Configure which products have text fields, 1 photo upload (Mugs/Cards), 2 photos (Couple frames), 4-6 photos + pop-out (Pop-Up Frames), or no customizer.
+                  </Text>
+                </BlockStack>
+                <Button variant="primary" url="/app/customizer" size="large">
+                  Manage Per-Product Customizer ➔
+                </Button>
+              </InlineStack>
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+
         {/* Instagram Settings */}
         <Layout.Section>
           <Card>

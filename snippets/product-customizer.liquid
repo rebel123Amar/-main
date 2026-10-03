@@ -357,75 +357,249 @@
 }
 </style>
 
+{%- liquid
+  assign enable_customizer = true
+  assign enable_text = true
+  assign text_label = 'Enter Text'
+  assign text_placeholder = 'Enter Text'
+  assign text_required = false
+
+  assign enable_images = true
+  assign images_label = 'Select (4-6) Images'
+  assign min_images = 4
+  assign max_images = 6
+
+  assign enable_popout = true
+  assign popout_label = 'Select 1 Pop-Out Image'
+  assign popout_required = true
+
+  # App Customizer Metafield Override (from rebel-custom-app admin interface)
+  assign rebel_cfg = product.metafields.rebel_customizer.config.value
+  assign has_custom_config = false
+
+  if rebel_cfg != blank
+    assign has_custom_config = true
+    if rebel_cfg.enabled == false
+      assign enable_customizer = false
+    else
+      assign enable_customizer = true
+      if rebel_cfg.enableText != nil
+        assign enable_text = rebel_cfg.enableText
+      endif
+      if rebel_cfg.textLabel != blank
+        assign text_label = rebel_cfg.textLabel
+      endif
+      if rebel_cfg.textPlaceholder != blank
+        assign text_placeholder = rebel_cfg.textPlaceholder
+      endif
+      if rebel_cfg.textRequired != nil
+        assign text_required = rebel_cfg.textRequired
+      endif
+      if rebel_cfg.enablePhotos != nil
+        assign enable_images = rebel_cfg.enablePhotos
+      endif
+      if rebel_cfg.photosLabel != blank
+        assign images_label = rebel_cfg.photosLabel
+      endif
+      if rebel_cfg.minPhotos != blank
+        assign min_images = rebel_cfg.minPhotos | plus: 0
+      endif
+      if rebel_cfg.maxPhotos != blank
+        assign max_images = rebel_cfg.maxPhotos | plus: 0
+      endif
+      if rebel_cfg.enablePopout != nil
+        assign enable_popout = rebel_cfg.enablePopout
+      endif
+      if rebel_cfg.popoutLabel != blank
+        assign popout_label = rebel_cfg.popoutLabel
+      endif
+      if rebel_cfg.popoutRequired != nil
+        assign popout_required = rebel_cfg.popoutRequired
+      endif
+    endif
+  endif
+
+  # Product Tags Override (Per-Product Flexibility if no metafield)
+  assign has_custom_tag = false
+  for tag in product.tags
+    assign down_tag = tag | downcase | strip
+
+    if down_tag == 'custom:disable' or down_tag == 'custom:disabled' or down_tag == 'no-custom' or down_tag == 'customizer:disabled'
+      assign enable_customizer = false
+      assign has_custom_tag = true
+    endif
+
+    if down_tag == 'custom:1-photo' or down_tag == 'custom:single-photo' or down_tag == 'custom:photos:1' or down_tag == '1-photo' or down_tag == 'single-photo'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_images = true
+        assign images_label = 'Upload Your Photo'
+        assign min_images = 1
+        assign max_images = 1
+        assign enable_popout = false
+        assign popout_required = false
+      endunless
+    endif
+
+    if down_tag == 'custom:2-photos' or down_tag == 'custom:photos:2' or down_tag == '2-photos'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_images = true
+        assign images_label = 'Upload 2 Photos'
+        assign min_images = 2
+        assign max_images = 2
+        assign enable_popout = false
+        assign popout_required = false
+      endunless
+    endif
+
+    if down_tag == 'custom:3-photos' or down_tag == 'custom:photos:3' or down_tag == '3-photos'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_images = true
+        assign images_label = 'Upload 3 Photos'
+        assign min_images = 3
+        assign max_images = 3
+        assign enable_popout = false
+        assign popout_required = false
+      endunless
+    endif
+
+    if down_tag == 'custom:4-6-photos' or down_tag == 'custom:popup-frame' or down_tag == 'popup-frame' or down_tag == '4-6-photos'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_images = true
+        assign images_label = 'Select (4-6) Images'
+        assign min_images = 4
+        assign max_images = 6
+        assign enable_popout = true
+        assign popout_required = true
+      endunless
+    endif
+
+    if down_tag == 'custom:text-only' or down_tag == 'text-only' or down_tag == 'custom:engraving'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_text = true
+        assign text_required = true
+        assign enable_images = false
+        assign enable_popout = false
+        assign popout_required = false
+      endunless
+    endif
+
+    if down_tag == 'custom:no-text' or down_tag == 'no-text'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_text = false
+      endunless
+    endif
+
+    if down_tag == 'custom:no-popout' or down_tag == 'no-popout'
+      assign has_custom_tag = true
+      unless has_custom_config
+        assign enable_popout = false
+        assign popout_required = false
+      endunless
+    endif
+  endfor
+
+  # Generic Metafields overrides
+  if product.metafields.custom.min_images != blank and has_custom_config == false
+    assign min_images = product.metafields.custom.min_images | plus: 0
+  endif
+  if product.metafields.custom.max_images != blank and has_custom_config == false
+    assign max_images = product.metafields.custom.max_images | plus: 0
+  endif
+-%}
+
+{%- if enable_customizer -%}
 <div
   class="rebel-product-customizer"
-  data-app-url="{{ app_url | default: 'https://main-pink-phi.vercel.app' }}"
+  data-app-url="{{ app_url | default: 'https://mature-incident-slot-colours.trycloudflare.com' }}"
   data-product-title="{{ product.title | escape }}"
   data-shop="{{ shop.permanent_domain | escape }}"
+  data-enable-text="{{ enable_text }}"
+  data-text-label="{{ text_label | escape }}"
+  data-text-required="{{ text_required }}"
+  data-enable-images="{{ enable_images }}"
+  data-images-label="{{ images_label | escape }}"
+  data-min-images="{{ min_images }}"
+  data-max-images="{{ max_images }}"
+  data-enable-popout="{{ enable_popout }}"
+  data-popout-label="{{ popout_label | escape }}"
+  data-popout-required="{{ popout_required }}"
 >
-  <div class="rebel-pc-error-banner" role="alert">
+  <div class="rebel-pc-error-banner" role="alert" style="display:none;">
     <span class="rebel-pc-error-text"></span>
   </div>
 
-  <div class="rebel-pc-status" role="status">
+  <div class="rebel-pc-status" role="status" style="display:none;">
     <div class="rebel-pc-spinner"></div>
     <span class="rebel-pc-status-text">Uploading photos...</span>
   </div>
 
-  <!-- 1. Enter Text -->
-  <div class="rebel-pc-field-group rebel-pc-text-group">
-    <label class="rebel-pc-label" for="rebel-pc-text-input">
-      <span>Enter Text<span class="req" style="display:none;">*</span></span>
-    </label>
-    <input
-      type="text"
-      id="rebel-pc-text-input"
-      class="rebel-pc-input-text"
-      placeholder="Enter Text"
-      autocomplete="off"
-    />
-  </div>
-
-  <!-- 2. Select (4-6) Images -->
-  <div class="rebel-pc-field-group">
-    <label class="rebel-pc-label">
-      <span>Select (4-6) Images<span class="req">*</span></span>
-      <span class="counter" id="rebel-pc-collage-counter">(0 selected)</span>
-    </label>
-    <div class="rebel-pc-dropzone" id="rebel-pc-collage-drop" tabindex="0" role="button">
+  <!-- 1. Enter Text (Conditional) -->
+  {%- if enable_text -%}
+    <div class="rebel-pc-field-group rebel-pc-text-group">
+      <label class="rebel-pc-label" for="rebel-pc-text-input">
+        <span>{{ text_label }}<span class="req" style="{% unless text_required %}display:none;{% endunless %}">*</span></span>
+      </label>
       <input
-        type="file"
-        id="rebel-pc-collage-input"
-        accept="image/jpeg,image/png,image/webp,image/jpg"
-        multiple
-        aria-label="Upload collage images"
+        type="text"
+        id="rebel-pc-text-input"
+        class="rebel-pc-input-text"
+        placeholder="{{ text_label }}"
+        autocomplete="off"
       />
-      <div class="rebel-pc-dropzone-content">
-        <span>Drag & Drop your files or <span class="browse-link">Browse</span></span>
-      </div>
     </div>
-    <div class="rebel-pc-thumbnails" id="rebel-pc-collage-thumbs"></div>
-  </div>
+  {%- endif -%}
 
-  <!-- 3. Select 1 Pop-Out Image -->
-  <div class="rebel-pc-field-group">
-    <label class="rebel-pc-label">
-      <span>Select 1 Pop-Out Image<span class="req">*</span></span>
-    </label>
-    <div class="rebel-pc-dropzone" id="rebel-pc-popout-drop" tabindex="0" role="button">
-      <input
-        type="file"
-        id="rebel-pc-popout-input"
-        accept="image/jpeg,image/png,image/webp,image/jpg"
-        aria-label="Upload pop-out image"
-      />
-      <div class="rebel-pc-dropzone-content">
-        <span>Drag & Drop your files or <span class="browse-link">Browse</span></span>
+  <!-- 2. Select Images (Conditional) -->
+  {%- if enable_images -%}
+    <div class="rebel-pc-field-group rebel-pc-images-group">
+      <label class="rebel-pc-label">
+        <span>{{ images_label }}<span class="req">*</span></span>
+        <span class="counter" id="rebel-pc-collage-counter">(0 selected)</span>
+      </label>
+      <div class="rebel-pc-dropzone" id="rebel-pc-collage-drop" tabindex="0" role="button">
+        <input
+          type="file"
+          id="rebel-pc-collage-input"
+          accept="image/jpeg,image/png,image/webp,image/jpg"
+          {% if max_images > 1 %}multiple{% endif %}
+          aria-label="{{ images_label }}"
+        />
+        <div class="rebel-pc-dropzone-content">
+          <span>Drag & Drop your {% if max_images == 1 %}photo{% else %}files{% endif %} or <span class="browse-link">Browse</span></span>
+        </div>
       </div>
+      <div class="rebel-pc-thumbnails" id="rebel-pc-collage-thumbs"></div>
     </div>
-    <div class="rebel-pc-thumbnails" id="rebel-pc-popout-thumbs"></div>
-  </div>
+  {%- endif -%}
+
+  <!-- 3. Select Pop-Out Image (Conditional) -->
+  {%- if enable_popout -%}
+    <div class="rebel-pc-field-group rebel-pc-popout-group">
+      <label class="rebel-pc-label">
+        <span>{{ popout_label }}<span class="req">{% if popout_required %}*{% endif %}</span></span>
+      </label>
+      <div class="rebel-pc-dropzone" id="rebel-pc-popout-drop" tabindex="0" role="button">
+        <input
+          type="file"
+          id="rebel-pc-popout-input"
+          accept="image/jpeg,image/png,image/webp,image/jpg"
+          aria-label="{{ popout_label }}"
+        />
+        <div class="rebel-pc-dropzone-content">
+          <span>Drag & Drop your file or <span class="browse-link">Browse</span></span>
+        </div>
+      </div>
+      <div class="rebel-pc-thumbnails" id="rebel-pc-popout-thumbs"></div>
+    </div>
+  {%- endif -%}
 </div>
+{%- endif -%}
 
 <script>
 (function() {
@@ -495,8 +669,11 @@
 
   function handleCollage(files, container) {
     clearErr(container);
-    if (collageImages.length + files.length > 6) {
-      showErr(container, "Maximum 6 images allowed for collage.");
+    const maxFiles = parseInt(container.dataset.maxImages, 10) || 6;
+    if (maxFiles === 1) {
+      collageImages = [];
+    } else if (collageImages.length + files.length > maxFiles) {
+      showErr(container, `Maximum ${maxFiles} images allowed.`);
       return;
     }
     for (const f of files) {
@@ -635,17 +812,11 @@
 
       const isBuyNow = Boolean(buyBtn);
       const actionBtn = buyBtn || addBtn;
-      const actionLabel = isBuyNow ? "buying now" : "adding to cart";
 
-      if (collageImages.length === 0) {
+      const validation = validateFormInputs(container, isBuyNow);
+      if (!validation.valid) {
         e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        showErr(container, `⚠️ Please select your (4-6) images before ${actionLabel}.`);
-        container.scrollIntoView({ behavior: "smooth", block: "center" });
-        return false;
-      }
-      if (!popoutImage) {
-        e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-        showErr(container, `⚠️ Please select 1 Pop-Out image before ${actionLabel}.`);
+        showErr(container, validation.error);
         container.scrollIntoView({ behavior: "smooth", block: "center" });
         return false;
       }
@@ -676,13 +847,9 @@
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      if (collageImages.length === 0) {
-        showErr(container, "⚠️ Please select your (4-6) images before adding to cart.");
-        container.scrollIntoView({ behavior: "smooth", block: "center" });
-        return false;
-      }
-      if (!popoutImage) {
-        showErr(container, "⚠️ Please select 1 Pop-Out image before adding to cart.");
+      const validation = validateFormInputs(container, false);
+      if (!validation.valid) {
+        showErr(container, validation.error);
         container.scrollIntoView({ behavior: "smooth", block: "center" });
         return false;
       }
@@ -691,6 +858,44 @@
       doExecuteAction(container, actionBtn, false);
       return false;
     }, true);
+  }
+
+  function validateFormInputs(container, isBuyNow) {
+    const actionLabel = isBuyNow ? "buying now" : "adding to cart";
+    const enableImages = container.dataset.enableImages !== "false";
+    const minImages = parseInt(container.dataset.minImages, 10) || 1;
+    const enablePopout = container.dataset.enablePopout !== "false";
+    const popoutRequired = container.dataset.popoutRequired === "true";
+    const enableText = container.dataset.enableText !== "false";
+    const textRequired = container.dataset.textRequired === "true";
+
+    if (enableImages && collageImages.length < minImages) {
+      const drop = container.querySelector("#rebel-pc-collage-drop");
+      if (drop) drop.classList.add("error");
+      const msg = minImages === 1
+        ? `⚠️ Please select your photo before ${actionLabel}.`
+        : `⚠️ Please select at least ${minImages} image(s) before ${actionLabel}.`;
+      return { valid: false, error: msg };
+    }
+
+    if (enablePopout && popoutRequired && !popoutImage) {
+      const drop = container.querySelector("#rebel-pc-popout-drop");
+      if (drop) drop.classList.add("error");
+      return { valid: false, error: `⚠️ Please select 1 Pop-Out image before ${actionLabel}.` };
+    }
+
+    if (enableText) {
+      const textGroup = container.querySelector(".rebel-pc-text-group");
+      const textInput = container.querySelector("#rebel-pc-text-input");
+      const reqStar = textGroup?.querySelector(".req");
+      const isMandatory = textRequired || (reqStar && reqStar.style.display !== "none");
+      if (isMandatory && textInput && !textInput.value.trim()) {
+        textInput.focus();
+        return { valid: false, error: `⚠️ Please enter your custom text before ${actionLabel}.` };
+      }
+    }
+
+    return { valid: true };
   }
 
   function setupHeaderCartInterceptor() {
@@ -744,12 +949,29 @@
       const productTitle = container.dataset.productTitle || "POP UP FRAME";
 
       const properties = {};
-      if (textVal) properties["Enter Text"] = textVal;
+      const enableText = container.dataset.enableText !== "false";
+      const enableImages = container.dataset.enableImages !== "false";
+      const enablePopout = container.dataset.enablePopout !== "false";
+      const maxImages = parseInt(container.dataset.maxImages, 10) || 6;
+      const textLabel = container.dataset.textLabel || "Enter Text";
 
-      collageImages.forEach((img, idx) => {
-        if (img.url) properties[`${productTitle}_${idx + 1}`] = img.url;
-      });
-      if (popoutImage && popoutImage.url) {
+      if (enableText && textVal) {
+        properties[textLabel] = textVal;
+      }
+
+      if (enableImages) {
+        if (maxImages === 1 && collageImages.length === 1) {
+          if (collageImages[0].url) {
+            properties[`${productTitle} Photo`] = collageImages[0].url;
+          }
+        } else {
+          collageImages.forEach((img, idx) => {
+            if (img.url) properties[`${productTitle}_${idx + 1}`] = img.url;
+          });
+        }
+      }
+
+      if (enablePopout && popoutImage && popoutImage.url) {
         properties["upload - Single Pop Out Image_1"] = popoutImage.url;
       }
 

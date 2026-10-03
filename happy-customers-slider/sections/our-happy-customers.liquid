@@ -1,0 +1,954 @@
+{% comment %}
+  ==============================================================================
+  Section Name: Our Happy Customers 😊 (Auto-sliding Review Screenshots)
+  Reference: 99customizedjewellery.in
+  Features:
+  - 2-second Auto-slide with seamless loop
+  - Touch swipe for Mobile & Drag for Desktop
+  - Left & Right navigation arrows + clickable pagination dots
+  - Pause on hover / touch
+  - Lightbox modal on image click (zoom to read WhatsApp/customer reviews)
+  - 100% responsive (Mobile & Desktop)
+  - Fully customizable in Shopify Theme Editor (Settings & Blocks)
+  ==============================================================================
+{% endcomment %}
+
+{%- liquid
+  assign sec_id = section.id | replace: '-', '_'
+  assign autoplay_sec = section.settings.autoplay_speed | default: 2
+  assign autoplay_ms = autoplay_sec | times: 1000
+-%}
+
+<div
+  id="happy-customers-{{ sec_id }}"
+  class="happy-customers-section"
+  data-autoplay="{{ section.settings.autoplay }}"
+  data-speed="{{ autoplay_ms }}"
+  data-cards-desktop="{{ section.settings.cards_desktop | default: 4 }}"
+  style="
+    --hc-bg: {{ section.settings.bg_color | default: '#ffffff' }};
+    --hc-text: {{ section.settings.text_color | default: '#111827' }};
+    --hc-accent: {{ section.settings.accent_color | default: '#f05454' }};
+    --hc-pt: {{ section.settings.padding_top | default: 40 }}px;
+    --hc-pb: {{ section.settings.padding_bottom | default: 48 }}px;
+  "
+>
+  <div class="hc-container">
+    {%- if section.settings.title != blank -%}
+      <div class="hc-header">
+        <h2 class="hc-title">{{ section.settings.title | escape }}</h2>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="hc-subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.show_rating_badge -%}
+          <div class="hc-badge">
+            <span class="hc-stars">★★★★★</span>
+            <span class="hc-badge-text">{{ section.settings.rating_badge_text | default: '4.9/5 from 12,000+ Happy Customers' }}</span>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="hc-slider-wrapper">
+      {%- if section.settings.show_arrows -%}
+        <button type="button" class="hc-arrow hc-prev" aria-label="Previous Review">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      {%- endif -%}
+
+      <div class="hc-slider-track-wrap">
+        <div class="hc-slider-track" id="hc-track-{{ sec_id }}">
+          {%- if section.blocks.size > 0 -%}
+            {%- for block in section.blocks -%}
+              <div class="hc-card" data-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+                <div class="hc-card-inner">
+                  <div class="hc-card-image-wrap">
+                    {%- assign img_url = '' -%}
+                    {%- if block.settings.image != blank -%}
+                      {%- assign img_url = block.settings.image | image_url: width: 800 -%}
+                    {%- elsif block.settings.external_image_url != blank -%}
+                      {%- assign img_url = block.settings.external_image_url -%}
+                    {%- endif -%}
+
+                    {%- if img_url != blank -%}
+                      <img
+                        src="{{ img_url }}"
+                        alt="{{ block.settings.customer_name | default: 'Customer Review' | escape }}"
+                        loading="lazy"
+                        class="hc-card-img"
+                      />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    {%- else -%}
+                      <div class="hc-card-placeholder">
+                        <span>Review Screenshot</span>
+                      </div>
+                    {%- endif -%}
+                  </div>
+
+                  {%- if block.settings.customer_name != blank or block.settings.caption != blank -%}
+                    <div class="hc-card-info">
+                      {%- if block.settings.show_stars -%}
+                        <div class="hc-card-stars">★★★★★</div>
+                      {%- endif -%}
+                      {%- if block.settings.customer_name != blank -%}
+                        <div class="hc-customer-name">
+                          <span>{{ block.settings.customer_name | escape }}</span>
+                          {%- if block.settings.verified_buyer -%}
+                            <span class="hc-verified-badge" title="Verified Customer">
+                              <svg viewBox="0 0 20 20" width="14" height="14" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                              Verified
+                            </span>
+                          {%- endif -%}
+                        </div>
+                      {%- endif -%}
+                      {%- if block.settings.customer_location != blank -%}
+                        <div class="hc-customer-location">{{ block.settings.customer_location | escape }}</div>
+                      {%- endif -%}
+                      {%- if block.settings.caption != blank -%}
+                        <p class="hc-customer-caption">"{{ block.settings.caption | escape }}"</p>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- else -%}
+            {%- comment -%} Fallback default review cards matching 99customizedjewellery {%- endcomment -%}
+            {%- assign default_imgs = 'https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW11.jpg?v=1725990862,https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW3.jpg?v=1725990862,https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW9.jpg?v=1725990862,https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW12.jpg?v=1725990862,https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW6.jpg?v=1725990862,https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW14.jpg?v=1725990862' | split: ',' -%}
+            {%- assign default_names = 'Priya S.,Rohit Verma,Ananya Patel,Simran Kaur,Vikram Mehta,Neha Gupta' | split: ',' -%}
+            {%- assign default_locs = 'Mumbai,Delhi,Ahmedabad,Chandigarh,Bangalore,Jaipur' | split: ',' -%}
+            {%- for img in default_imgs -%}
+              <div class="hc-card" data-index="{{ forloop.index0 }}">
+                <div class="hc-card-inner">
+                  <div class="hc-card-image-wrap">
+                    <img src="{{ img }}" alt="Customer Review" loading="lazy" class="hc-card-img" />
+                    <div class="hc-zoom-hint" title="Click to enlarge">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                    </div>
+                  </div>
+                  <div class="hc-card-info">
+                    <div class="hc-card-stars">★★★★★</div>
+                    <div class="hc-customer-name">
+                      <span>{{ default_names[forloop.index0] }}</span>
+                      <span class="hc-verified-badge" title="Verified Customer">
+                        <svg viewBox="0 0 20 20" width="14" height="14" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        Verified
+                      </span>
+                    </div>
+                    <div class="hc-customer-location">{{ default_locs[forloop.index0] }}</div>
+                  </div>
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- if section.settings.show_arrows -%}
+        <button type="button" class="hc-arrow hc-next" aria-label="Next Review">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.show_dots -%}
+      <div class="hc-pagination" id="hc-pagination-{{ sec_id }}"></div>
+    {%- endif -%}
+  </div>
+
+  <!-- Lightbox Modal for Full-size Review View -->
+  <div class="hc-modal" id="hc-modal-{{ sec_id }}" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="hc-modal-overlay"></div>
+    <div class="hc-modal-dialog">
+      <button type="button" class="hc-modal-close" aria-label="Close review screenshot">✕</button>
+      <img src="" alt="Enlarged Customer Review" class="hc-modal-img" />
+    </div>
+  </div>
+</div>
+
+<style>
+  #happy-customers-{{ sec_id }} {
+    background-color: var(--hc-bg);
+    color: var(--hc-text);
+    padding-top: var(--hc-pt);
+    padding-bottom: var(--hc-pb);
+    overflow: hidden;
+    position: relative;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  #happy-customers-{{ sec_id }} * {
+    box-sizing: border-box;
+  }
+  .hc-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 16px;
+    position: relative;
+  }
+  .hc-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .hc-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: inherit;
+    line-height: 1.25;
+  }
+  .hc-subtitle {
+    font-size: 15px;
+    color: #4b5563;
+    margin: 0 0 10px;
+  }
+  .hc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #9b2c2c;
+  }
+  .hc-stars {
+    color: #f59e0b;
+    letter-spacing: 2px;
+    font-size: 14px;
+  }
+
+  /* Slider Structure */
+  .hc-slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .hc-slider-track-wrap {
+    overflow: hidden;
+    width: 100%;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    padding: 10px 4px 14px;
+  }
+  .hc-slider-track-wrap.is-dragging {
+    cursor: grabbing;
+  }
+  .hc-slider-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    will-change: transform;
+    gap: 16px;
+  }
+
+  /* Review Cards */
+  .hc-card {
+    flex: 0 0 280px;
+    max-width: 320px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  @media (min-width: 1024px) {
+    .hc-card {
+      /* Dynamic width based on settings */
+      flex: 0 0 calc((100% - (var(--gap, 16px) * ({{ section.settings.cards_desktop | default: 4 }} - 1))) / {{ section.settings.cards_desktop | default: 4 }});
+      max-width: none;
+    }
+  }
+  @media (max-width: 767px) {
+    .hc-card {
+      flex: 0 0 78%; /* Shows peek of next card on mobile */
+      max-width: 300px;
+    }
+  }
+
+  .hc-card-inner {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hc-card:hover .hc-card-inner {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .hc-card-image-wrap {
+    position: relative;
+    background: #f9fafb;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hc-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .hc-card-image-wrap:hover .hc-card-img {
+    transform: scale(1.03);
+  }
+  .hc-zoom-hint {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(17, 24, 39, 0.75);
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .hc-card-image-wrap:hover .hc-zoom-hint {
+    opacity: 1;
+  }
+
+  .hc-card-placeholder {
+    width: 100%;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  .hc-card-info {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .hc-card-stars {
+    color: #f59e0b;
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+  .hc-customer-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hc-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .hc-customer-location {
+    font-size: 12px;
+    color: #6b7280;
+  }
+  .hc-customer-caption {
+    font-size: 13px;
+    color: #374151;
+    margin: 4px 0 0;
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  /* Arrows */
+  .hc-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1f2937;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+  .hc-arrow:hover {
+    background: #111827;
+    color: #ffffff;
+    border-color: #111827;
+  }
+  .hc-prev {
+    left: -12px;
+  }
+  .hc-next {
+    right: -12px;
+  }
+  @media (max-width: 767px) {
+    .hc-arrow {
+      display: none; /* Mobile relies on swipe */
+    }
+  }
+
+  /* Pagination Dots */
+  .hc-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+  }
+  .hc-dot {
+    width: 16px;
+    height: 6px;
+    background: #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .hc-dot.active {
+    background: var(--hc-accent);
+    width: 26px;
+  }
+
+  /* Lightbox Modal */
+  .hc-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .hc-modal.is-open {
+    display: flex;
+  }
+  .hc-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+  }
+  .hc-modal-dialog {
+    position: relative;
+    z-index: 10;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hc-modal-img {
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: 10px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    object-fit: contain;
+  }
+  .hc-modal-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+  }
+</style>
+
+<script>
+(function() {
+  function initSlider() {
+    const section = document.getElementById("happy-customers-{{ sec_id }}");
+    if (!section) return;
+
+    const track = section.querySelector(".hc-slider-track");
+    const trackWrap = section.querySelector(".hc-slider-track-wrap");
+    const pagination = section.querySelector(".hc-pagination");
+    const prevBtn = section.querySelector(".hc-prev");
+    const nextBtn = section.querySelector(".hc-next");
+    const modal = document.getElementById("hc-modal-{{ sec_id }}");
+    const modalImg = modal?.querySelector(".hc-modal-img");
+    const modalClose = modal?.querySelector(".hc-modal-close");
+    const modalOverlay = modal?.querySelector(".hc-modal-overlay");
+
+    if (!track || !trackWrap) return;
+
+    const cards = Array.from(track.children);
+    if (cards.length === 0) return;
+
+    const isAutoplayEnabled = section.dataset.autoplay === "true";
+    const autoSpeed = parseInt(section.dataset.speed, 10) || 2000; // 2 seconds default
+
+    let currentIndex = 0;
+    let timer = null;
+    let isDragging = false;
+    let startX = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    let animationID = null;
+
+    // Calculate maximum slide index
+    function getMaxIndex() {
+      const cardWidth = getCardWidth();
+      const wrapWidth = trackWrap.offsetWidth;
+      const totalWidth = cards.length * cardWidth;
+      const visibleCount = Math.max(1, Math.floor(wrapWidth / cardWidth));
+      return Math.max(0, cards.length - visibleCount);
+    }
+
+    function getCardWidth() {
+      const card = cards[0];
+      const style = window.getComputedStyle(track);
+      const gap = parseFloat(style.gap) || 16;
+      return card.offsetWidth + gap;
+    }
+
+    // Go to slide
+    function goToSlide(index, animate = true) {
+      const maxIndex = getMaxIndex();
+      if (index > maxIndex) index = 0; // Loop back to start
+      if (index < 0) index = maxIndex;
+
+      currentIndex = index;
+      const cardWidth = getCardWidth();
+      const targetOffset = -(currentIndex * cardWidth);
+
+      track.style.transition = animate ? "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)" : "none";
+      track.style.transform = `translateX(${targetOffset}px)`;
+      currentTranslate = targetOffset;
+      prevTranslate = targetOffset;
+
+      updateDots();
+    }
+
+    // Next / Prev
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    // Autoplay (every 2 seconds)
+    function startAutoplay() {
+      if (!isAutoplayEnabled) return;
+      stopAutoplay();
+      timer = setInterval(nextSlide, autoSpeed);
+    }
+    function stopAutoplay() {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    // Pagination Dots
+    function buildDots() {
+      if (!pagination) return;
+      pagination.innerHTML = "";
+      const maxIndex = getMaxIndex();
+      const count = maxIndex + 1;
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement("div");
+        dot.className = `hc-dot ${i === currentIndex ? "active" : ""}`;
+        dot.addEventListener("click", () => {
+          goToSlide(i);
+          startAutoplay();
+        });
+        pagination.appendChild(dot);
+      }
+    }
+    function updateDots() {
+      if (!pagination) return;
+      const dots = pagination.querySelectorAll(".hc-dot");
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle("active", idx === currentIndex);
+      });
+    }
+
+    // Drag / Touch handlers
+    function getPosX(e) {
+      return e.type.includes("mouse") ? e.pageX : e.touches[0].clientX;
+    }
+
+    function onDragStart(e) {
+      isDragging = true;
+      startX = getPosX(e);
+      stopAutoplay();
+      trackWrap.classList.add("is-dragging");
+      track.style.transition = "none";
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const currentX = getPosX(e);
+      const deltaX = currentX - startX;
+      currentTranslate = prevTranslate + deltaX;
+      track.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    function onDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      trackWrap.classList.remove("is-dragging");
+
+      const movedBy = currentTranslate - prevTranslate;
+      const threshold = 40; // minimum swipe distance
+
+      if (movedBy < -threshold) {
+        nextSlide();
+      } else if (movedBy > threshold) {
+        prevSlide();
+      } else {
+        goToSlide(currentIndex);
+      }
+
+      startAutoplay();
+    }
+
+    // Touch events
+    trackWrap.addEventListener("touchstart", onDragStart, { passive: true });
+    trackWrap.addEventListener("touchmove", onDragMove, { passive: true });
+    trackWrap.addEventListener("touchend", onDragEnd);
+
+    // Mouse events
+    trackWrap.addEventListener("mousedown", onDragStart);
+    window.addEventListener("mousemove", onDragMove);
+    window.addEventListener("mouseup", onDragEnd);
+
+    // Pause on hover
+    trackWrap.addEventListener("mouseenter", stopAutoplay);
+    trackWrap.addEventListener("mouseleave", startAutoplay);
+
+    // Buttons
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        prevSlide();
+        startAutoplay();
+      });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        nextSlide();
+        startAutoplay();
+      });
+    }
+
+    // Modal Lightbox for images
+    section.querySelectorAll(".hc-card-image-wrap").forEach(wrap => {
+      wrap.addEventListener("click", (e) => {
+        const img = wrap.querySelector(".hc-card-img");
+        if (img && modal && modalImg) {
+          modalImg.src = img.src;
+          modal.classList.add("is-open");
+          modal.setAttribute("aria-hidden", "false");
+          stopAutoplay();
+        }
+      });
+    });
+
+    function closeModal() {
+      if (modal) {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        startAutoplay();
+      }
+    }
+    if (modalClose) modalClose.addEventListener("click", closeModal);
+    if (modalOverlay) modalOverlay.addEventListener("click", closeModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal?.classList.contains("is-open")) closeModal();
+    });
+
+    // Resize handling
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        buildDots();
+        goToSlide(currentIndex, false);
+      }, 150);
+    });
+
+    // Init
+    buildDots();
+    startAutoplay();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initSlider);
+  } else {
+    initSlider();
+  }
+
+  // Shopify Theme Editor support
+  document.addEventListener("shopify:section:load", function(e) {
+    if (e.target.querySelector("#happy-customers-{{ sec_id }}")) {
+      initSlider();
+    }
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Our Happy Customers 😊",
+  "tag": "section",
+  "class": "section-our-happy-customers",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Our Happy Customers 😊"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Real photos & customer reviews shared by verified buyers"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating_badge",
+      "label": "Show Rating Badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "rating_badge_text",
+      "label": "Rating Badge Text",
+      "default": "4.9/5 from 12,000+ Happy Customers"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto-slide",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "unit": "s",
+      "label": "Auto-slide Speed (Seconds)",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "cards_desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "label": "Cards Visible on Desktop",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show Navigation Arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show Pagination Dots",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style & Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color (Active Dot / Badge)",
+      "default": "#f05454"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 48
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Customer Review Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Review Screenshot / Photo"
+        },
+        {
+          "type": "text",
+          "id": "external_image_url",
+          "label": "Or External Image URL",
+          "info": "Useful for fast testing or linking cloud images directly"
+        },
+        {
+          "type": "text",
+          "id": "customer_name",
+          "label": "Customer Name",
+          "default": "Happy Customer"
+        },
+        {
+          "type": "text",
+          "id": "customer_location",
+          "label": "Location",
+          "default": "Mumbai, India"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Optional Caption / Short Review",
+          "default": "Loved the product quality! Delivered on time."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_stars",
+          "label": "Show 5 Stars",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "verified_buyer",
+          "label": "Show Verified Badge",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Our Happy Customers 😊",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW11.jpg?v=1725990862",
+            "customer_name": "Priya Sharma",
+            "customer_location": "Mumbai",
+            "caption": "Quality is top notch! Exactly as shown in the picture."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW3.jpg?v=1725990862",
+            "customer_name": "Rohit Verma",
+            "customer_location": "Delhi",
+            "caption": "Best purchase! My family loved it."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW9.jpg?v=1725990862",
+            "customer_name": "Ananya Patel",
+            "customer_location": "Ahmedabad",
+            "caption": "Super fast delivery and packaging was very secure."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW12.jpg?v=1725990862",
+            "customer_name": "Simran Kaur",
+            "customer_location": "Chandigarh",
+            "caption": "100% recommended! Customer support was very helpful."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW6.jpg?v=1725990862",
+            "customer_name": "Vikram Mehta",
+            "customer_location": "Bangalore",
+            "caption": "Very durable and premium build."
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "external_image_url": "https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW14.jpg?v=1725990862",
+            "customer_name": "Neha Gupta",
+            "customer_location": "Jaipur",
+            "caption": "Will definitely order again!"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

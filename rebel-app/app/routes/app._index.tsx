@@ -103,6 +103,25 @@ export default function Index() {
           </InlineGrid>
         </Layout.Section>
 
+        {/* Product Customizer Quick Action */}
+        <Layout.Section>
+          <Card>
+            <InlineStack align="space-between" blockAlign="center">
+              <BlockStack gap="100">
+                <Text variant="headingMd" as="h2">
+                  🎨 Product Customizer Settings
+                </Text>
+                <Text as="p" variant="bodySm" tone="subdued">
+                  Set different options per product: 1 photo (mugs), 2 photos (couple frames), 4-6 photos + pop-out (pop-up frames), or text engraving only.
+                </Text>
+              </BlockStack>
+              <Button variant="primary" url="/app/customizer" size="large">
+                Manage Product Customizer ➔
+              </Button>
+            </InlineStack>
+          </Card>
+        </Layout.Section>
+
         {/* Recent Reviews */}
         <Layout.Section>
           <Card>

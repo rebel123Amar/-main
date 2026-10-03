@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Happy Customers 😊 — Live Preview Slider</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Demo Control Bar */
+    .preview-bar {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .preview-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .preview-title span {
+      background: #f05454;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+    .preview-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .device-btn {
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .device-btn:hover, .device-btn.active {
+      background: #f05454;
+      color: #ffffff;
+      border-color: #f05454;
+    }
+    .speed-badge {
+      font-size: 12px;
+      color: #cbd5e1;
+      background: #1e293b;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+    }
+
+    /* Device Preview Frame */
+    .preview-frame-container {
+      flex: 1;
+      padding: 30px 16px 60px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .preview-frame {
+      width: 100%;
+      max-width: 1400px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .preview-frame.mobile-mode {
+      max-width: 390px;
+      border: 8px solid #0f172a;
+      border-radius: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* SECTION STYLES */
+    .happy-customers-section {
+      background-color: #ffffff;
+      padding: 48px 16px 56px;
+      overflow: hidden;
+      position: relative;
+    }
+    .hc-container {
+      max-width: 1320px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .hc-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .hc-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .hc-subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin-bottom: 12px;
+    }
+    .hc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e11d48;
+    }
+    .hc-stars {
+      color: #f59e0b;
+      letter-spacing: 2px;
+      font-size: 14px;
+    }
+
+    /* Slider Container */
+    .hc-slider-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .hc-slider-track-wrap {
+      overflow: hidden;
+      width: 100%;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      padding: 8px 4px 16px;
+    }
+    .hc-slider-track-wrap.is-dragging {
+      cursor: grabbing;
+    }
+    .hc-slider-track {
+      display: flex;
+      gap: 18px;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+      will-change: transform;
+    }
+
+    /* Review Card */
+    .hc-card {
+      flex: 0 0 280px;
+      max-width: 310px;
+    }
+    @media (min-width: 1024px) {
+      .preview-frame:not(.mobile-mode) .hc-card {
+        flex: 0 0 calc((100% - (18px * 3)) / 4);
+        max-width: none;
+      }
+    }
+    @media (max-width: 767px), (max-width: 1023px) {
+      .hc-card {
+        flex: 0 0 78%;
+        max-width: 300px;
+      }
+    }
+    .preview-frame.mobile-mode .hc-card {
+      flex: 0 0 78% !important;
+      max-width: 280px !important;
+    }
+
+    .hc-card-inner {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hc-card:hover .hc-card-inner {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+      border-color: #cbd5e1;
+    }
+
+    /* Image Wrapper */
+    .hc-card-image-wrap {
+      position: relative;
+      background: #f8fafc;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hc-card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+    .hc-card-image-wrap:hover .hc-card-img {
+      transform: scale(1.04);
+    }
+    .hc-zoom-hint {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #ffffff;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: scale(0.9);
+    }
+    .hc-card-image-wrap:hover .hc-zoom-hint {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Card Details */
+    .hc-card-info {
+      padding: 14px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-top: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+    .hc-card-stars {
+      color: #f59e0b;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+    .hc-customer-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hc-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .hc-customer-location {
+      font-size: 12px;
+      color: #64748b;
+    }
+    .hc-customer-caption {
+      font-size: 13px;
+      color: #334155;
+      margin-top: 4px;
+      line-height: 1.45;
+      font-style: italic;
+    }
+
+    /* Arrows */
+    .hc-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+    }
+    .hc-arrow:hover {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      transform: translateY(-50%) scale(1.08);
+    }
+    .hc-prev { left: -16px; }
+    .hc-next { right: -16px; }
+
+    @media (max-width: 767px) {
+      .hc-arrow { display: none; }
+    }
+    .preview-frame.mobile-mode .hc-arrow {
+      display: none;
+    }
+
+    /* Pagination */
+    .hc-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+    }
+    .hc-dot {
+      width: 14px;
+      height: 6px;
+      background: #cbd5e1;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .hc-dot.active {
+      background: #f05454;
+      width: 28px;
+    }
+
+    /* Lightbox Modal */
+    .hc-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .hc-modal.is-open {
+      display: flex;
+    }
+    .hc-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(6px);
+    }
+    .hc-modal-dialog {
+      position: relative;
+      z-index: 10;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hc-modal-img {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      object-fit: contain;
+    }
+    .hc-modal-close {
+      position: absolute;
+      top: -44px;
+      right: 0;
+      background: none;
+      border: none;
+      color: #ffffff;
+      font-size: 32px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: transform 0.2s;
+    }
+    .hc-modal-close:hover {
+      transform: scale(1.2);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar with responsive preview controls -->
+  <header class="preview-bar">
+    <div class="preview-title">
+      Our Happy Customers 😊
+      <span>Shopify Section Template</span>
+    </div>
+    <div class="preview-actions">
+      <span class="speed-badge">⚡ Auto-slides: <strong>Every 2 seconds</strong></span>
+      <button type="button" class="device-btn active" id="btn-desktop">💻 Laptop / Desktop</button>
+      <button type="button" class="device-btn" id="btn-mobile">📱 Mobile View</button>
+    </div>
+  </header>
+
+  <main class="preview-frame-container">
+    <div class="preview-frame" id="preview-frame">
+
+      <!-- SHOPIFY SECTION START -->
+      <section class="happy-customers-section" id="happy-customers-slider">
+        <div class="hc-container">
+
+          <div class="hc-header">
+            <h2 class="hc-title">Our Happy Customers 😊</h2>
+            <p class="hc-subtitle">Real photos & customer reviews shared by verified buyers</p>
+            <div class="hc-badge">
+              <span class="hc-stars">★★★★★</span>
+              <span>4.9/5 from 12,000+ Happy Customers</span>
+            </div>
+          </div>
+
+          <div class="hc-slider-wrapper">
+            <button type="button" class="hc-arrow hc-prev" aria-label="Previous">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+
+            <div class="hc-slider-track-wrap">
+              <div class="hc-slider-track">
+
+                <!-- Card 1 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW11.jpg?v=1725990862" alt="Customer Review 1" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Priya Sharma</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Mumbai, India</div>
+                      <p class="hc-customer-caption">"Quality is top notch! Exactly as shown in the picture."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW3.jpg?v=1725990862" alt="Customer Review 2" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Rohit Verma</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Delhi, India</div>
+                      <p class="hc-customer-caption">"Best purchase! My family loved the stand."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW9.jpg?v=1725990862" alt="Customer Review 3" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Ananya Patel</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Ahmedabad</div>
+                      <p class="hc-customer-caption">"Super fast delivery and packaging was very secure."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW12.jpg?v=1725990862" alt="Customer Review 4" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Simran Kaur</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Chandigarh</div>
+                      <p class="hc-customer-caption">"100% recommended! Customer support was very helpful."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW6.jpg?v=1725990862" alt="Customer Review 5" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Vikram Mehta</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Bangalore</div>
+                      <p class="hc-customer-caption">"Very durable and premium build metal stand."</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="hc-card">
+                  <div class="hc-card-inner">
+                    <div class="hc-card-image-wrap">
+                      <img src="https://cdn.shopify.com/s/files/1/0719/3467/3131/files/REVIEW14.jpg?v=1725990862" alt="Customer Review 6" class="hc-card-img" />
+                      <div class="hc-zoom-hint" title="Click to enlarge">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                      </div>
+                    </div>
+                    <div class="hc-card-info">
+                      <div class="hc-card-stars">★★★★★</div>
+                      <div class="hc-customer-name">
+                        <span>Neha Gupta</span>
+                        <span class="hc-verified-badge"><svg viewBox="0 0 20 20" width="13" height="13" fill="#10b981"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg> Verified</span>
+                      </div>
+                      <div class="hc-customer-location">Jaipur</div>
+                      <p class="hc-customer-caption">"Will definitely order again for my brother!"</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <button type="button" class="hc-arrow hc-next" aria-label="Next">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+
+          <div class="hc-pagination" id="hc-dots"></div>
+
+        </div>
+      </section>
+      <!-- SHOPIFY SECTION END -->
+
+    </div>
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div class="hc-modal" id="hc-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="hc-modal-overlay"></div>
+    <div class="hc-modal-dialog">
+      <button type="button" class="hc-modal-close" aria-label="Close modal">✕</button>
+      <img src="" alt="Customer Review Screenshot Full" class="hc-modal-img" />
+    </div>
+  </div>
+
+  <script>
+    // 1. Device Viewport Toggles (Desktop vs Mobile)
+    const btnDesktop = document.getElementById('btn-desktop');
+    const btnMobile = document.getElementById('btn-mobile');
+    const previewFrame = document.getElementById('preview-frame');
+
+    btnDesktop.addEventListener('click', () => {
+      btnDesktop.classList.add('active');
+      btnMobile.classList.remove('active');
+      previewFrame.classList.remove('mobile-mode');
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 350);
+    });
+
+    btnMobile.addEventListener('click', () => {
+      btnMobile.classList.add('active');
+      btnDesktop.classList.remove('active');
+      previewFrame.classList.add('mobile-mode');
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 350);
+    });
+
+    // 2. High-Performance 2-Second Slider Logic
+    (function () {
+      const section = document.getElementById('happy-customers-slider');
+      const track = section.querySelector('.hc-slider-track');
+      const trackWrap = section.querySelector('.hc-slider-track-wrap');
+      const pagination = document.getElementById('hc-dots');
+      const prevBtn = section.querySelector('.hc-prev');
+      const nextBtn = section.querySelector('.hc-next');
+      const modal = document.getElementById('hc-modal');
+      const modalImg = modal.querySelector('.hc-modal-img');
+      const modalClose = modal.querySelector('.hc-modal-close');
+      const modalOverlay = modal.querySelector('.hc-modal-overlay');
+
+      const cards = Array.from(track.children);
+      const AUTO_SPEED = 2000; // Exact 2 seconds as requested!
+      let currentIndex = 0;
+      let timer = null;
+      let isDragging = false;
+      let startX = 0;
+      let currentTranslate = 0;
+      let prevTranslate = 0;
+
+      function getCardWidth() {
+        const card = cards[0];
+        const style = window.getComputedStyle(track);
+        const gap = parseFloat(style.gap) || 18;
+        return card.offsetWidth + gap;
+      }
+
+      function getMaxIndex() {
+        const cardWidth = getCardWidth();
+        const wrapWidth = trackWrap.offsetWidth;
+        const visibleCount = Math.max(1, Math.floor(wrapWidth / cardWidth));
+        return Math.max(0, cards.length - visibleCount);
+      }
+
+      function goToSlide(index, animate = true) {
+        const maxIndex = getMaxIndex();
+        if (index > maxIndex) index = 0;
+        if (index < 0) index = maxIndex;
+
+        currentIndex = index;
+        const cardWidth = getCardWidth();
+        const targetOffset = -(currentIndex * cardWidth);
+
+        track.style.transition = animate ? "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)" : "none";
+        track.style.transform = `translateX(${targetOffset}px)`;
+        currentTranslate = targetOffset;
+        prevTranslate = targetOffset;
+
+        updateDots();
+      }
+
+      function nextSlide() {
+        goToSlide(currentIndex + 1);
+      }
+
+      function prevSlide() {
+        goToSlide(currentIndex - 1);
+      }
+
+      function startAutoplay() {
+        stopAutoplay();
+        timer = setInterval(nextSlide, AUTO_SPEED);
+      }
+
+      function stopAutoplay() {
+        if (timer) {
+          clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function buildDots() {
+        pagination.innerHTML = "";
+        const maxIndex = getMaxIndex();
+        const count = maxIndex + 1;
+        for (let i = 0; i < count; i++) {
+          const dot = document.createElement("div");
+          dot.className = `hc-dot ${i === currentIndex ? "active" : ""}`;
+          dot.addEventListener("click", () => {
+            goToSlide(i);
+            startAutoplay();
+          });
+          pagination.appendChild(dot);
+        }
+      }
+
+      function updateDots() {
+        const dots = pagination.querySelectorAll(".hc-dot");
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle("active", idx === currentIndex);
+        });
+      }
+
+      // Touch & Mouse Drag Handlers
+      function getPosX(e) {
+        return e.type.includes("mouse") ? e.pageX : e.touches[0].clientX;
+      }
+
+      function onDragStart(e) {
+        isDragging = true;
+        startX = getPosX(e);
+        stopAutoplay();
+        trackWrap.classList.add("is-dragging");
+        track.style.transition = "none";
+      }
+
+      function onDragMove(e) {
+        if (!isDragging) return;
+        const currentX = getPosX(e);
+        const deltaX = currentX - startX;
+        currentTranslate = prevTranslate + deltaX;
+        track.style.transform = `translateX(${currentTranslate}px)`;
+      }
+
+      function onDragEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        trackWrap.classList.remove("is-dragging");
+
+        const movedBy = currentTranslate - prevTranslate;
+        const threshold = 40;
+
+        if (movedBy < -threshold) {
+          nextSlide();
+        } else if (movedBy > threshold) {
+          prevSlide();
+        } else {
+          goToSlide(currentIndex);
+        }
+
+        startAutoplay();
+      }
+
+      // Listeners
+      trackWrap.addEventListener("touchstart", onDragStart, { passive: true });
+      trackWrap.addEventListener("touchmove", onDragMove, { passive: true });
+      trackWrap.addEventListener("touchend", onDragEnd);
+
+      trackWrap.addEventListener("mousedown", onDragStart);
+      window.addEventListener("mousemove", onDragMove);
+      window.addEventListener("mouseup", onDragEnd);
+
+      trackWrap.addEventListener("mouseenter", stopAutoplay);
+      trackWrap.addEventListener("mouseleave", startAutoplay);
+
+      prevBtn.addEventListener("click", () => {
+        prevSlide();
+        startAutoplay();
+      });
+
+      nextBtn.addEventListener("click", () => {
+        nextSlide();
+        startAutoplay();
+      });
+
+      // Lightbox Click
+      section.querySelectorAll(".hc-card-image-wrap").forEach(wrap => {
+        wrap.addEventListener("click", () => {
+          const img = wrap.querySelector(".hc-card-img");
+          if (img && modal && modalImg) {
+            modalImg.src = img.src;
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            stopAutoplay();
+          }
+        });
+      });
+
+      function closeModal() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+        startAutoplay();
+      }
+      modalClose.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", closeModal);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+      });
+
+      window.addEventListener("resize", () => {
+        buildDots();
+        goToSlide(currentIndex, false);
+      });
+
+      // Boot
+      buildDots();
+      startAutoplay();
+    })();
+  </script>
+</body>
+</html>

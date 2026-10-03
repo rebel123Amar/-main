@@ -146,9 +146,12 @@
 
   function handleCollageFiles(files, container) {
     clearError(container);
-    const maxFiles = 6;
+    const maxFiles = parseInt(container.dataset.maxImages, 10) || 6;
 
-    if (collageImages.length + files.length > maxFiles) {
+    if (maxFiles === 1) {
+      // Single photo mode: replace previous selection
+      collageImages = [];
+    } else if (collageImages.length + files.length > maxFiles) {
       showError(container, `You can select maximum ${maxFiles} images. (Already have ${collageImages.length})`);
       return;
     }
@@ -405,37 +408,51 @@
 
   function validateInputs(container, isBuyNow) {
     const actionLabel = isBuyNow ? "buying now" : "adding to cart";
+    const enableImages = container.dataset.enableImages !== "false";
+    const minImages = parseInt(container.dataset.minImages, 10) || 1;
+    const maxImages = parseInt(container.dataset.maxImages, 10) || 6;
+    const enablePopout = container.dataset.enablePopout !== "false";
+    const popoutRequired = container.dataset.popoutRequired === "true";
+    const enableText = container.dataset.enableText !== "false";
+    const textRequired = container.dataset.textRequired === "true";
 
-    // 1. Check collage images
-    if (collageImages.length === 0) {
-      const drop = container.querySelector("#rebel-pc-collage-drop");
-      if (drop) drop.classList.add("error");
-      return {
-        valid: false,
-        error: `⚠️ Please select your (4-6) images before ${actionLabel}.`,
-      };
+    // 1. Check images if enabled
+    if (enableImages) {
+      if (collageImages.length < minImages) {
+        const drop = container.querySelector("#rebel-pc-collage-drop");
+        if (drop) drop.classList.add("error");
+        const msg = minImages === 1
+          ? `⚠️ Please select your photo before ${actionLabel}.`
+          : `⚠️ Please select at least ${minImages} image(s) before ${actionLabel}.`;
+        return { valid: false, error: msg };
+      }
     }
 
-    // 2. Check popout image
-    if (!popoutImage) {
-      const drop = container.querySelector("#rebel-pc-popout-drop");
-      if (drop) drop.classList.add("error");
-      return {
-        valid: false,
-        error: `⚠️ Please select 1 Pop-Out image before ${actionLabel}.`,
-      };
+    // 2. Check popout image if enabled & required
+    if (enablePopout && popoutRequired) {
+      if (!popoutImage) {
+        const drop = container.querySelector("#rebel-pc-popout-drop");
+        if (drop) drop.classList.add("error");
+        return {
+          valid: false,
+          error: `⚠️ Please select 1 Pop-Out image before ${actionLabel}.`,
+        };
+      }
     }
 
-    // 3. Check custom text if variant says "with Text"
-    const textGroup = container.querySelector(".rebel-pc-text-group");
-    const textInput = container.querySelector("#rebel-pc-text-input");
-    const reqStar = textGroup?.querySelector(".req");
-    if (reqStar && reqStar.style.display !== "none" && textInput && !textInput.value.trim()) {
-      textInput.focus();
-      return {
-        valid: false,
-        error: `⚠️ Please enter your custom text before ${actionLabel}.`,
-      };
+    // 3. Check custom text if enabled & required (or variant says "with Text")
+    if (enableText) {
+      const textGroup = container.querySelector(".rebel-pc-text-group");
+      const textInput = container.querySelector("#rebel-pc-text-input");
+      const reqStar = textGroup?.querySelector(".req");
+      const isMandatory = textRequired || (reqStar && reqStar.style.display !== "none");
+      if (isMandatory && textInput && !textInput.value.trim()) {
+        textInput.focus();
+        return {
+          valid: false,
+          error: `⚠️ Please enter your custom text before ${actionLabel}.`,
+        };
+      }
     }
 
     return { valid: true };
@@ -514,20 +531,33 @@
       // Product Title prefix for property names
       let productTitle = container.dataset.productTitle || "POP UP FRAME";
 
-      // Build properties matching Mosambi Media
+      // Build properties matching dynamic configuration
       const properties = {};
+      const enableText = container.dataset.enableText !== "false";
+      const enableImages = container.dataset.enableImages !== "false";
+      const enablePopout = container.dataset.enablePopout !== "false";
+      const maxImages = parseInt(container.dataset.maxImages, 10) || 6;
+      const textLabel = container.dataset.textLabel || "Enter Text";
 
-      if (customText) {
-        properties["Enter Text"] = customText;
+      if (enableText && customText) {
+        properties[textLabel] = customText;
       }
 
-      collageImages.forEach((img, idx) => {
-        if (img.url) {
-          properties[`${productTitle}_${idx + 1}`] = img.url;
+      if (enableImages) {
+        if (maxImages === 1 && collageImages.length === 1) {
+          if (collageImages[0].url) {
+            properties[`${productTitle} Photo`] = collageImages[0].url;
+          }
+        } else {
+          collageImages.forEach((img, idx) => {
+            if (img.url) {
+              properties[`${productTitle}_${idx + 1}`] = img.url;
+            }
+          });
         }
-      });
+      }
 
-      if (popoutImage && popoutImage.url) {
+      if (enablePopout && popoutImage && popoutImage.url) {
         properties["upload - Single Pop Out Image_1"] = popoutImage.url;
       }
 
