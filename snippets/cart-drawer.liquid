@@ -584,8 +584,36 @@
           document.querySelectorAll('.cart-milestone.milestone-2').forEach(function (m) { m.classList.toggle('active', total >= TIER_2); });
           document.querySelectorAll('.cart-milestone.milestone-3').forEach(function (m) { m.classList.toggle('active', total >= TIER_3); });
           document.querySelectorAll('.cart-milestone.milestone-4').forEach(function (m) { m.classList.toggle('active', total >= TIER_4); });
+
+          // Synchronize below discount tags with reward milestone offers
+          syncRewardDiscountLabels();
         }
 
+        // ── Helper: Format discount badges below to match tiered rewards ─────
+        function syncRewardDiscountLabels() {
+          var items = document.querySelectorAll('.discounts__discount, [aria-label*="discount"] li, .cart-item__discount');
+          for (var j = 0; j < items.length; j++) {
+            var el = items[j];
+            var txt = (el.textContent || '').trim();
+            var txtLower = txt.toLowerCase();
+            if (txtLower.includes('999') || txtLower.includes('5%')) {
+              var svg = el.querySelector('svg');
+              var prefix = svg ? svg.outerHTML + ' ' : '';
+              el.innerHTML = prefix + '1 Gift (₹100)';
+            } else if (txtLower.includes('1599') || txtLower.includes('10%')) {
+              var svg = el.querySelector('svg');
+              var prefix = svg ? svg.outerHTML + ' ' : '';
+              el.innerHTML = prefix + '10% OFF';
+            } else if (txtLower.includes('2499') || txtLower.includes('3 gift')) {
+              var svg = el.querySelector('svg');
+              var prefix = svg ? svg.outerHTML + ' ' : '';
+              el.innerHTML = prefix + '3 Gifts (₹500)';
+            } else if (txtLower.includes('699') || txtLower.includes('shipping')) {
+              var svg = el.querySelector('svg');
+              var prefix = svg ? svg.outerHTML + ' ' : '';
+              el.innerHTML = prefix + 'Free Shipping';
+            }
+          }
         }
 
         // ── DOM fallback reader ──────────────────────────────────────────────
@@ -968,7 +996,19 @@
                             {%- for discount in item.line_level_discount_allocations -%}
                               <li class="discounts__discount">
                                 {{- 'icon-discount.svg' | inline_asset_content -}}
-                                {{ discount.discount_application.title }}
+                                {%- assign disc_title = discount.discount_application.title -%}
+                                {%- assign disc_title_down = disc_title | downcase -%}
+                                {%- if disc_title_down contains '999' or disc_title_down contains '5%' -%}
+                                  1 Gift (₹100)
+                                {%- elsif disc_title_down contains '1599' or disc_title_down contains '10%' -%}
+                                  10% OFF
+                                {%- elsif disc_title_down contains '2499' or disc_title_down contains '3 gift' -%}
+                                  3 Gifts (₹500)
+                                {%- elsif disc_title_down contains '699' or disc_title_down contains 'shipping' -%}
+                                  Free Shipping
+                                {%- else -%}
+                                  {{ disc_title }}
+                                {%- endif -%}
                               </li>
                             {%- endfor -%}
                           </ul>
@@ -2051,7 +2091,19 @@
                 {%- for discount in cart.cart_level_discount_applications -%}
                   <li class="discounts__discount discounts__discount--end">
                     {{- 'icon-discount.svg' | inline_asset_content -}}
-                    {{ discount.title | escape }}
+                    {%- assign cart_disc_title = discount.title -%}
+                    {%- assign cart_disc_title_down = cart_disc_title | downcase -%}
+                    {%- if cart_disc_title_down contains '999' or cart_disc_title_down contains '5%' -%}
+                      1 Gift (₹100)
+                    {%- elsif cart_disc_title_down contains '1599' or cart_disc_title_down contains '10%' -%}
+                      10% OFF
+                    {%- elsif cart_disc_title_down contains '2499' or cart_disc_title_down contains '3 gift' -%}
+                      3 Gifts (₹500)
+                    {%- elsif cart_disc_title_down contains '699' or cart_disc_title_down contains 'shipping' -%}
+                      Free Shipping
+                    {%- else -%}
+                      {{ cart_disc_title | escape }}
+                    {%- endif -%}
                     (-{{ discount.total_allocated_amount | money }})
                   </li>
                 {%- endfor -%}
