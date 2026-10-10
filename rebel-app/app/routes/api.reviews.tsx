@@ -17,16 +17,54 @@ function checkRateLimit(ip: string, maxPerHour = 3): boolean {
   return true;
 }
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Shop-Domain",
+};
+
 // GET /api/reviews?shop=xxx&productId=xxx&page=1
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
   const productId = url.searchParams.get("productId");
   const page = parseInt(url.searchParams.get("page") || "1");
   const productHandle = url.searchParams.get("handle") || "";
+  const orderId = url.searchParams.get("orderId");
+  const authorEmail = url.searchParams.get("authorEmail");
 
-  if (!shop || !productId) {
-    return json({ error: "Missing shop or productId" }, { status: 400 });
+  if (!shop) {
+    return json({ error: "Missing shop parameter" }, { status: 400, headers: CORS_HEADERS });
+  }
+
+  // If checking existing reviews by customer/order
+  if (authorEmail && productId) {
+    const existing = await prisma.review.findFirst({
+      where: {
+        shopDomain: shop,
+        productId,
+        authorEmail,
+      },
+      select: {
+        id: true,
+        rating: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    return json(
+      { hasReviewed: Boolean(existing), review: existing },
+      { headers: CORS_HEADERS }
+    );
+  }
+
+  if (!productId) {
+    return json({ error: "Missing productId" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const settings = await prisma.appSettings.findUnique({
@@ -97,7 +135,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     },
     {
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        ...CORS_HEADERS,
         "Cache-Control": "no-store",
       },
     }
@@ -106,8 +144,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 // POST /api/reviews — submit a new review
 export const action = async ({ request }: ActionFunctionArgs) => {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (request.method !== "POST") {
-    return json({ error: "Method not allowed" }, { status: 405 });
+    return json({ error: "Method not allowed" }, { status: 405, headers: CORS_HEADERS });
   }
 
   const ip =
@@ -120,7 +162,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       { error: "Too many submissions. Please try again later." },
       {
         status: 429,
-        headers: { "Access-Control-Allow-Origin": "*" },
+        headers: CORS_HEADERS,
       }
     );
   }
@@ -129,7 +171,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   try {
     body = await request.json();
   } catch {
-    return json({ error: "Invalid JSON body" }, { status: 400 });
+    return json({ error: "Invalid JSON body" }, { status: 400, headers: CORS_HEADERS });
   }
 
   const {
@@ -143,32 +185,34 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     reviewBody,
     mediaUrls,
     honeypot, // spam prevention
+    orderId,
+    orderName,
   } = body;
 
   // Honeypot check
   if (honeypot) {
-    return json({ success: true }); // silently discard spam
+    return json({ success: true }, { headers: CORS_HEADERS }); // silently discard spam
   }
 
   // Validation
   if (!shop || !productId || !authorName || !authorEmail || !rating || !reviewBody) {
     return json(
       { error: "Missing required fields" },
-      { status: 400, headers: { "Access-Control-Allow-Origin": "*" } }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
 
   if (rating < 1 || rating > 5) {
     return json(
       { error: "Rating must be between 1 and 5" },
-      { status: 400, headers: { "Access-Control-Allow-Origin": "*" } }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
 
   if (!authorEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     return json(
       { error: "Invalid email address" },
-      { status: 400, headers: { "Access-Control-Allow-Origin": "*" } }
+      { status: 400, headers: CORS_HEADERS }
     );
   }
 
@@ -178,6 +222,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const status = settings?.autoApproveReviews ? "approved" : "pending";
 
+  // Build clean, informative title
+  let finalTitle = (title || "").trim();
+  const orderRef = orderName || (orderId ? `#${orderId}` : "");
+  if (orderRef) {
+    if (!finalTitle) {
+      finalTitle = `Verified Order ${orderRef}`;
+    } else if (!finalTitle.includes(orderRef)) {
+      finalTitle = `${finalTitle} (${orderRef})`;
+    }
+  }
+
   await prisma.review.create({
     data: {
       shopDomain: shop,
@@ -186,7 +241,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       authorName: authorName.substring(0, 100),
       authorEmail: authorEmail.substring(0, 200),
       rating: Math.floor(Number(rating)),
-      title: (title || "").substring(0, 200),
+      title: finalTitle.substring(0, 200),
       body: reviewBody.substring(0, 5000),
       status,
       mediaUrls: JSON.stringify(
@@ -201,9 +256,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       success: true,
       message:
         status === "approved"
-          ? "Review published!"
-          : "Review submitted! It will appear after moderation.",
+          ? "Thank you! Your review has been published."
+          : "Thank you! Your review has been submitted and will appear shortly.",
     },
-    { headers: { "Access-Control-Allow-Origin": "*" } }
+    { headers: CORS_HEADERS }
   );
 };

@@ -241,6 +241,52 @@ export default function OrdersPage() {
 
                         <Divider />
 
+                        {/* Quick Post-Delivery Review Request */}
+                        <div
+                          style={{
+                            marginTop: 10,
+                            marginBottom: 8,
+                            padding: "8px 12px",
+                            background: "#fefce8",
+                            borderRadius: 8,
+                            border: "1px solid #fef08a",
+                          }}
+                        >
+                          <InlineStack align="space-between" blockAlign="center">
+                            <InlineStack gap="150" blockAlign="center">
+                              <Text as="span" variant="bodySm" fontWeight="semibold">
+                                ⭐ Post-Delivery Review:
+                              </Text>
+                              <Text as="span" variant="bodySm" tone="subdued">
+                                Ask customer for rating & unboxing photos
+                              </Text>
+                            </InlineStack>
+                            <InlineStack gap="200" blockAlign="center">
+                              <Button
+                                size="micro"
+                                url={`https://wa.me/?text=${encodeURIComponent(
+                                  `Hi! Hope you loved your order ${order.orderName || ''} from Rebel Gifts. We would love your review and unboxing photos! Please rate your experience here: https://${shop}/?review_order=${order.orderId}`
+                                )}`}
+                                target="_blank"
+                              >
+                                📱 WhatsApp Review Link
+                              </Button>
+                              <Button
+                                size="micro"
+                                variant="plain"
+                                onClick={() =>
+                                  handleCopy(
+                                    `https://${shop}/?review_order=${order.orderId}`,
+                                    `rev-${order.id}`
+                                  )
+                                }
+                              >
+                                {copiedIndex === `rev-${order.id}` ? "Copied Link!" : "📋 Copy Link"}
+                              </Button>
+                            </InlineStack>
+                          </InlineStack>
+                        </div>
+
                         {/* Special Instructions */}
                         {hasRequest && (
                           <div style={{ marginTop: 12 }}>

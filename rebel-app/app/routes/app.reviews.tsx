@@ -171,7 +171,7 @@ export default function ReviewsPage() {
                           }}
                         >
                           <BlockStack gap="100">
-                            <InlineStack gap="200">
+                            <InlineStack gap="200" blockAlign="center">
                               <Text variant="bodyMd" as="span" fontWeight="bold">
                                 {review.authorName}
                               </Text>
@@ -186,10 +186,17 @@ export default function ReviewsPage() {
                               >
                                 {review.status}
                               </Badge>
+                              {review.title && review.title.includes("Verified Order") && (
+                                <Badge tone="info">✓ Verified Order</Badge>
+                              )}
                             </InlineStack>
                             <Text as="p" variant="bodySm" tone="subdued">
                               {review.authorEmail} · Product #{review.productId} ·{" "}
-                              {new Date(review.createdAt).toLocaleDateString("en-IN")}
+                              {new Date(review.createdAt).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
                             </Text>
                           </BlockStack>
                           <Text as="p" variant="bodyMd" tone="caution">

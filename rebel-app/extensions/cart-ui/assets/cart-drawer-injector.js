@@ -294,4 +294,278 @@
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
+
+  // ─── Post-Delivery Order Review Modal (Triggered via WhatsApp / Direct Link) ───
+  function setupPostDeliveryReviewModal() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("review_order") || urlParams.get("order_review");
+    if (!orderId) return;
+
+    if (document.getElementById("rebel-post-delivery-modal")) return;
+
+    // Inject styles
+    const styleEl = document.createElement("style");
+    styleEl.textContent = `
+      .rebel-rev-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        z-index: 99999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        box-sizing: border-box;
+      }
+      .rebel-rev-modal-card {
+        background: #ffffff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 520px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        box-sizing: border-box;
+        position: relative;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: #111827;
+      }
+      .rebel-rev-close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: #f3f4f6;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4b5563;
+      }
+      .rebel-rev-close-btn:hover { background: #e5e7eb; color: #111; }
+      .rebel-rev-stars { display: flex; gap: 6px; margin: 8px 0 16px; }
+      .rebel-rev-star {
+        background: none; border: none; font-size: 32px; color: #d1d5db; cursor: pointer; padding: 0;
+        transition: transform 0.15s, color 0.15s;
+      }
+      .rebel-rev-star.active, .rebel-rev-star.hover { color: #f59e0b; }
+      .rebel-rev-star:hover { transform: scale(1.15); }
+      .rebel-rev-input, .rebel-rev-textarea {
+        width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #d1d5db;
+        border-radius: 8px; font-size: 14px; margin-bottom: 12px; outline: none;
+      }
+      .rebel-rev-input:focus, .rebel-rev-textarea:focus {
+        border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+      }
+      .rebel-rev-upload {
+        border: 1.5px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center;
+        background: #f8fafc; cursor: pointer; margin-bottom: 12px; position: relative;
+      }
+      .rebel-rev-upload input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      }
+      .rebel-rev-previews { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+      .rebel-rev-thumb {
+        width: 60px; height: 60px; border-radius: 6px; overflow: hidden; position: relative;
+        border: 1px solid #cbd5e1;
+      }
+      .rebel-rev-thumb img { width: 100%; height: 100%; object-fit: cover; }
+      .rebel-rev-thumb-del {
+        position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); color: #fff;
+        border: none; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .rebel-rev-submit {
+        width: 100%; background: #111827; color: #fff; border: none; padding: 12px;
+        border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer;
+      }
+      .rebel-rev-submit:hover:not(:disabled) { background: #000; }
+    `;
+    document.head.appendChild(styleEl);
+
+    // Create modal element
+    const modalEl = document.createElement("div");
+    modalEl.id = "rebel-post-delivery-modal";
+    modalEl.className = "rebel-rev-modal-overlay";
+    modalEl.innerHTML = `
+      <div class="rebel-rev-modal-card">
+        <button type="button" class="rebel-rev-close-btn" id="rebel-rev-close">✕</button>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <span style="font-size:28px;">🎁</span>
+          <div>
+            <h3 style="margin:0; font-size:18px; font-weight:700;">Rate Your Delivered Order</h3>
+            <p style="margin:2px 0 0; font-size:13px; color:#6b7280;">Order #${orderId} — Rebel Gifts & Mosambi</p>
+          </div>
+        </div>
+
+        <label style="display:block; font-size:12px; font-weight:600; text-transform:uppercase; color:#374151; margin-bottom:4px;">
+          Your Star Rating *
+        </label>
+        <div class="rebel-rev-stars" id="rebel-rev-star-row">
+          <button type="button" class="rebel-rev-star" data-val="1">★</button>
+          <button type="button" class="rebel-rev-star" data-val="2">★</button>
+          <button type="button" class="rebel-rev-star" data-val="3">★</button>
+          <button type="button" class="rebel-rev-star" data-val="4">★</button>
+          <button type="button" class="rebel-rev-star" data-val="5">★</button>
+        </div>
+
+        <label style="display:block; font-size:12px; font-weight:600; text-transform:uppercase; color:#374151; margin-bottom:4px;">
+          Your Name *
+        </label>
+        <input type="text" class="rebel-rev-input" id="rebel-rev-name" placeholder="e.g. Rahul Sharma" />
+
+        <label style="display:block; font-size:12px; font-weight:600; text-transform:uppercase; color:#374151; margin-bottom:4px;">
+          Your Email *
+        </label>
+        <input type="email" class="rebel-rev-input" id="rebel-rev-email" placeholder="e.g. rahul@example.com" />
+
+        <label style="display:block; font-size:12px; font-weight:600; text-transform:uppercase; color:#374151; margin-bottom:4px;">
+          Review & Feedback *
+        </label>
+        <textarea class="rebel-rev-textarea" id="rebel-rev-body" rows="3" placeholder="Tell us about the gift quality, packaging, and delivery experience..."></textarea>
+
+        <label style="display:block; font-size:12px; font-weight:600; text-transform:uppercase; color:#374151; margin-bottom:4px;">
+          Upload Photos / Unboxing (Optional)
+        </label>
+        <div class="rebel-rev-upload">
+          <input type="file" id="rebel-rev-files" accept="image/jpeg,image/png,image/webp,image/jpg" multiple />
+          <span style="font-size:13px; color:#4b5563;">📸 Tap to add photos from your phone or gallery</span>
+        </div>
+        <div id="rebel-rev-upload-status" style="display:none; font-size:12px; color:#2563eb; margin-bottom:8px;">⏳ Uploading photos... please wait</div>
+        <div class="rebel-rev-previews" id="rebel-rev-previews"></div>
+
+        <button type="button" class="rebel-rev-submit" id="rebel-rev-submit-btn">Submit Review</button>
+        <div id="rebel-rev-success" style="display:none; margin-top:12px; padding:12px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; color:#065f46; font-size:14px; text-align:center; font-weight:600;">
+          🎉 Thank you! Your review has been submitted successfully!
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalEl);
+
+    // Close handlers
+    const closeBtn = document.getElementById("rebel-rev-close");
+    closeBtn?.addEventListener("click", () => modalEl.remove());
+    modalEl.addEventListener("click", (e) => {
+      if (e.target === modalEl) modalEl.remove();
+    });
+
+    let rating = 0;
+    const starBtns = modalEl.querySelectorAll(".rebel-rev-star");
+    starBtns.forEach((b) => {
+      const v = parseInt(b.dataset.val);
+      b.addEventListener("mouseenter", () => {
+        starBtns.forEach((s) => s.classList.toggle("hover", parseInt(s.dataset.val) <= v));
+      });
+      b.addEventListener("mouseleave", () => {
+        starBtns.forEach((s) => s.classList.remove("hover"));
+      });
+      b.addEventListener("click", () => {
+        rating = v;
+        starBtns.forEach((s) => s.classList.toggle("active", parseInt(s.dataset.val) <= v));
+      });
+    });
+
+    let uploadedMedia = [];
+    const fileInput = document.getElementById("rebel-rev-files");
+    const previewsWrap = document.getElementById("rebel-rev-previews");
+    const uploadStatus = document.getElementById("rebel-rev-upload-status");
+
+    fileInput?.addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (!files.length) return;
+      uploadStatus.style.display = "block";
+      const formData = new FormData();
+      files.slice(0, 5).forEach((f) => formData.append("files", f));
+
+      try {
+        const res = await fetch(`${getAppUrl()}/api/upload`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.urls)) {
+          data.urls.forEach((url) => {
+            uploadedMedia.push(url);
+            const thumb = document.createElement("div");
+            thumb.className = "rebel-rev-thumb";
+            thumb.innerHTML = `
+              <img src="${url}" />
+              <button type="button" class="rebel-rev-thumb-del">✕</button>
+            `;
+            thumb.querySelector(".rebel-rev-thumb-del").addEventListener("click", () => {
+              uploadedMedia = uploadedMedia.filter((u) => u !== url);
+              thumb.remove();
+            });
+            previewsWrap.appendChild(thumb);
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        uploadStatus.style.display = "none";
+        e.target.value = "";
+      }
+    });
+
+    const submitBtn = document.getElementById("rebel-rev-submit-btn");
+    submitBtn?.addEventListener("click", async () => {
+      if (!rating) { alert("Please choose a star rating (1-5 stars)"); return; }
+      const name = document.getElementById("rebel-rev-name").value.trim();
+      const email = document.getElementById("rebel-rev-email").value.trim();
+      const bodyText = document.getElementById("rebel-rev-body").value.trim();
+      if (!name) { alert("Please enter your name"); return; }
+      if (!email || !email.includes("@")) { alert("Please enter a valid email"); return; }
+      if (!bodyText) { alert("Please enter your review"); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting Review...";
+
+      try {
+        const res = await fetch(`${getAppUrl()}/api/reviews`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            shop: window.location.hostname,
+            productId: "order-" + orderId,
+            authorName: name,
+            authorEmail: email,
+            rating,
+            title: "Verified Order #" + orderId,
+            reviewBody: bodyText,
+            mediaUrls: uploadedMedia,
+            orderId,
+            orderName: "#" + orderId,
+          }),
+        });
+        const d = await res.json();
+        if (d.success) {
+          submitBtn.style.display = "none";
+          document.getElementById("rebel-rev-success").style.display = "block";
+          setTimeout(() => modalEl.remove(), 3500);
+        } else {
+          alert(d.error || "Submission failed");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Review";
+        }
+      } catch (err) {
+        alert("Network error, please try again");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Review";
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setupPostDeliveryReviewModal);
+  } else {
+    setupPostDeliveryReviewModal();
+  }
 })();

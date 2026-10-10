@@ -1,0 +1,599 @@
+{% comment %}
+  Rebel Gifts & Mosambi — Order Delivered Product Review Snippet
+  Allows customers whose order has been placed/delivered to submit:
+  - 1 to 5 Star Rating
+  - Written Review Textarea
+  - Customer Photo & Unboxing Media Upload (with previews)
+  - Auto-linked to the verified order and product
+  
+  Can be placed in:
+  - checkout.liquid (Order Status / Thank You page)
+  - Settings -> Checkout -> Additional Scripts
+  - templates/customers/order.liquid
+  - Any custom review page
+{% endcomment %}
+
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{%- if order != blank -%}
+  {%- assign order_id = order.id -%}
+  {%- assign order_name = order.name -%}
+  {%- assign customer_name = order.customer.name | default: order.shipping_address.name | default: "Valued Customer" -%}
+  {%- assign customer_email = order.email | default: order.customer.email | default: "" -%}
+{%- else -%}
+  {%- assign order_id = "" -%}
+  {%- assign order_name = "" -%}
+  {%- assign customer_name = "" -%}
+  {%- assign customer_email = "" -%}
+{%- endif -%}
+
+<div
+  class="rebel-order-review"
+  id="rebel-order-review-root"
+  data-shop="{{ current_shop }}"
+  data-app-url="{{ app_url }}"
+  data-order-id="{{ order_id }}"
+  data-order-name="{{ order_name }}"
+  data-customer-name="{{ customer_name | escape }}"
+  data-customer-email="{{ customer_email | escape }}"
+>
+  <style>
+    .rebel-order-review {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 24px 20px;
+      margin: 24px 0;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      color: #111827;
+      max-width: 680px;
+    }
+    .rebel-order-review__header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .rebel-order-review__icon {
+      font-size: 28px;
+      line-height: 1;
+      background: #fef3c7;
+      border-radius: 12px;
+      padding: 8px;
+    }
+    .rebel-order-review__title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .rebel-order-review__subtitle {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .rebel-order-review__item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .rebel-order-review__item:last-child {
+      margin-bottom: 0;
+    }
+    .rebel-order-review__item.is-submitted {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+    .rebel-order-review__prod-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .rebel-order-review__prod-img {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #e5e7eb;
+      border: 1px solid #d1d5db;
+      flex-shrink: 0;
+    }
+    .rebel-order-review__prod-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin: 0 0 2px;
+    }
+    .rebel-order-review__prod-variant {
+      font-size: 12px;
+      color: #6b7280;
+      margin: 0;
+    }
+    /* Rating Star Picker */
+    .rebel-order-review__stars-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .rebel-order-review__star-btn {
+      background: none;
+      border: none;
+      font-size: 26px;
+      color: #d1d5db;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+      transition: transform 0.15s, color 0.15s;
+    }
+    .rebel-order-review__star-btn:hover {
+      transform: scale(1.2);
+    }
+    .rebel-order-review__star-btn.is-active,
+    .rebel-order-review__star-btn.is-hover {
+      color: #f59e0b;
+    }
+    .rebel-order-review__star-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4b5563;
+      margin-left: 8px;
+    }
+    /* Form Fields */
+    .rebel-order-review__field {
+      margin-bottom: 12px;
+    }
+    .rebel-order-review__label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .rebel-order-review__textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      resize: vertical;
+      min-height: 80px;
+      background: #ffffff;
+      color: #111827;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .rebel-order-review__textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    /* Photo Upload Area */
+    .rebel-order-review__upload-box {
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      background: #ffffff;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+    }
+    .rebel-order-review__upload-box:hover {
+      border-color: #3b82f6;
+      background: #f8fafc;
+    }
+    .rebel-order-review__upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .rebel-order-review__upload-text {
+      font-size: 13px;
+      color: #4b5563;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .rebel-order-review__previews {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .rebel-order-review__thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #d1d5db;
+      background: #000;
+    }
+    .rebel-order-review__thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .rebel-order-review__thumb-del {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      border: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .rebel-order-review__upload-loading {
+      font-size: 12px;
+      color: #2563eb;
+      margin-top: 6px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Submit Button */
+    .rebel-order-review__btn-submit {
+      width: 100%;
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+    .rebel-order-review__btn-submit:hover:not(:disabled) {
+      background: #000000;
+      transform: translateY(-1px);
+    }
+    .rebel-order-review__btn-submit:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    /* Success Message */
+    .rebel-order-review__success {
+      display: none;
+      padding: 14px;
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      color: #065f46;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+
+  <div class="rebel-order-review__header">
+    <div class="rebel-order-review__icon">🎁</div>
+    <div>
+      <h3 class="rebel-order-review__title">How was your order?</h3>
+      <p class="rebel-order-review__subtitle">
+        Share your experience and photos with us. Your feedback helps us make gifts even more special!
+      </p>
+    </div>
+  </div>
+
+  <div class="rebel-order-review__items-list" id="rebel-review-items-container">
+    {%- if order != blank and order.line_items.size > 0 -%}
+      {%- for item in order.line_items -%}
+        {%- if item.product != blank -%}
+          <div
+            class="rebel-order-review__item"
+            data-product-id="{{ item.product.id }}"
+            data-product-handle="{{ item.product.handle }}"
+            data-product-title="{{ item.product.title | escape }}"
+          >
+            <div class="rebel-order-review__prod-info">
+              {%- if item.image -%}
+                <img class="rebel-order-review__prod-img" src="{{ item.image | img_url: '120x120', crop: 'center' }}" alt="{{ item.title | escape }}" />
+              {%- else -%}
+                <div class="rebel-order-review__prod-img" style="display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:20px;">🖼️</div>
+              {%- endif -%}
+              <div>
+                <p class="rebel-order-review__prod-title">{{ item.product.title }}</p>
+                {%- if item.variant.title != 'Default Title' -%}
+                  <p class="rebel-order-review__prod-variant">{{ item.variant.title }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <!-- Star Picker -->
+            <div class="rebel-order-review__stars-wrap">
+              <span class="rebel-order-review__label" style="margin-bottom:0;margin-right:4px;">Rating:</span>
+              {%- for star in (1..5) -%}
+                <button type="button" class="rebel-order-review__star-btn" data-star="{{ star }}" aria-label="{{ star }} Star">★</button>
+              {%- endfor -%}
+              <span class="rebel-order-review__star-label"></span>
+              <input type="hidden" class="rebel-order-review__star-val" value="" />
+            </div>
+
+            <!-- Review Textarea -->
+            <div class="rebel-order-review__field">
+              <label class="rebel-order-review__label">Your Review & Unboxing Experience</label>
+              <textarea
+                class="rebel-order-review__textarea"
+                placeholder="Tell us about the print quality, packaging, and your experience..."
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Photo Upload with Previews -->
+            <div class="rebel-order-review__field">
+              <label class="rebel-order-review__label">Upload Photos (Optional)</label>
+              <div class="rebel-order-review__upload-box">
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple class="rebel-order-review__file-input" />
+                <div class="rebel-order-review__upload-text">
+                  <span>📸 Tap to select photos or unboxing pictures</span>
+                </div>
+              </div>
+              <div class="rebel-order-review__upload-loading">
+                <span>⏳ Uploading photos... please wait</span>
+              </div>
+              <div class="rebel-order-review__previews"></div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="button" class="rebel-order-review__btn-submit">
+              Submit Review
+            </button>
+
+            <!-- Success message -->
+            <div class="rebel-order-review__success">
+              🎉 Thank you for your review! We've received your feedback.
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- comment -%} Fallback dynamic item container for client-side order loader {%- endcomment -%}
+      <div id="rebel-dynamic-order-item-wrap"></div>
+    {%- endif -%}
+  </div>
+
+  <script>
+    (function () {
+      const root = document.getElementById("rebel-order-review-root");
+      if (!root) return;
+
+      const shop = root.dataset.shop || window.location.hostname;
+      const appUrl = root.dataset.appUrl || "https://main-pink-phi.vercel.app";
+      const orderId = root.dataset.orderId;
+      const orderName = root.dataset.orderName;
+      const customerName = root.dataset.customerName || "Happy Customer";
+      const customerEmail = root.dataset.customerEmail || "";
+
+      // Star rating labels
+      const starLabels = {
+        1: "Poor 😞",
+        2: "Fair 😐",
+        3: "Good 🙂",
+        4: "Very Good 😊",
+        5: "Loved It! 🌟"
+      };
+
+      function setupItemCard(card) {
+        const prodId = card.dataset.productId;
+        const prodHandle = card.dataset.productHandle;
+        const starBtns = card.querySelectorAll(".rebel-order-review__star-btn");
+        const starValInput = card.querySelector(".rebel-order-review__star-val");
+        const starLabel = card.querySelector(".rebel-order-review__star-label");
+        const textarea = card.querySelector(".rebel-order-review__textarea");
+        const fileInput = card.querySelector(".rebel-order-review__file-input");
+        const previewsWrap = card.querySelector(".rebel-order-review__previews");
+        const loadingEl = card.querySelector(".rebel-order-review__upload-loading");
+        const submitBtn = card.querySelector(".rebel-order-review__btn-submit");
+        const successMsg = card.querySelector(".rebel-order-review__success");
+
+        let currentRating = 0;
+        let uploadedImages = [];
+
+        // Star interaction
+        starBtns.forEach((btn) => {
+          const s = parseInt(btn.dataset.star);
+          btn.addEventListener("mouseenter", () => {
+            starBtns.forEach((b) => {
+              const bVal = parseInt(b.dataset.star);
+              b.classList.toggle("is-hover", bVal <= s);
+            });
+            starLabel.textContent = starLabels[s] || "";
+          });
+
+          btn.addEventListener("mouseleave", () => {
+            starBtns.forEach((b) => b.classList.remove("is-hover"));
+            starLabel.textContent = starLabels[currentRating] || "";
+          });
+
+          btn.addEventListener("click", () => {
+            currentRating = s;
+            starValInput.value = s;
+            starBtns.forEach((b) => {
+              const bVal = parseInt(b.dataset.star);
+              b.classList.toggle("is-active", bVal <= s);
+            });
+            starLabel.textContent = starLabels[s] || "";
+          });
+        });
+
+        // Photo Upload via Rebel App API
+        fileInput?.addEventListener("change", async (e) => {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+
+          loadingEl.style.display = "flex";
+          const formData = new FormData();
+          files.slice(0, 5).forEach((f) => formData.append("files", f));
+
+          try {
+            const res = await fetch(`${appUrl}/api/upload`, {
+              method: "POST",
+              body: formData,
+            });
+            const data = await res.json();
+            if (data.success && Array.isArray(data.urls)) {
+              data.urls.forEach((url) => {
+                uploadedImages.push(url);
+                const thumb = document.createElement("div");
+                thumb.className = "rebel-order-review__thumb";
+                thumb.innerHTML = `
+                  <img src="${url}" alt="Preview" />
+                  <button type="button" class="rebel-order-review__thumb-del" title="Remove">✕</button>
+                `;
+                thumb.querySelector(".rebel-order-review__thumb-del").addEventListener("click", () => {
+                  uploadedImages = uploadedImages.filter((u) => u !== url);
+                  thumb.remove();
+                });
+                previewsWrap.appendChild(thumb);
+              });
+            } else {
+              alert(data.error || "Upload failed. Please try again.");
+            }
+          } catch (err) {
+            console.error("[Review Upload Error]", err);
+            alert("Could not upload photos. Please check connection.");
+          } finally {
+            loadingEl.style.display = "none";
+            e.target.value = "";
+          }
+        });
+
+        // Review Submission
+        submitBtn?.addEventListener("click", async () => {
+          if (!currentRating) {
+            alert("Please select a star rating (1 to 5 stars).");
+            return;
+          }
+          const reviewText = textarea.value.trim();
+          if (!reviewText) {
+            alert("Please write a few words about your experience.");
+            textarea.focus();
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Submitting Review...";
+
+          try {
+            const payload = {
+              shop,
+              productId: prodId,
+              productHandle: prodHandle || "",
+              authorName: customerName || "Verified Buyer",
+              authorEmail: customerEmail || "customer@rebelgifts.in",
+              rating: currentRating,
+              title: orderName ? `Verified Order ${orderName}` : "Customer Review",
+              reviewBody: reviewText,
+              mediaUrls: uploadedImages,
+              orderId: orderId || "",
+              orderName: orderName || "",
+            };
+
+            const res = await fetch(`${appUrl}/api/reviews`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+
+            const data = await res.json();
+            if (data.success) {
+              card.classList.add("is-submitted");
+              submitBtn.style.display = "none";
+              textarea.disabled = true;
+              fileInput.disabled = true;
+              successMsg.style.display = "block";
+            } else {
+              alert(data.error || "Submission failed. Please try again.");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Submit Review";
+            }
+          } catch (err) {
+            console.error("[Review Submit Error]", err);
+            alert("Connection error. Please try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Review";
+          }
+        });
+      }
+
+      // Initialize all cards rendered on server
+      document.querySelectorAll(".rebel-order-review__item").forEach(setupItemCard);
+
+      // Support dynamic URL parameter mode: ?review_order=123&product_id=456&title=Custom+Frame
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlProdId = urlParams.get("product_id") || urlParams.get("productId");
+      const urlProdTitle = urlParams.get("product_title") || urlParams.get("productTitle") || "Purchased Product";
+      const dynamicWrap = document.getElementById("rebel-dynamic-order-item-wrap");
+
+      if (dynamicWrap && urlProdId) {
+        const itemHtml = `
+          <div class="rebel-order-review__item" data-product-id="${urlProdId}" data-product-handle="" data-product-title="${urlProdTitle}">
+            <div class="rebel-order-review__prod-info">
+              <div class="rebel-order-review__prod-img" style="display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:20px;">🎁</div>
+              <div>
+                <p class="rebel-order-review__prod-title">${urlProdTitle}</p>
+                <p class="rebel-order-review__prod-variant">Order Verified Purchase</p>
+              </div>
+            </div>
+            <div class="rebel-order-review__stars-wrap">
+              <span class="rebel-order-review__label" style="margin-bottom:0;margin-right:4px;">Rating:</span>
+              <button type="button" class="rebel-order-review__star-btn" data-star="1">★</button>
+              <button type="button" class="rebel-order-review__star-btn" data-star="2">★</button>
+              <button type="button" class="rebel-order-review__star-btn" data-star="3">★</button>
+              <button type="button" class="rebel-order-review__star-btn" data-star="4">★</button>
+              <button type="button" class="rebel-order-review__star-btn" data-star="5">★</button>
+              <span class="rebel-order-review__star-label"></span>
+              <input type="hidden" class="rebel-order-review__star-val" value="" />
+            </div>
+            <div class="rebel-order-review__field">
+              <label class="rebel-order-review__label">Your Review & Unboxing Experience</label>
+              <textarea class="rebel-order-review__textarea" placeholder="Tell us about the print quality, packaging, and your experience..." rows="3"></textarea>
+            </div>
+            <div class="rebel-order-review__field">
+              <label class="rebel-order-review__label">Upload Photos (Optional)</label>
+              <div class="rebel-order-review__upload-box">
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/jpg" multiple class="rebel-order-review__file-input" />
+                <div class="rebel-order-review__upload-text">
+                  <span>📸 Tap to select photos or unboxing pictures</span>
+                </div>
+              </div>
+              <div class="rebel-order-review__upload-loading">
+                <span>⏳ Uploading photos... please wait</span>
+              </div>
+              <div class="rebel-order-review__previews"></div>
+            </div>
+            <button type="button" class="rebel-order-review__btn-submit">Submit Review</button>
+            <div class="rebel-order-review__success">🎉 Thank you for your review! We've received your feedback.</div>
+          </div>
+        `;
+        dynamicWrap.innerHTML = itemHtml;
+        setupItemCard(dynamicWrap.querySelector(".rebel-order-review__item"));
+      }
+    })();
+  </script>
+</div>
