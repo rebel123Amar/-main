@@ -217,44 +217,79 @@ export default function ReviewsPage() {
                         </Text>
 
                         {/* Media Thumbnails */}
+                        {/* Media Thumbnails */}
                         {mediaUrls.length > 0 && (
                           <div
                             style={{
                               display: "flex",
-                              gap: 8,
+                              gap: 12,
                               marginTop: 12,
                               flexWrap: "wrap",
                             }}
                           >
                             {mediaUrls.map((url, i) => {
                               const isVideo = url.match(/\.(mp4|webm|mov)$/i);
-                              return isVideo ? (
-                                <video
+                              const safeAuthor = (review.authorName || "customer").replace(/[^a-zA-Z0-9_-]/g, "_");
+                              const filename = `Review_${safeAuthor}_media_${i + 1}`;
+                              return (
+                                <div
                                   key={i}
-                                  src={url}
                                   style={{
-                                    width: 80,
-                                    height: 80,
-                                    objectFit: "cover",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    background: "#f9fafb",
+                                    padding: 6,
                                     borderRadius: 6,
-                                    border: "1px solid #ddd",
+                                    border: "1px solid #e5e7eb",
                                   }}
-                                  controls
-                                />
-                              ) : (
-                                <a key={i} href={url} target="_blank" rel="noreferrer">
-                                  <img
-                                    src={url}
-                                    alt={`Review media ${i + 1}`}
+                                >
+                                  {isVideo ? (
+                                    <video
+                                      src={url}
+                                      style={{
+                                        width: 80,
+                                        height: 80,
+                                        objectFit: "cover",
+                                        borderRadius: 6,
+                                        border: "1px solid #ddd",
+                                      }}
+                                      controls
+                                    />
+                                  ) : (
+                                    <a href={url} target="_blank" rel="noreferrer">
+                                      <img
+                                        src={url}
+                                        alt={`Review media ${i + 1}`}
+                                        style={{
+                                          width: 80,
+                                          height: 80,
+                                          objectFit: "cover",
+                                          borderRadius: 6,
+                                          border: "1px solid #ddd",
+                                        }}
+                                      />
+                                    </a>
+                                  )}
+                                  <a
+                                    href={`/api/download-image?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}`}
                                     style={{
-                                      width: 80,
-                                      height: 80,
-                                      objectFit: "cover",
-                                      borderRadius: 6,
-                                      border: "1px solid #ddd",
+                                      fontSize: "11px",
+                                      color: "#008060",
+                                      fontWeight: 600,
+                                      textDecoration: "none",
+                                      background: "#f0fdf4",
+                                      border: "1px solid #bbf7d0",
+                                      padding: "1px 6px",
+                                      borderRadius: 4,
+                                      marginTop: 2,
                                     }}
-                                  />
-                                </a>
+                                    title="Download this review photo"
+                                  >
+                                    ⬇️ Download
+                                  </a>
+                                </div>
                               );
                             })}
                           </div>

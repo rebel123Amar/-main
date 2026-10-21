@@ -13,6 +13,7 @@ import {
   Pagination,
   Badge,
   Button,
+  ButtonGroup,
   Banner,
   Modal,
 } from "@shopify/polaris";
@@ -138,14 +139,58 @@ export default function OrdersPage() {
   const navigation = useNavigation();
   const isSyncing = navigation.state === "submitting";
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string;
+    orderName: string;
+    index: number;
+  } | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
+  const [downloadingZipId, setDownloadingZipId] = useState<string | null>(null);
+  const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
 
   const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
     setCopiedIndex(id);
     setTimeout(() => setCopiedIndex(null), 2000);
   }, []);
+
+  // Download a single customer image via our proxy endpoint
+  const handleDownloadSingle = useCallback((url: string, baseFilename: string) => {
+    setDownloadingUrl(url);
+    const cleanFilename = baseFilename.replace(/[^a-zA-Z0-9_-]/g, "_");
+    const downloadUrl = `/api/download-image?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(cleanFilename)}`;
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.setAttribute("download", `${cleanFilename}.jpg`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => setDownloadingUrl(null), 1000);
+  }, []);
+
+  // Download all images of an order bundled into a single ZIP archive
+  const handleDownloadZip = useCallback((urls: string[], orderName: string, orderId: string) => {
+    setDownloadingZipId(orderId);
+    const safeOrderName = (orderName || `Order_${orderId}`).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const downloadUrl = `/api/download-zip?orderName=${encodeURIComponent(safeOrderName)}&urls=${encodeURIComponent(JSON.stringify(urls))}`;
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => setDownloadingZipId(null), 2500);
+  }, []);
+
+  // Download all individual images one by one with a slight stagger
+  const handleDownloadAllIndividual = useCallback(async (urls: string[], orderName: string) => {
+    const safeOrderName = (orderName || "order").replace(/[^a-zA-Z0-9_-]/g, "_");
+    for (let i = 0; i < urls.length; i++) {
+      handleDownloadSingle(urls[i], `${safeOrderName}_photo_${i + 1}`);
+      if (i < urls.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+    }
+  }, [handleDownloadSingle]);
 
   return (
     <Page
@@ -323,96 +368,191 @@ export default function OrdersPage() {
 
                         {/* Uploaded Reference Images */}
                         {hasImages && (
-                          <div style={{ marginTop: 14 }}>
-                            <BlockStack gap="200">
-                              <Text as="p" variant="bodySm" fontWeight="semibold">
-                                🖼️ Customer Uploaded Images ({images.length}):
-                              </Text>
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: 12,
-                                flexWrap: "wrap",
-                              }}
-                            >
-                              {images.map((url, i) => (
-                                <div
-                                  key={i}
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    gap: 6,
-                                  }}
-                                >
+                          <div
+                            style={{
+                              marginTop: 14,
+                              padding: "14px 16px",
+                              background: "#f8fafc",
+                              borderRadius: 10,
+                              border: "1px solid #e2e8f0",
+                            }}
+                          >
+                            <BlockStack gap="300">
+                              <InlineStack align="space-between" blockAlign="center">
+                                <InlineStack gap="200" blockAlign="center">
+                                  <Text as="p" variant="bodySm" fontWeight="semibold">
+                                    🖼️ Customer Uploaded Images ({images.length}):
+                                  </Text>
+                                  <Badge tone="success">{`${images.length} Image${images.length > 1 ? "s" : ""}`}</Badge>
+                                </InlineStack>
+
+                                <InlineStack gap="200" blockAlign="center">
+                                  {images.length > 1 ? (
+                                    <ButtonGroup>
+                                      <Button
+                                        size="slim"
+                                        variant="primary"
+                                        loading={downloadingZipId === order.id}
+                                        onClick={() =>
+                                          handleDownloadZip(
+                                            images,
+                                            order.orderName || `Order_${order.orderId}`,
+                                            order.id
+                                          )
+                                        }
+                                      >
+                                        📦 Download All (ZIP)
+                                      </Button>
+                                      <Button
+                                        size="slim"
+                                        onClick={() =>
+                                          handleDownloadAllIndividual(
+                                            images,
+                                            order.orderName || `Order_${order.orderId}`
+                                          )
+                                        }
+                                      >
+                                        ⬇️ Download Each
+                                      </Button>
+                                    </ButtonGroup>
+                                  ) : (
+                                    <Button
+                                      size="slim"
+                                      variant="primary"
+                                      loading={downloadingUrl === images[0]}
+                                      onClick={() =>
+                                        handleDownloadSingle(
+                                          images[0],
+                                          `${order.orderName || `Order_${order.orderId}`}_photo_1`
+                                        )
+                                      }
+                                    >
+                                      ⬇️ Download Photo
+                                    </Button>
+                                  )}
+                                </InlineStack>
+                              </InlineStack>
+
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 14,
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                {images.map((url, i) => (
                                   <div
-                                    onClick={() => setSelectedImage(url)}
+                                    key={i}
                                     style={{
-                                      width: 90,
-                                      height: 90,
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      alignItems: "center",
+                                      gap: 6,
+                                      padding: "8px",
+                                      background: "#ffffff",
                                       borderRadius: 8,
-                                      overflow: "hidden",
-                                      border: "1.5px solid #d1d5db",
-                                      cursor: "pointer",
-                                      background: "#f3f4f6",
-                                      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                                      transition: "transform 0.15s, border-color 0.15s",
-                                    }}
-                                    title="Click to view full image"
-                                    onMouseEnter={(e) => {
-                                      e.currentTarget.style.transform = "scale(1.03)";
-                                      e.currentTarget.style.borderColor = "#111";
-                                    }}
-                                    onMouseLeave={(e) => {
-                                      e.currentTarget.style.transform = "scale(1)";
-                                      e.currentTarget.style.borderColor = "#d1d5db";
+                                      border: "1px solid #e2e8f0",
+                                      boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
                                     }}
                                   >
-                                    <img
-                                      src={url}
-                                      alt={`Order upload ${i + 1}`}
+                                    <div
+                                      onClick={() =>
+                                        setSelectedImage({
+                                          url,
+                                          orderName: order.orderName || `Order_${order.orderId}`,
+                                          index: i,
+                                        })
+                                      }
                                       style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        objectFit: "cover",
-                                      }}
-                                    />
-                                  </div>
-                                  <InlineStack gap="100">
-                                    <a
-                                      href={url}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      style={{
-                                        fontSize: "11px",
-                                        color: "#2563eb",
-                                        textDecoration: "underline",
-                                      }}
-                                    >
-                                      Full Size
-                                    </a>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleCopy(url, `url-${order.id}-${i}`)}
-                                      style={{
-                                        background: "none",
-                                        border: "none",
-                                        padding: 0,
+                                        width: 100,
+                                        height: 100,
+                                        borderRadius: 6,
+                                        overflow: "hidden",
+                                        border: "1.5px solid #cbd5e1",
                                         cursor: "pointer",
-                                        fontSize: "11px",
-                                        color: "#6b7280",
-                                        textDecoration: "underline",
+                                        background: "#f1f5f9",
+                                        position: "relative",
+                                        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                        transition: "transform 0.15s, border-color 0.15s",
+                                      }}
+                                      title="Click to view full image"
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = "scale(1.03)";
+                                        e.currentTarget.style.borderColor = "#0f172a";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = "scale(1)";
+                                        e.currentTarget.style.borderColor = "#cbd5e1";
                                       }}
                                     >
-                                      {copiedIndex === `url-${order.id}-${i}` ? "Copied" : "Copy URL"}
-                                    </button>
-                                  </InlineStack>
-                                </div>
-                              ))}
-                            </div>
-                          </BlockStack>
-                        </div>
-                      )}
+                                      <img
+                                        src={url}
+                                        alt={`Order upload ${i + 1}`}
+                                        style={{
+                                          width: "100%",
+                                          height: "100%",
+                                          objectFit: "cover",
+                                        }}
+                                      />
+                                      <span
+                                        style={{
+                                          position: "absolute",
+                                          bottom: 4,
+                                          right: 4,
+                                          background: "rgba(0,0,0,0.7)",
+                                          color: "#ffffff",
+                                          fontSize: "10px",
+                                          padding: "1px 5px",
+                                          borderRadius: 3,
+                                          fontWeight: "bold",
+                                        }}
+                                      >
+                                        #{i + 1}
+                                      </span>
+                                    </div>
+
+                                    {/* Action buttons below each thumbnail */}
+                                    <InlineStack gap="100" blockAlign="center">
+                                      <Button
+                                        size="micro"
+                                        variant="primary"
+                                        loading={downloadingUrl === url}
+                                        onClick={() =>
+                                          handleDownloadSingle(
+                                            url,
+                                            `${order.orderName || `Order_${order.orderId}`}_photo_${i + 1}`
+                                          )
+                                        }
+                                      >
+                                        ⬇️ Download
+                                      </Button>
+                                      <Button
+                                        size="micro"
+                                        variant="plain"
+                                        onClick={() =>
+                                          setSelectedImage({
+                                            url,
+                                            orderName: order.orderName || `Order_${order.orderId}`,
+                                            index: i,
+                                          })
+                                        }
+                                      >
+                                        Preview
+                                      </Button>
+                                      <Button
+                                        size="micro"
+                                        variant="plain"
+                                        onClick={() => handleCopy(url, `url-${order.id}-${i}`)}
+                                      >
+                                        {copiedIndex === `url-${order.id}-${i}` ? "Copied" : "Copy"}
+                                      </Button>
+                                    </InlineStack>
+                                  </div>
+                                ))}
+                              </div>
+                            </BlockStack>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -439,17 +579,25 @@ export default function OrdersPage() {
         </Layout.Section>
       </Layout>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal with direct Download button */}
       {selectedImage && (
         <Modal
           open={Boolean(selectedImage)}
           onClose={() => setSelectedImage(null)}
-          title="Reference Image Preview"
+          title={`Customer Photo #${selectedImage.index + 1} — ${selectedImage.orderName}`}
           primaryAction={{
-            content: "Open in New Tab",
-            onAction: () => window.open(selectedImage, "_blank"),
+            content: "⬇️ Download Image",
+            onAction: () =>
+              handleDownloadSingle(
+                selectedImage.url,
+                `${selectedImage.orderName}_photo_${selectedImage.index + 1}`
+              ),
           }}
           secondaryActions={[
+            {
+              content: "Open in New Tab",
+              onAction: () => window.open(selectedImage.url, "_blank"),
+            },
             {
               content: "Close",
               onAction: () => setSelectedImage(null),
@@ -462,24 +610,45 @@ export default function OrdersPage() {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                background: "#000",
+                background: "#09090b",
                 borderRadius: 8,
                 overflow: "hidden",
                 maxHeight: "70vh",
+                padding: "8px",
               }}
             >
               <img
-                src={selectedImage}
+                src={selectedImage.url}
                 alt="Enlarged reference"
                 style={{
                   maxWidth: "100%",
-                  maxHeight: "70vh",
+                  maxHeight: "68vh",
                   objectFit: "contain",
+                  borderRadius: 4,
                 }}
               />
             </div>
-            <div style={{ marginTop: 12, wordBreak: "break-all", fontSize: "12px", color: "#666" }}>
-              <strong>URL:</strong> {selectedImage}
+            <div
+              style={{
+                marginTop: 12,
+                padding: "10px 14px",
+                background: "#f1f5f9",
+                borderRadius: 6,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <div style={{ wordBreak: "break-all", fontSize: "12px", color: "#334155" }}>
+                <strong>URL:</strong> {selectedImage.url}
+              </div>
+              <Button
+                size="micro"
+                onClick={() => handleCopy(selectedImage.url, "modal-url")}
+              >
+                {copiedIndex === "modal-url" ? "✓ Copied" : "Copy URL"}
+              </Button>
             </div>
           </Modal.Section>
         </Modal>

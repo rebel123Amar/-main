@@ -207,21 +207,56 @@ export default function Index() {
                           </Text>
                         )}
                         {images.length > 0 && (
-                          <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
-                            {images.map((url, i) => (
-                              <img
-                                key={i}
-                                src={url}
-                                alt={`Upload ${i + 1}`}
-                                style={{
-                                  width: 56,
-                                  height: 56,
-                                  objectFit: "cover",
-                                  borderRadius: 6,
-                                  border: "1px solid #ddd",
-                                }}
-                              />
-                            ))}
+                          <div style={{ marginTop: 10 }}>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                              {images.map((url, i) => (
+                                <a
+                                  key={i}
+                                  href={`/api/download-image?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(
+                                    `${(order.orderName || order.orderId).replace(/[^a-zA-Z0-9_-]/g, "_")}_photo_${i + 1}.jpg`
+                                  )}`}
+                                  title={`Click to download Image #${i + 1}`}
+                                  style={{
+                                    display: "inline-block",
+                                    width: 56,
+                                    height: 56,
+                                    borderRadius: 6,
+                                    overflow: "hidden",
+                                    border: "1px solid #ddd",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <img
+                                    src={url}
+                                    alt={`Upload ${i + 1}`}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "cover",
+                                    }}
+                                  />
+                                </a>
+                              ))}
+                              {images.length > 1 ? (
+                                <Button
+                                  size="micro"
+                                  url={`/api/download-zip?orderName=${encodeURIComponent(
+                                    (order.orderName || order.orderId).replace(/[^a-zA-Z0-9_-]/g, "_")
+                                  )}&urls=${encodeURIComponent(JSON.stringify(images))}`}
+                                >
+                                  {`📦 Download ZIP (${images.length})`}
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="micro"
+                                  url={`/api/download-image?url=${encodeURIComponent(images[0])}&filename=${encodeURIComponent(
+                                    `${(order.orderName || order.orderId).replace(/[^a-zA-Z0-9_-]/g, "_")}_photo_1.jpg`
+                                  )}`}
+                                >
+                                  ⬇️ Download Image
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -239,7 +274,7 @@ export default function Index() {
           <Card>
             <BlockStack gap="300">
               <Text variant="headingMd" as="h2">Quick Actions</Text>
-              <InlineGrid columns={3} gap="300">
+              <InlineGrid columns={{ xs: 1, md: 3 }} gap="300">
                 <Button url="/app/reviews">Moderate Reviews</Button>
                 <Button url="/app/orders">View Orders</Button>
                 <Button url="/app/settings">App Settings</Button>

@@ -77,6 +77,40 @@
 
       <!-- ================= CART TIERED REWARDS PROGRESS BAR (BLACK TIMELINE UI WITH CELEBRATION) ================= -->
       <style>
+        /* Ensure cart drawer content layout is always properly structured when not empty */
+        cart-drawer:not(.is-empty) .drawer__inner,
+        .drawer__inner:not(.is-empty) {
+          display: flex !important;
+          flex-direction: column !important;
+          height: 100% !important;
+          overflow: hidden !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__header {
+          display: flex !important;
+        }
+
+        cart-drawer:not(.is-empty) cart-drawer-items {
+          display: block !important;
+          flex: 1 1 auto !important;
+          overflow-y: auto !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer {
+          display: block !important;
+          margin-top: auto !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__inner-empty,
+        cart-drawer:not(.is-empty) .cart-drawer__warnings {
+          display: none !important;
+        }
+
+        /* Hide reward progress bar when cart is truly empty to keep clean empty UI */
+        cart-drawer.is-empty .cart-reward-wrapper {
+          display: none !important;
+        }
+
         .cart-reward-wrapper {
           background: #ffffff !important;
           padding: 16px 12px 14px !important;
@@ -734,6 +768,39 @@
                   var isOpen = drawer.classList.contains('active') || drawer.hasAttribute('open');
                   if (isOpen && !drawer.__wasOpen) {
                     drawer.__wasOpen = true;
+                    var inner = drawer.querySelector('.drawer__inner');
+                    var itemsWrapper = drawer.querySelector('.drawer__cart-items-wrapper, .cart-items, .cart-item');
+                    var wrapper = document.getElementById('cart-reward-wrapper');
+                    var currentTotal = wrapper ? parseFloat(wrapper.getAttribute('data-cart-total') || '0') : 0;
+                    if (itemsWrapper || currentTotal > 0) {
+                      drawer.classList.remove('is-empty');
+                      if (inner) inner.classList.remove('is-empty');
+                      var itemsEl = drawer.querySelector('cart-drawer-items');
+                      if (itemsEl) itemsEl.classList.remove('is-empty');
+                      var emptyEl = drawer.querySelector('.drawer__inner-empty, .cart-drawer__warnings');
+                      if (emptyEl) emptyEl.style.display = 'none';
+                    }
+                    if (!itemsWrapper && currentTotal > 0 && !drawer.__fetchingSections) {
+                      drawer.__fetchingSections = true;
+                      var root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+                      fetch(root.replace(/\/+$/, '') + '/?sections=cart-drawer')
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                          drawer.__fetchingSections = false;
+                          if (data && data['cart-drawer']) {
+                            var doc = new DOMParser().parseFromString(data['cart-drawer'], 'text/html');
+                            var newInner = doc.querySelector('.drawer__inner');
+                            if (newInner && inner) {
+                              inner.innerHTML = newInner.innerHTML;
+                              drawer.classList.remove('is-empty');
+                              inner.classList.remove('is-empty');
+                              var itemsEl = drawer.querySelector('cart-drawer-items');
+                              if (itemsEl) itemsEl.classList.remove('is-empty');
+                            }
+                          }
+                        })
+                        .catch(function () { drawer.__fetchingSections = false; });
+                    }
                     scheduleRender(50);
                   } else if (!isOpen) {
                     drawer.__wasOpen = false;

@@ -609,23 +609,134 @@
     }
   }
 
+  // 6.5 Helper: Fetch fresh cart-drawer and cart-icon-bubble HTML sections from Shopify
+  async function fetchCartSections() {
+    const root = (window.Shopify?.routes?.root || "/").replace(/\/+$/, "");
+    try {
+      const res = await fetch(`${root}/?sections=cart-drawer,cart-icon-bubble`, {
+        headers: { "Cache-Control": "no-cache" }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data["cart-drawer"]) {
+          return data;
+        }
+      }
+    } catch (e) {
+      console.warn("[Customizer] Failed to fetch sections:", e);
+    }
+
+    try {
+      const res2 = await fetch(`${root}/cart?section_id=cart-drawer`, {
+        headers: { "Cache-Control": "no-cache" }
+      });
+      if (res2.ok) {
+        const html = await res2.text();
+        if (html && html.trim()) {
+          return { "cart-drawer": html };
+        }
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
   // 7. Open Cart Sidebar (Handles both Dawn native drawer AND fallback slide drawer)
   async function openCartSidebar(cartData) {
     const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
 
-    if (dawnDrawer) {
-      // 1. If Dawn's native cart-drawer is in the DOM
-      try {
-        if (typeof dawnDrawer.renderContents === "function") {
-          dawnDrawer.renderContents(cartData);
-        } else if (cartData?.sections && cartData.sections["cart-drawer"]) {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(cartData.sections["cart-drawer"], "text/html");
-          const newContent = doc.querySelector("#CartDrawer") || doc.querySelector("cart-drawer");
-          if (newContent) dawnDrawer.innerHTML = newContent.innerHTML;
-        }
-      } catch (_) {}
+    // Fetch fresh cart-drawer HTML section from Shopify
+    let sections = cartData?.sections;
+    if (!sections || !sections["cart-drawer"]) {
+      sections = await fetchCartSections();
+      if (sections) {
+        cartData = cartData || {};
+        cartData.sections = sections;
+      }
+    }
 
+    if (dawnDrawer) {
+      // 1. Immediately remove is-empty from dawnDrawer & elements
+      dawnDrawer.classList.remove("is-empty");
+      const drawerInner = dawnDrawer.querySelector(".drawer__inner");
+      if (drawerInner) drawerInner.classList.remove("is-empty");
+      const emptyContent = dawnDrawer.querySelector(".drawer__inner-empty, .cart-drawer__warnings");
+      if (emptyContent) emptyContent.style.display = "none";
+      const itemsComponent = dawnDrawer.querySelector("cart-drawer-items");
+      if (itemsComponent) itemsComponent.classList.remove("is-empty");
+
+      let updated = false;
+
+      // 2. Try Dawn's native renderContents method
+      if (sections && sections["cart-drawer"] && typeof dawnDrawer.renderContents === "function") {
+        try {
+          dawnDrawer.renderContents({
+            id: cartData?.id,
+            sections: sections
+          });
+          updated = true;
+        } catch (err) {
+          console.warn("[Customizer] dawnDrawer.renderContents error:", err);
+        }
+      }
+
+      // 3. Fallback: Parse and update .drawer__inner or #CartDrawer directly
+      if (!updated && sections && sections["cart-drawer"]) {
+        try {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(sections["cart-drawer"], "text/html");
+
+          const newInner = doc.querySelector(".drawer__inner");
+          const curInner = dawnDrawer.querySelector(".drawer__inner");
+          if (newInner && curInner) {
+            curInner.innerHTML = newInner.innerHTML;
+            curInner.classList.remove("is-empty");
+            updated = true;
+          } else {
+            const newCartDrawer = doc.querySelector("#CartDrawer") || doc.querySelector("cart-drawer");
+            if (newCartDrawer) {
+              const curCartDrawer = document.getElementById("CartDrawer") || dawnDrawer;
+              curCartDrawer.innerHTML = newCartDrawer.innerHTML;
+              updated = true;
+            }
+          }
+        } catch (err) {
+          console.error("[Customizer] Manual drawer update failed:", err);
+        }
+      }
+
+      // 4. Update cart-icon-bubble in header
+      if (sections && sections["cart-icon-bubble"]) {
+        try {
+          const bubble = document.querySelector("#cart-icon-bubble");
+          if (bubble) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(sections["cart-icon-bubble"], "text/html");
+            const newBubble = doc.querySelector(".shopify-section, #cart-icon-bubble") || doc.body.firstElementChild;
+            if (newBubble) bubble.innerHTML = newBubble.innerHTML;
+          }
+        } catch (_) {}
+      }
+
+      // 5. Ensure elements are visible and styled properly
+      dawnDrawer.classList.remove("is-empty");
+      const finalInner = dawnDrawer.querySelector(".drawer__inner");
+      if (finalInner) {
+        finalInner.classList.remove("is-empty");
+        finalInner.style.display = "flex";
+        finalInner.style.flexDirection = "column";
+      }
+      const finalItems = dawnDrawer.querySelector("cart-drawer-items");
+      if (finalItems) {
+        finalItems.classList.remove("is-empty");
+        finalItems.style.display = "block";
+      }
+      const finalHeader = dawnDrawer.querySelector(".drawer__header");
+      if (finalHeader) {
+        finalHeader.style.display = "flex";
+      }
+
+      // 6. Open Dawn drawer
       if (typeof dawnDrawer.open === "function") {
         dawnDrawer.open();
       } else {
@@ -633,10 +744,17 @@
         document.body.classList.add("overflow-hidden");
       }
 
+      // 7. Dispatch events so progress bar & theme listeners update
       document.dispatchEvent(new CustomEvent("cart:updated", { detail: { cart: cartData } }));
       document.dispatchEvent(new CustomEvent("cart-drawer:open"));
-      setTimeout(formatDrawerPropertyLinks, 150);
-      setTimeout(formatDrawerPropertyLinks, 500);
+      document.dispatchEvent(new CustomEvent("cart:refresh"));
+
+      if (typeof window.__CartPBRefresh === "function") {
+        window.__CartPBRefresh();
+      }
+
+      setTimeout(setupCartDrawerLinkFormatter, 150);
+      setTimeout(setupCartDrawerLinkFormatter, 500);
       return;
     }
 
