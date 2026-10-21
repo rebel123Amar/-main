@@ -772,34 +772,55 @@
                     var itemsWrapper = drawer.querySelector('.drawer__cart-items-wrapper, .cart-items, .cart-item');
                     var wrapper = document.getElementById('cart-reward-wrapper');
                     var currentTotal = wrapper ? parseFloat(wrapper.getAttribute('data-cart-total') || '0') : 0;
-                    if (itemsWrapper || currentTotal > 0) {
+                    if (itemsWrapper) {
                       drawer.classList.remove('is-empty');
                       if (inner) inner.classList.remove('is-empty');
                       var itemsEl = drawer.querySelector('cart-drawer-items');
                       if (itemsEl) itemsEl.classList.remove('is-empty');
                       var emptyEl = drawer.querySelector('.drawer__inner-empty, .cart-drawer__warnings');
                       if (emptyEl) emptyEl.style.display = 'none';
-                    }
-                    if (!itemsWrapper && currentTotal > 0 && !drawer.__fetchingSections) {
+                    } else if (!drawer.__fetchingSections) {
                       drawer.__fetchingSections = true;
                       var root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
-                      fetch(root.replace(/\/+$/, '') + '/?sections=cart-drawer')
-                        .then(function (r) { return r.json(); })
-                        .then(function (data) {
-                          drawer.__fetchingSections = false;
-                          if (data && data['cart-drawer']) {
-                            var doc = new DOMParser().parseFromString(data['cart-drawer'], 'text/html');
-                            var newInner = doc.querySelector('.drawer__inner');
-                            if (newInner && inner) {
-                              inner.innerHTML = newInner.innerHTML;
-                              drawer.classList.remove('is-empty');
-                              inner.classList.remove('is-empty');
-                              var itemsEl = drawer.querySelector('cart-drawer-items');
-                              if (itemsEl) itemsEl.classList.remove('is-empty');
-                            }
+                      var populateDrawer = function (html) {
+                        if (html && (html.includes('drawer__inner') || html.includes('CartDrawer'))) {
+                          var doc = new DOMParser().parseFromString(html, 'text/html');
+                          var newInner = doc.querySelector('.drawer__inner');
+                          if (newInner && inner) {
+                            inner.innerHTML = newInner.innerHTML;
+                            inner.className = newInner.className;
                           }
+                          drawer.classList.remove('is-empty');
+                          if (inner) {
+                            inner.classList.remove('is-empty');
+                            inner.style.display = 'flex';
+                            inner.style.flexDirection = 'column';
+                          }
+                          var itemsEl = drawer.querySelector('cart-drawer-items');
+                          if (itemsEl) {
+                            itemsEl.classList.remove('is-empty');
+                            itemsEl.style.display = 'block';
+                          }
+                          var emptyEl = drawer.querySelector('.drawer__inner-empty, .cart-drawer__warnings');
+                          if (emptyEl) emptyEl.style.display = 'none';
+                        }
+                      };
+
+                      fetch(root.replace(/\/+$/, '') + '/cart?section_id=cart-drawer')
+                        .then(function (r) { return r.text(); })
+                        .then(function (html) {
+                          drawer.__fetchingSections = false;
+                          populateDrawer(html);
                         })
-                        .catch(function () { drawer.__fetchingSections = false; });
+                        .catch(function () {
+                          fetch(root.replace(/\/+$/, '') + '/cart')
+                            .then(function (r) { return r.text(); })
+                            .then(function (html) {
+                              drawer.__fetchingSections = false;
+                              populateDrawer(html);
+                            })
+                            .catch(function () { drawer.__fetchingSections = false; });
+                        });
                     }
                     scheduleRender(50);
                   } else if (!isOpen) {

@@ -569,19 +569,34 @@
       // Sync into hidden form inputs as fallback
       syncHiddenFormInputs(form, properties);
 
-      // Add to Shopify Cart with line item properties
+      // Add to Shopify Cart with line item properties and sections via FormData
+      const formData = new FormData();
+      formData.append("id", variantId);
+      formData.append("quantity", quantity);
+      for (const [k, v] of Object.entries(properties)) {
+        formData.append(`properties[${k}]`, v);
+      }
+
+      const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
+      let sectionsToRequest = ["cart-drawer", "cart-icon-bubble"];
+      if (dawnDrawer && typeof dawnDrawer.getSectionsToRender === "function") {
+        try {
+          sectionsToRequest = dawnDrawer.getSectionsToRender().map((s) => s.id);
+        } catch (_) {}
+      }
+
+      if (!isBuyNow) {
+        formData.append("sections", sectionsToRequest.join(","));
+        formData.append("sections_url", window.location.pathname);
+      }
+
       const addRes = await fetch((window.Shopify?.routes?.root || "/") + "cart/add.js", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          id: variantId,
-          quantity: quantity,
-          properties: properties,
-          sections: isBuyNow ? "" : "cart-drawer,cart-icon-bubble",
-        }),
+        body: formData,
       });
 
       const cartData = await addRes.json();
@@ -612,28 +627,46 @@
   // 6.5 Helper: Fetch fresh cart-drawer and cart-icon-bubble HTML sections from Shopify
   async function fetchCartSections() {
     const root = (window.Shopify?.routes?.root || "/").replace(/\/+$/, "");
+
+    // Strategy 1: Current product page URL with ?sections=
     try {
-      const res = await fetch(`${root}/?sections=cart-drawer,cart-icon-bubble`, {
-        headers: { "Cache-Control": "no-cache" }
+      const res = await fetch(`${window.location.pathname}?sections=cart-drawer,cart-icon-bubble`, {
+        headers: { "Cache-Control": "no-cache", "X-Requested-With": "XMLHttpRequest" }
       });
       if (res.ok) {
         const data = await res.json();
         if (data && data["cart-drawer"]) {
-          return data;
+          return { drawer: data["cart-drawer"], bubble: data["cart-icon-bubble"] };
         }
       }
     } catch (e) {
       console.warn("[Customizer] Failed to fetch sections:", e);
     }
 
+    // Strategy 2: /cart?section_id=cart-drawer
     try {
       const res2 = await fetch(`${root}/cart?section_id=cart-drawer`, {
         headers: { "Cache-Control": "no-cache" }
       });
       if (res2.ok) {
         const html = await res2.text();
-        if (html && html.trim()) {
-          return { "cart-drawer": html };
+        if (html && (html.includes("drawer__inner") || html.includes("CartDrawer"))) {
+          return { drawer: html };
+        }
+      }
+    } catch (e) {}
+
+    // Strategy 3: /cart full page (contains server-rendered <cart-drawer>)
+    try {
+      const res3 = await fetch(`${root}/cart`, {
+        headers: { "Cache-Control": "no-cache" }
+      });
+      if (res3.ok) {
+        const fullHtml = await res3.text();
+        const doc = new DOMParser().parseFromString(fullHtml, "text/html");
+        const found = doc.querySelector("cart-drawer, #CartDrawer");
+        if (found) {
+          return { drawer: found.outerHTML || found.innerHTML };
         }
       }
     } catch (e) {}
@@ -645,59 +678,33 @@
   async function openCartSidebar(cartData) {
     const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
 
-    // Fetch fresh cart-drawer HTML section from Shopify
-    let sections = cartData?.sections;
-    if (!sections || !sections["cart-drawer"]) {
-      sections = await fetchCartSections();
-      if (sections) {
-        cartData = cartData || {};
-        cartData.sections = sections;
+    let drawerHtml = cartData?.sections?.["cart-drawer"] || null;
+    let bubbleHtml = cartData?.sections?.["cart-icon-bubble"] || null;
+
+    if (!drawerHtml) {
+      const fresh = await fetchCartSections();
+      if (fresh) {
+        drawerHtml = fresh.drawer;
+        if (fresh.bubble) bubbleHtml = fresh.bubble;
       }
     }
 
     if (dawnDrawer) {
-      // 1. Immediately remove is-empty from dawnDrawer & elements
-      dawnDrawer.classList.remove("is-empty");
-      const drawerInner = dawnDrawer.querySelector(".drawer__inner");
-      if (drawerInner) drawerInner.classList.remove("is-empty");
-      const emptyContent = dawnDrawer.querySelector(".drawer__inner-empty, .cart-drawer__warnings");
-      if (emptyContent) emptyContent.style.display = "none";
-      const itemsComponent = dawnDrawer.querySelector("cart-drawer-items");
-      if (itemsComponent) itemsComponent.classList.remove("is-empty");
-
-      let updated = false;
-
-      // 2. Try Dawn's native renderContents method
-      if (sections && sections["cart-drawer"] && typeof dawnDrawer.renderContents === "function") {
+      // 1. Inject fresh drawer content BEFORE opening so it never shows blank
+      if (drawerHtml) {
         try {
-          dawnDrawer.renderContents({
-            id: cartData?.id,
-            sections: sections
-          });
-          updated = true;
-        } catch (err) {
-          console.warn("[Customizer] dawnDrawer.renderContents error:", err);
-        }
-      }
-
-      // 3. Fallback: Parse and update .drawer__inner or #CartDrawer directly
-      if (!updated && sections && sections["cart-drawer"]) {
-        try {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(sections["cart-drawer"], "text/html");
-
+          const doc = new DOMParser().parseFromString(drawerHtml, "text/html");
           const newInner = doc.querySelector(".drawer__inner");
           const curInner = dawnDrawer.querySelector(".drawer__inner");
+
           if (newInner && curInner) {
             curInner.innerHTML = newInner.innerHTML;
-            curInner.classList.remove("is-empty");
-            updated = true;
+            curInner.className = newInner.className;
           } else {
             const newCartDrawer = doc.querySelector("#CartDrawer") || doc.querySelector("cart-drawer");
             if (newCartDrawer) {
               const curCartDrawer = document.getElementById("CartDrawer") || dawnDrawer;
               curCartDrawer.innerHTML = newCartDrawer.innerHTML;
-              updated = true;
             }
           }
         } catch (err) {
@@ -705,26 +712,29 @@
         }
       }
 
-      // 4. Update cart-icon-bubble in header
-      if (sections && sections["cart-icon-bubble"]) {
+      // 2. Update cart-icon-bubble in header
+      if (bubbleHtml) {
         try {
           const bubble = document.querySelector("#cart-icon-bubble");
           if (bubble) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(sections["cart-icon-bubble"], "text/html");
+            const doc = new DOMParser().parseFromString(bubbleHtml, "text/html");
             const newBubble = doc.querySelector(".shopify-section, #cart-icon-bubble") || doc.body.firstElementChild;
             if (newBubble) bubble.innerHTML = newBubble.innerHTML;
           }
         } catch (_) {}
       }
 
-      // 5. Ensure elements are visible and styled properly
+      // 3. Ensure elements are visible and styled properly
       dawnDrawer.classList.remove("is-empty");
       const finalInner = dawnDrawer.querySelector(".drawer__inner");
       if (finalInner) {
         finalInner.classList.remove("is-empty");
         finalInner.style.display = "flex";
         finalInner.style.flexDirection = "column";
+      }
+      const emptyContent = dawnDrawer.querySelector(".drawer__inner-empty, .cart-drawer__warnings");
+      if (emptyContent) {
+        emptyContent.style.display = "none";
       }
       const finalItems = dawnDrawer.querySelector("cart-drawer-items");
       if (finalItems) {
@@ -735,8 +745,21 @@
       if (finalHeader) {
         finalHeader.style.display = "flex";
       }
+      const finalFooter = dawnDrawer.querySelector(".drawer__footer");
+      if (finalFooter) {
+        finalFooter.style.display = "block";
+      }
 
-      // 6. Open Dawn drawer
+      // 4. Re-bind overlay close
+      const overlay = dawnDrawer.querySelector("#CartDrawer-Overlay");
+      if (overlay) {
+        overlay.onclick = function () {
+          if (typeof dawnDrawer.close === "function") dawnDrawer.close();
+          else dawnDrawer.classList.remove("active", "animate");
+        };
+      }
+
+      // 5. Open Dawn drawer now that the content is populated!
       if (typeof dawnDrawer.open === "function") {
         dawnDrawer.open();
       } else {
@@ -744,7 +767,7 @@
         document.body.classList.add("overflow-hidden");
       }
 
-      // 7. Dispatch events so progress bar & theme listeners update
+      // 6. Dispatch events so progress bar & theme listeners update
       document.dispatchEvent(new CustomEvent("cart:updated", { detail: { cart: cartData } }));
       document.dispatchEvent(new CustomEvent("cart-drawer:open"));
       document.dispatchEvent(new CustomEvent("cart:refresh"));
@@ -753,8 +776,8 @@
         window.__CartPBRefresh();
       }
 
-      setTimeout(setupCartDrawerLinkFormatter, 150);
-      setTimeout(setupCartDrawerLinkFormatter, 500);
+      setTimeout(setupCartDrawerLinkFormatter, 100);
+      setTimeout(setupCartDrawerLinkFormatter, 400);
       return;
     }
 
