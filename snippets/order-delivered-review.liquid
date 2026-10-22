@@ -291,11 +291,11 @@
   </style>
 
   <div class="rebel-order-review__header">
-    <div class="rebel-order-review__icon">🎁</div>
+    <div class="rebel-order-review__icon">💌</div>
     <div>
-      <h3 class="rebel-order-review__title">How was your order?</h3>
+      <h3 class="rebel-order-review__title">Heyyy! 💌 Aapko apna Rebel Gifts order kaisa laga? 🥹❤️</h3>
       <p class="rebel-order-review__subtitle">
-        Share your experience and photos with us. Your feedback helps us make gifts even more special!
+        Your honest review means the world to us! Would you recommend us to your friends? 🫶🏻
       </p>
     </div>
   </div>
@@ -544,20 +544,22 @@
       // Initialize all cards rendered on server
       document.querySelectorAll(".rebel-order-review__item").forEach(setupItemCard);
 
-      // Support dynamic URL parameter mode: ?review_order=123&product_id=456&title=Custom+Frame
+      // Support dynamic URL parameter mode: ?review_order=123&order_id=123&product_title=Custom+Frame
       const urlParams = new URLSearchParams(window.location.search);
-      const urlProdId = urlParams.get("product_id") || urlParams.get("productId");
-      const urlProdTitle = urlParams.get("product_title") || urlParams.get("productTitle") || "Purchased Product";
+      const urlOrderId = urlParams.get("order_id") || urlParams.get("orderId") || urlParams.get("review_order");
+      const urlProdId = urlParams.get("product_id") || urlParams.get("productId") || (urlOrderId ? "order-" + urlOrderId : "");
+      const urlProdTitle = urlParams.get("product_title") || urlParams.get("productTitle") || urlParams.get("product") || "Personalized Rebel Gift";
+      const urlProdImg = urlParams.get("product_img") || urlParams.get("image") || urlParams.get("img") || "";
       const dynamicWrap = document.getElementById("rebel-dynamic-order-item-wrap");
 
-      if (dynamicWrap && urlProdId) {
+      if (dynamicWrap && (urlProdId || urlOrderId)) {
         const itemHtml = `
-          <div class="rebel-order-review__item" data-product-id="${urlProdId}" data-product-handle="" data-product-title="${urlProdTitle}">
+          <div class="rebel-order-review__item" data-product-id="${urlProdId || urlOrderId}" data-product-handle="" data-product-title="${urlProdTitle}">
             <div class="rebel-order-review__prod-info">
-              <div class="rebel-order-review__prod-img" style="display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:20px;">🎁</div>
+              ${urlProdImg ? `<img class="rebel-order-review__prod-img" src="${urlProdImg}" alt="${urlProdTitle}" />` : `<div class="rebel-order-review__prod-img" style="display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:24px;">🎁</div>`}
               <div>
                 <p class="rebel-order-review__prod-title">${urlProdTitle}</p>
-                <p class="rebel-order-review__prod-variant">Order Verified Purchase</p>
+                <p class="rebel-order-review__prod-variant">Order Verified Purchase ${urlOrderId ? '#' + urlOrderId : ''}</p>
               </div>
             </div>
             <div class="rebel-order-review__stars-wrap">

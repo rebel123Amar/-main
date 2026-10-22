@@ -1,0 +1,676 @@
+{% comment %}
+  Rebel Gifts & Mosambi — Dedicated Order Review Page Section
+  Allows customers to review their delivered order from WhatsApp link
+{% endcomment %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{% style %}
+  #rebel-review-sec-{{ sec_id }} {
+    --primary-pink: #f43f5e;
+    --dark-pink: #e11d48;
+    --soft-pink: #fff1f2;
+    --border-pink: #fecdd3;
+    --text-dark: #0f172a;
+    --text-muted: #475569;
+    
+    background: radial-gradient(100% 60% at 50% 0%, #ffe4e6 0%, #fff1f2 35%, #faf7f8 100%);
+    padding: 40px 16px 80px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .rebel-rev-page__wrap {
+    width: 100%;
+    max-width: 540px;
+  }
+
+  .rebel-rev-page__header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .rebel-rev-page__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--border-pink);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark-pink);
+    box-shadow: 0 2px 10px rgba(225, 29, 72, 0.08);
+    margin-bottom: 12px;
+  }
+
+  .rebel-rev-page__title {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--text-dark);
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .rebel-rev-page__subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .rebel-rev-page__card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 24px 20px;
+    box-shadow: 0 12px 36px -4px rgba(225, 29, 72, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+    border: 1px solid #ffe4e6;
+  }
+
+  @media (min-width: 480px) {
+    .rebel-rev-page__card {
+      padding: 32px 28px;
+    }
+  }
+
+  .rebel-rev-page__prod-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: #fff5f6;
+    border: 1px solid #fed7aa33;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
+
+  .rebel-rev-page__prod-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ffffff;
+    border: 1px solid var(--border-pink);
+    flex-shrink: 0;
+  }
+
+  .rebel-rev-page__prod-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 4px;
+  }
+
+  .rebel-rev-page__prod-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid #a7f3d0;
+  }
+
+  .rebel-rev-page__stars-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fafaf9;
+    border: 1px solid #f5f5f4;
+    border-radius: 18px;
+    padding: 16px 12px 14px;
+    margin-bottom: 22px;
+  }
+
+  .rebel-rev-page__stars-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .rebel-rev-page__star-btn {
+    background: none;
+    border: none;
+    font-size: 40px;
+    line-height: 1;
+    cursor: pointer;
+    color: #e2e8f0;
+    transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
+    padding: 4px;
+  }
+
+  .rebel-rev-page__star-btn:hover {
+    transform: scale(1.22);
+  }
+
+  .rebel-rev-page__star-btn.is-active {
+    color: #f59e0b;
+    filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+  }
+
+  .rebel-rev-page__star-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--primary-pink);
+  }
+
+  .rebel-rev-page__field {
+    margin-bottom: 20px;
+  }
+
+  .rebel-rev-page__label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+  }
+
+  .rebel-rev-page__pills {
+    display: flex;
+    gap: 10px;
+  }
+
+  .rebel-rev-page__pill {
+    flex: 1;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+
+  .rebel-rev-page__pill.is-active {
+    border-color: var(--primary-pink);
+    background: #ffe4e6;
+    color: #be123c;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+  }
+
+  .rebel-rev-page__input,
+  .rebel-rev-page__textarea {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--text-dark);
+    background: #fafafa;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  .rebel-rev-page__input:focus,
+  .rebel-rev-page__textarea:focus {
+    border-color: var(--primary-pink);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12);
+  }
+
+  .rebel-rev-page__dropzone {
+    border: 2px dashed #f472b6;
+    background: #fff5f7;
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .rebel-rev-page__dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .rebel-rev-page__previews {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .rebel-rev-page__thumb {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-pink);
+  }
+
+  .rebel-rev-page__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .rebel-rev-page__thumb-del {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(15, 23, 42, 0.75);
+    color: #ffffff;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .rebel-rev-page__btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: #ffffff;
+    border: none;
+    padding: 16px 20px;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px -4px rgba(225, 29, 72, 0.45);
+    transition: transform 0.15s;
+    margin-top: 10px;
+  }
+
+  .rebel-rev-page__btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .rebel-rev-page__success {
+    display: none;
+    text-align: center;
+    padding: 36px 16px;
+  }
+{% endstyle %}
+
+<div
+  id="rebel-review-sec-{{ sec_id }}"
+  data-shop="{{ current_shop }}"
+  data-app-url="{{ app_url }}"
+>
+  <div class="rebel-rev-page__wrap">
+    <!-- Header -->
+    <div class="rebel-rev-page__header">
+      <div class="rebel-rev-page__badge">
+        <span>🎁</span>
+        <span>Rebel Gifts & Personalization</span>
+      </div>
+      <h1 class="rebel-rev-page__title" id="rebel-page-greeting">
+        Heyyy! 💌
+      </h1>
+      <p class="rebel-rev-page__subtitle">
+        Aapko apna Rebel Gifts order kaisa laga? 🥹❤️
+        <br />
+        Your honest review means the world to our gifting team! 🫶🏻
+      </p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="rebel-rev-page__card">
+      <div class="rebel-rev-page__success" id="rebel-page-success">
+        <div style="font-size:56px; margin-bottom:16px;">🥹❤️🎉</div>
+        <h2 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:8px;">Thank You So Much!</h2>
+        <p style="font-size:14.5px; color:#475569; line-height:1.6; max-width:380px; margin:0 auto 24px;">
+          Aapka honest review aur feedback successfully save ho gaya hai. Aapki khushi hi hamare liye sab kuch hai! 🫶🏻✨
+        </p>
+        <a href="/" style="display:inline-flex; align-items:center; gap:8px; background:#0f172a; color:#fff; padding:14px 28px; border-radius:999px; text-decoration:none; font-size:14px; font-weight:700;">
+          <span>Visit Rebel Gifts Store</span>
+          <span>🛍️</span>
+        </a>
+      </div>
+
+      <form id="rebel-page-form">
+        <!-- Product Banner -->
+        <div class="rebel-rev-page__prod-banner">
+          <img
+            id="rebel-prod-image"
+            src=""
+            alt="Product"
+            class="rebel-rev-page__prod-img"
+            style="display:none;"
+          />
+          <div id="rebel-prod-placeholder" class="rebel-rev-page__prod-img" style="display:flex;align-items:center;justify-content:center;font-size:28px;">
+            🎁
+          </div>
+          <div>
+            <div class="rebel-rev-page__prod-title" id="rebel-prod-title">
+              Personalized Rebel Gift
+            </div>
+            <span class="rebel-rev-page__prod-tag" id="rebel-prod-badge">
+              ✓ Verified Purchase
+            </span>
+          </div>
+        </div>
+
+        <!-- Star Rating -->
+        <div class="rebel-rev-page__stars-box">
+          <label class="rebel-rev-page__label" style="margin-bottom:4px;">
+            Aapko Gift Kaisa Laga? Rate Karein:
+          </label>
+          <div class="rebel-rev-page__stars-row" id="rebel-star-row">
+            <button type="button" class="rebel-rev-page__star-btn" data-star="1">★</button>
+            <button type="button" class="rebel-rev-page__star-btn" data-star="2">★</button>
+            <button type="button" class="rebel-rev-page__star-btn" data-star="3">★</button>
+            <button type="button" class="rebel-rev-page__star-btn" data-star="4">★</button>
+            <button type="button" class="rebel-rev-page__star-btn is-active" data-star="5">★</button>
+          </div>
+          <div class="rebel-rev-page__star-label" id="rebel-star-text">
+            Obsessed & Loved it! 🥹🌟❤️
+          </div>
+        </div>
+
+        <!-- Would recommend -->
+        <div class="rebel-rev-page__field">
+          <label class="rebel-rev-page__label">
+            Would you recommend us to your friends? 🫶🏻
+          </label>
+          <div class="rebel-rev-page__pills">
+            <button type="button" class="rebel-rev-page__pill is-active" id="rebel-rec-yes">
+              Yes, absolutely! 🫶🏻
+            </button>
+            <button type="button" class="rebel-rev-page__pill" id="rebel-rec-no">
+              Maybe / Not sure
+            </button>
+          </div>
+        </div>
+
+        <!-- Review Body -->
+        <div class="rebel-rev-page__field">
+          <label class="rebel-rev-page__label" for="rebel-page-textarea">
+            Your Honest Review & Unboxing Experience 📝
+          </label>
+          <textarea
+            id="rebel-page-textarea"
+            class="rebel-rev-page__textarea"
+            rows="4"
+            placeholder="Tell us what you loved about the print quality, finishing, packaging and delivery... 🥹❤️"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="rebel-rev-page__field">
+          <label class="rebel-rev-page__label">
+            Unboxing Photos / Gift Pictures (Optional) 📸
+          </label>
+          <div class="rebel-rev-page__dropzone">
+            <input type="file" id="rebel-page-fileinput" accept="image/jpeg,image/png,image/webp,image/jpg" multiple />
+            <div style="font-size:32px; margin-bottom:6px; line-height:1;">📸</div>
+            <div style="font-size:13.5px; font-weight:700; color:#be123c;" id="rebel-page-droptext">
+              Tap here to add photos from gallery or camera
+            </div>
+            <div style="font-size:12px; color:#9f1239; opacity:0.8;">
+              Show the gift unboxing or finishing (up to 8 photos)
+            </div>
+          </div>
+          <div class="rebel-rev-page__previews" id="rebel-page-previews"></div>
+        </div>
+
+        <!-- Customer Inputs -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+          <div>
+            <label class="rebel-rev-page__label">Your Name</label>
+            <input type="text" id="rebel-page-name" class="rebel-rev-page__input" placeholder="e.g. Rahul Sharma" required />
+          </div>
+          <div>
+            <label class="rebel-rev-page__label">Email Address</label>
+            <input type="email" id="rebel-page-email" class="rebel-rev-page__input" placeholder="e.g. rahul@example.com" required />
+          </div>
+        </div>
+
+        <button type="submit" class="rebel-rev-page__btn-submit" id="rebel-page-submit">
+          Submit Honest Review 💌
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.getElementById("rebel-review-sec-{{ sec_id }}");
+      if (!root) return;
+
+      const shop = root.dataset.shop || window.location.hostname;
+      const appUrl = root.dataset.appUrl || "https://main-pink-phi.vercel.app";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get("order_id") || urlParams.get("orderId") || urlParams.get("review_order") || "";
+      const orderName = urlParams.get("order_name") || urlParams.get("orderName") || (orderId ? "#" + orderId : "");
+      let customerName = urlParams.get("name") || urlParams.get("customer_name") || "";
+      let customerEmail = urlParams.get("email") || urlParams.get("customer_email") || "";
+      let productTitle = urlParams.get("product_title") || urlParams.get("product") || urlParams.get("prod") || "";
+      let productImg = urlParams.get("product_img") || urlParams.get("image") || urlParams.get("img") || "";
+      let productId = urlParams.get("product_id") || urlParams.get("productId") || (orderId ? "order-" + orderId : "rebel-gift");
+
+      // Elements
+      const greetingEl = document.getElementById("rebel-page-greeting");
+      const prodImgEl = document.getElementById("rebel-prod-image");
+      const prodPlaceEl = document.getElementById("rebel-prod-placeholder");
+      const prodTitleEl = document.getElementById("rebel-prod-title");
+      const prodBadgeEl = document.getElementById("rebel-prod-badge");
+      const nameInput = document.getElementById("rebel-page-name");
+      const emailInput = document.getElementById("rebel-page-email");
+      const textarea = document.getElementById("rebel-page-textarea");
+      const starBtns = root.querySelectorAll(".rebel-rev-page__star-btn");
+      const starTextEl = document.getElementById("rebel-star-text");
+      const recYesBtn = document.getElementById("rebel-rec-yes");
+      const recNoBtn = document.getElementById("rebel-rec-no");
+      const fileInput = document.getElementById("rebel-page-fileinput");
+      const dropText = document.getElementById("rebel-page-droptext");
+      const previewsWrap = document.getElementById("rebel-page-previews");
+      const form = document.getElementById("rebel-page-form");
+      const submitBtn = document.getElementById("rebel-page-submit");
+      const successCard = document.getElementById("rebel-page-success");
+
+      let currentRating = 5;
+      let wouldRecommend = true;
+      let uploadedImages = [];
+
+      const starLabels = {
+        1: "Disappointed 😞",
+        2: "Could be better 😐",
+        3: "Good gift 🙂",
+        4: "Loved it! 😊💖",
+        5: "Obsessed & Loved it! 🥹🌟❤️",
+      };
+
+      // Set initial values
+      if (customerName) {
+        greetingEl.textContent = "Heyyy " + customerName.split(" ")[0] + "! 💌";
+        nameInput.value = customerName;
+      }
+      if (customerEmail) emailInput.value = customerEmail;
+      if (productTitle) prodTitleEl.textContent = productTitle;
+      if (orderName) prodBadgeEl.textContent = "✓ " + orderName + " Verified Purchase";
+
+      if (productImg) {
+        prodImgEl.src = productImg;
+        prodImgEl.style.display = "block";
+        prodPlaceEl.style.display = "none";
+      }
+
+      // If missing product details and orderId exists, fetch from api.order-info
+      if (orderId && (!productTitle || !productImg)) {
+        fetch(appUrl + "/api/order-info?shop=" + encodeURIComponent(shop) + "&orderId=" + encodeURIComponent(orderId))
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.order) {
+              const o = data.order;
+              if (!productTitle && o.productTitle) prodTitleEl.textContent = o.productTitle;
+              if (!productImg && o.productImage) {
+                prodImgEl.src = o.productImage;
+                prodImgEl.style.display = "block";
+                prodPlaceEl.style.display = "none";
+              }
+              if (!nameInput.value && o.customerName) {
+                nameInput.value = o.customerName;
+                greetingEl.textContent = "Heyyy " + o.customerName.split(" ")[0] + "! 💌";
+              }
+              if (!emailInput.value && o.customerEmail) emailInput.value = o.customerEmail;
+            }
+          })
+          .catch((err) => console.warn(err));
+      }
+
+      // Star interaction
+      function updateStars(val) {
+        starBtns.forEach((btn) => {
+          const s = parseInt(btn.dataset.star);
+          btn.classList.toggle("is-active", s <= val);
+        });
+        starTextEl.textContent = starLabels[val] || "";
+      }
+
+      starBtns.forEach((btn) => {
+        const val = parseInt(btn.dataset.star);
+        btn.addEventListener("mouseenter", () => updateStars(val));
+        btn.addEventListener("mouseleave", () => updateStars(currentRating));
+        btn.addEventListener("click", () => {
+          currentRating = val;
+          updateStars(val);
+        });
+      });
+
+      // Recommend toggle
+      recYesBtn?.addEventListener("click", () => {
+        wouldRecommend = true;
+        recYesBtn.classList.add("is-active");
+        recNoBtn.classList.remove("is-active");
+      });
+      recNoBtn?.addEventListener("click", () => {
+        wouldRecommend = false;
+        recNoBtn.classList.add("is-active");
+        recYesBtn.classList.remove("is-active");
+      });
+
+      // Upload photos
+      fileInput?.addEventListener("change", async (e) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+
+        dropText.textContent = "Uploading photos... please wait ⏳";
+        const formData = new FormData();
+        files.slice(0, 8).forEach((f) => formData.append("files", f));
+
+        try {
+          const res = await fetch(appUrl + "/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const d = await res.json();
+          if (d.success && Array.isArray(d.urls)) {
+            d.urls.forEach((url) => {
+              uploadedImages.push(url);
+              const thumb = document.createElement("div");
+              thumb.className = "rebel-rev-page__thumb";
+              thumb.innerHTML = '<img src="' + url + '" alt="Unboxing" /><button type="button" class="rebel-rev-page__thumb-del">✕</button>';
+              thumb.querySelector(".rebel-rev-page__thumb-del").addEventListener("click", () => {
+                uploadedImages = uploadedImages.filter((u) => u !== url);
+                thumb.remove();
+              });
+              previewsWrap.appendChild(thumb);
+            });
+          }
+        } catch (err) {
+          alert("Photo upload error. Please check your connection.");
+        } finally {
+          dropText.textContent = "Tap here to add photos from gallery or camera";
+          e.target.value = "";
+        }
+      });
+
+      // Submit Form
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const reviewText = textarea.value.trim();
+        const authorName = nameInput.value.trim();
+        const authorEmail = emailInput.value.trim();
+
+        if (!reviewText) {
+          alert("Please write a few words about your gift experience.");
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting Review... ⏳";
+
+        try {
+          const res = await fetch(appUrl + "/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop,
+              productId,
+              productHandle: "",
+              authorName,
+              authorEmail,
+              rating: currentRating,
+              title: (productTitle || "Rebel Gift") + (wouldRecommend ? " — Would Recommend! 🫶🏻" : ""),
+              reviewBody: reviewText,
+              mediaUrls: uploadedImages,
+              orderId,
+              orderName,
+            }),
+          });
+
+          const resData = await res.json();
+          if (resData.success) {
+            form.style.display = "none";
+            successCard.style.display = "block";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            alert(resData.error || "Submission failed. Please try again.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Honest Review 💌";
+          }
+        } catch (err) {
+          alert("Network error. Please try again.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Honest Review 💌";
+        }
+      });
+    })();
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Rebel Review Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Review Your Order"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Rebel Review Page"
+    }
+  ]
+}
+{% endschema %}

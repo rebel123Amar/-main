@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Review Your Order — Rebel Gifts 💌</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #faf7f8;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .rebel-review-root {
+      min-height: 100vh;
+      background: radial-gradient(100% 60% at 50% 0%, #ffe4e6 0%, #fff1f2 35%, #faf7f8 100%);
+      padding: 24px 16px 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .rebel-container {
+      width: 100%;
+      max-width: 540px;
+    }
+
+    /* Top Brand Header */
+    .rebel-brand-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .rebel-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #fecdd3;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #e11d48;
+      box-shadow: 0 2px 10px rgba(225, 29, 72, 0.08);
+      margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+    }
+
+    .rebel-greeting-title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: #0f172a;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .rebel-greeting-subtitle {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    /* Main Card */
+    .rebel-card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 24px 20px;
+      box-shadow: 0 12px 36px -4px rgba(225, 29, 72, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+      border: 1px solid #ffe4e6;
+      position: relative;
+    }
+
+    @media (min-width: 480px) {
+      .rebel-card {
+        padding: 32px 28px;
+      }
+    }
+
+    /* Product Showcase */
+    .rebel-prod-banner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      background: #fff5f6;
+      border: 1px solid #fed7aa33;
+      border-radius: 16px;
+      margin-bottom: 24px;
+    }
+
+    .rebel-prod-img-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #fecdd3;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .rebel-prod-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rebel-prod-details {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rebel-prod-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .rebel-prod-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #059669;
+      background: #ecfdf5;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid #a7f3d0;
+    }
+
+    /* Section Block */
+    .rebel-field-section {
+      margin-bottom: 22px;
+    }
+
+    .rebel-field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    /* Interactive Stars */
+    .rebel-stars-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fafaf9;
+      border: 1px solid #f5f5f4;
+      border-radius: 18px;
+      padding: 16px 12px 14px;
+      margin-bottom: 22px;
+    }
+
+    .rebel-stars-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .rebel-star-btn {
+      background: none;
+      border: none;
+      font-size: 40px;
+      line-height: 1;
+      cursor: pointer;
+      color: #e2e8f0;
+      transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
+      user-select: none;
+      padding: 4px;
+      outline: none;
+    }
+
+    .rebel-star-btn:hover {
+      transform: scale(1.22);
+    }
+
+    .rebel-star-btn.is-active {
+      color: #f59e0b;
+      filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+    }
+
+    .rebel-star-feedback {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #f43f5e;
+    }
+
+    /* Recommend Pill Toggle */
+    .rebel-recommend-box {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .rebel-pill-btn {
+      flex: 1;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .rebel-pill-btn:hover {
+      border-color: #f43f5e;
+      background: #fff5f6;
+    }
+
+    .rebel-pill-btn.is-selected {
+      border-color: #f43f5e;
+      background: #ffe4e6;
+      color: #be123c;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.15);
+    }
+
+    /* Inputs & Textareas */
+    .rebel-input,
+    .rebel-textarea {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #0f172a;
+      background: #fafafa;
+      transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .rebel-input:focus,
+    .rebel-textarea:focus {
+      border-color: #f43f5e;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.12);
+    }
+
+    .rebel-input-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (min-width: 480px) {
+      .rebel-input-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Photo Upload Dropzone */
+    .rebel-dropzone {
+      border: 2px dashed #f472b6;
+      background: #fff5f7;
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .rebel-dropzone:hover {
+      background: #ffe4e6;
+      border-color: #e11d48;
+    }
+
+    .rebel-dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .rebel-dropzone-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .rebel-dropzone-text {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #be123c;
+      margin-bottom: 2px;
+    }
+
+    .rebel-dropzone-sub {
+      font-size: 12px;
+      color: #9f1239;
+      opacity: 0.8;
+    }
+
+    /* Upload Previews */
+    .rebel-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .rebel-preview-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #fbcfe8;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .rebel-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rebel-preview-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(15, 23, 42, 0.75);
+      color: #ffffff;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Submit Button */
+    .rebel-submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      color: #ffffff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px -4px rgba(225, 29, 72, 0.45);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      font-family: inherit;
+      margin-top: 8px;
+    }
+
+    .rebel-submit-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -4px rgba(225, 29, 72, 0.6);
+    }
+
+    /* Success Card */
+    .rebel-success-card {
+      display: none;
+      text-align: center;
+      padding: 36px 16px;
+    }
+
+    .rebel-success-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      animation: bounce 0.6s ease;
+    }
+
+    .rebel-success-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .rebel-success-text {
+      font-size: 14.5px;
+      color: #475569;
+      line-height: 1.6;
+      max-width: 400px;
+      margin: 0 auto 24px;
+    }
+
+    .rebel-store-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 14px 28px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="rebel-review-root">
+    <div class="rebel-container">
+      <!-- Top Brand Greeting -->
+      <div class="rebel-brand-header">
+        <div class="rebel-brand-badge">
+          <span>🎁</span>
+          <span>Rebel Gifts & Personalization</span>
+        </div>
+        <h1 class="rebel-greeting-title" id="greeting-name">
+          Heyyy! 💌
+        </h1>
+        <p class="rebel-greeting-subtitle">
+          Aapko apna Rebel Gifts order kaisa laga? 🥹❤️
+          <br />
+          Your honest review means the world to our gifting team! 🫶🏻
+        </p>
+      </div>
+
+      <!-- Card Body -->
+      <div class="rebel-card">
+        <div class="rebel-success-card" id="success-view">
+          <div class="rebel-success-icon">🥹❤️🎉</div>
+          <h2 class="rebel-success-title">Thank You So Much!</h2>
+          <p class="rebel-success-text">
+            Aapka honest review aur unboxing feedback successfully save ho gaya hai. Aapki khushi hi hamare liye sab kuch hai! 🫶🏻✨
+          </p>
+          <a href="#" class="rebel-store-btn" onclick="location.reload()">
+            <span>Review Another Item or Order 🛍️</span>
+          </a>
+        </div>
+
+        <form id="review-form">
+          <!-- Product Showcase -->
+          <div class="rebel-prod-banner">
+            <div class="rebel-prod-img-wrap">
+              <img
+                id="product-image"
+                src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300"
+                alt="Product"
+                class="rebel-prod-img"
+              />
+            </div>
+            <div class="rebel-prod-details">
+              <div class="rebel-prod-title" id="product-title">Personalized Spotify Acrylic Plaque</div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <span class="rebel-prod-badge" id="order-badge">
+                  <span>✓</span>
+                  <span id="order-badge-text">Order #1042 Verified Purchase</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1. Rating Stars -->
+          <div class="rebel-stars-wrapper">
+            <span class="rebel-field-label" style="margin-bottom: 4px;">
+              Aapko Gift Kaisa Laga? Rate Karein:
+            </span>
+            <div class="rebel-stars-row" id="star-row">
+              <button type="button" class="rebel-star-btn" data-val="1">★</button>
+              <button type="button" class="rebel-star-btn" data-val="2">★</button>
+              <button type="button" class="rebel-star-btn" data-val="3">★</button>
+              <button type="button" class="rebel-star-btn" data-val="4">★</button>
+              <button type="button" class="rebel-star-btn is-active" data-val="5">★</button>
+            </div>
+            <div class="rebel-star-feedback" id="star-feedback">
+              <span>🥹🌟❤️</span>
+              <span>Obsessed & Loved it!</span>
+            </div>
+          </div>
+
+          <!-- 2. Would you recommend to friends? -->
+          <div class="rebel-field-section">
+            <label class="rebel-field-label">
+              Would you recommend us to your friends? 🫶🏻
+            </label>
+            <div class="rebel-recommend-box">
+              <button type="button" class="rebel-pill-btn is-selected" id="rec-yes">
+                <span>Yes, absolutely! 🫶🏻</span>
+              </button>
+              <button type="button" class="rebel-pill-btn" id="rec-no">
+                <span>Maybe / Not sure</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. Review Body -->
+          <div class="rebel-field-section">
+            <label class="rebel-field-label" for="review-body">
+              Your Honest Review & Unboxing Experience 📝
+            </label>
+            <textarea
+              id="review-body"
+              class="rebel-textarea"
+              rows="4"
+              placeholder="Tell us what you loved about the print quality, finishing, packaging and delivery... 🥹❤️"
+              required
+            ></textarea>
+          </div>
+
+          <!-- 4. Photo & Media Upload -->
+          <div class="rebel-field-section">
+            <label class="rebel-field-label">
+              Unboxing Photos / Gift Pictures (Optional) 📸
+            </label>
+            <div class="rebel-dropzone">
+              <input type="file" id="photo-upload" accept="image/*" multiple />
+              <div class="rebel-dropzone-icon">📸</div>
+              <div class="rebel-dropzone-text" id="drop-text">
+                Tap here to add photos from gallery or camera
+              </div>
+              <div class="rebel-dropzone-sub">
+                Show the gift unboxing or finishing (up to 8 photos)
+              </div>
+            </div>
+            <div class="rebel-preview-grid" id="preview-grid"></div>
+          </div>
+
+          <!-- 5. Customer Details -->
+          <div class="rebel-input-grid">
+            <div>
+              <label class="rebel-field-label" for="cust-name">Your Name</label>
+              <input id="cust-name" type="text" class="rebel-input" placeholder="e.g. Rahul Sharma" required />
+            </div>
+            <div>
+              <label class="rebel-field-label" for="cust-email">Email Address</label>
+              <input id="cust-email" type="email" class="rebel-input" placeholder="e.g. rahul@example.com" required />
+            </div>
+          </div>
+
+          <!-- Submit CTA -->
+          <button type="submit" class="rebel-submit-btn" id="submit-btn">
+            <span>Submit Honest Review 💌</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "Pooja";
+      const product = urlParams.get("product") || "Personalized Spotify Acrylic Plaque";
+      const img = urlParams.get("img");
+      const order = urlParams.get("order") || urlParams.get("order_name") || "#1042";
+
+      if (name) {
+        document.getElementById("greeting-name").textContent = `Heyyy ${name.split(" ")[0]}! 💌`;
+        document.getElementById("cust-name").value = name;
+        document.getElementById("cust-email").value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("product-title").textContent = product;
+      if (img) document.getElementById("product-image").src = img;
+      if (order) document.getElementById("order-badge-text").textContent = `Order ${order} Verified Purchase`;
+
+      // Star interaction
+      let rating = 5;
+      const starBtns = document.querySelectorAll(".rebel-star-btn");
+      const feedback = document.getElementById("star-feedback");
+
+      const labels = {
+        1: { text: "Disappointed", emoji: "😞" },
+        2: { text: "Could be better", emoji: "😐" },
+        3: { text: "Good gift", emoji: "🙂" },
+        4: { text: "Loved it!", emoji: "😊💖" },
+        5: { text: "Obsessed & Loved it!", emoji: "🥹🌟❤️" }
+      };
+
+      function setRating(val) {
+        starBtns.forEach(btn => {
+          const v = parseInt(btn.dataset.val);
+          btn.classList.toggle("is-active", v <= val);
+        });
+        feedback.innerHTML = `<span>${labels[val].emoji}</span> <span>${labels[val].text}</span>`;
+      }
+
+      starBtns.forEach(btn => {
+        const val = parseInt(btn.dataset.val);
+        btn.addEventListener("mouseenter", () => setRating(val));
+        btn.addEventListener("mouseleave", () => setRating(rating));
+        btn.addEventListener("click", () => {
+          rating = val;
+          setRating(val);
+        });
+      });
+
+      // Recommend toggle
+      const recYes = document.getElementById("rec-yes");
+      const recNo = document.getElementById("rec-no");
+      recYes.addEventListener("click", () => {
+        recYes.classList.add("is-selected");
+        recNo.classList.remove("is-selected");
+      });
+      recNo.addEventListener("click", () => {
+        recNo.classList.add("is-selected");
+        recYes.classList.remove("is-selected");
+      });
+
+      // Local photo preview demo
+      const upload = document.getElementById("photo-upload");
+      const grid = document.getElementById("preview-grid");
+      upload.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const div = document.createElement("div");
+            div.className = "rebel-preview-item";
+            div.innerHTML = `<img src="${ev.target.result}" /><button type="button" class="rebel-preview-del">✕</button>`;
+            div.querySelector("button").onclick = () => div.remove();
+            grid.appendChild(div);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+
+      // Form submit
+      const form = document.getElementById("review-form");
+      const successView = document.getElementById("success-view");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Submitting Review... ⏳";
+        setTimeout(() => {
+          form.style.display = "none";
+          successView.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 800);
+      });
+    })();
+  </script>
+</body>
+</html>
