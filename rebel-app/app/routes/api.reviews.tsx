@@ -216,8 +216,17 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
+  // Normalize shop domain so reviews are always tied to the active Shopify store
+  let resolvedShop = (shop || "").trim().toLowerCase();
+  if (!resolvedShop || !resolvedShop.includes(".myshopify.com") || resolvedShop.includes("rebelgifts")) {
+    const activeSession = await prisma.session.findFirst({
+      orderBy: { id: "desc" },
+    });
+    resolvedShop = activeSession?.shop || "f83czm-2f.myshopify.com";
+  }
+
   const settings = await prisma.appSettings.findUnique({
-    where: { shopDomain: shop },
+    where: { shopDomain: resolvedShop },
   });
 
   const status = settings?.autoApproveReviews ? "approved" : "pending";
@@ -235,7 +244,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   await prisma.review.create({
     data: {
-      shopDomain: shop,
+      shopDomain: resolvedShop,
       productId: String(productId),
       productHandle: productHandle || "",
       authorName: authorName.substring(0, 100),

@@ -17,7 +17,9 @@ export const meta: MetaFunction = () => {
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
-  const shop = url.searchParams.get("shop") || "rebelgifts.in";
+  let shop = url.searchParams.get("shop") || "f83czm-2f.myshopify.com";
+  if (shop === "rebelgifts.in") shop = "f83czm-2f.myshopify.com";
+  const storeUrl = "https://rebelgifts-india.myshopify.com";
   const orderId =
     url.searchParams.get("order_id") ||
     url.searchParams.get("orderId") ||
@@ -59,6 +61,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   return json({
     shop,
+    storeUrl,
     orderId,
     orderName: orderName || (orderId ? `#${orderId}` : "Your Gift Order"),
     customerName,
@@ -704,7 +707,7 @@ export default function ReviewPage() {
                 khushi hi hamare liye sab kuch hai! 🫶🏻✨
               </p>
               <a
-                href={`https://${data.shop}`}
+                href={data.storeUrl || `https://${data.shop}`}
                 target="_blank"
                 rel="noreferrer"
                 className="rebel-store-btn"

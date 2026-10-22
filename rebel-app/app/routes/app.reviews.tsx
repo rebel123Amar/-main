@@ -27,8 +27,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const page = parseInt(url.searchParams.get("page") || "1");
   const statusFilter = url.searchParams.get("status") || "all";
 
+  // Match any Rebel Gifts domain variant so no review is missed
+  const knownDomains = Array.from(
+    new Set([
+      session.shop,
+      "f83czm-2f.myshopify.com",
+      "rebelgifts-india.myshopify.com",
+      "rebelgifts.in",
+    ])
+  );
+
   const where = {
-    shopDomain: session.shop,
+    shopDomain: { in: knownDomains },
     ...(statusFilter !== "all" ? { status: statusFilter } : {}),
   };
 
@@ -60,7 +70,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (!reviewId) return json({ error: "Missing reviewId" }, { status: 400 });
 
   const review = await prisma.review.findFirst({
-    where: { id: reviewId, shopDomain: session.shop },
+    where: { id: reviewId },
   });
   if (!review) return json({ error: "Review not found" }, { status: 404 });
 

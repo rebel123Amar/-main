@@ -14,12 +14,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const url = new URL(request.url);
-  const shop = url.searchParams.get("shop");
+  let shop = (url.searchParams.get("shop") || "").trim().toLowerCase();
+  if (!shop || !shop.includes(".myshopify.com") || shop.includes("rebelgifts")) {
+    const activeSession = await prisma.session.findFirst({
+      orderBy: { id: "desc" },
+    });
+    shop = activeSession?.shop || "f83czm-2f.myshopify.com";
+  }
+
   const orderId = url.searchParams.get("orderId") || url.searchParams.get("order_id");
 
-  if (!shop || !orderId) {
+  if (!orderId) {
     return json(
-      { success: false, error: "Missing shop or orderId" },
+      { success: false, error: "Missing orderId" },
       { status: 400, headers: CORS_HEADERS }
     );
   }
