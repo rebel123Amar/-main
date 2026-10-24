@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Customer Unboxing Wall & Review — UGC Social Edition 📸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    .ugc-root {
+      min-height: 100vh;
+      background: 
+        radial-gradient(circle at 10% 10%, rgba(244, 63, 94, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
+        #0b0f19;
+      padding: 24px 16px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ugc-container {
+      width: 100%;
+      max-width: 530px;
+    }
+
+    /* Top Social Proof Bar */
+    .ugc-trust-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      padding: 6px 14px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+    }
+
+    .ugc-trust-avatars {
+      display: flex;
+      align-items: center;
+    }
+
+    .ugc-trust-avatars img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid #0f172a;
+      margin-left: -6px;
+    }
+
+    .ugc-trust-avatars img:first-child {
+      margin-left: 0;
+    }
+
+    .ugc-trust-txt {
+      font-size: 12px;
+      font-weight: 700;
+      color: #e2e8f0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .ugc-trust-rating {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fbbf24;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    /* Header */
+    .ugc-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .ugc-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #ffffff 40%, #f472b6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .ugc-subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+    }
+
+    /* Live UGC Gallery Ticker */
+    .ugc-ticker-wrap {
+      margin-bottom: 20px;
+    }
+
+    .ugc-ticker-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f43f5e;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ugc-ticker-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      scrollbar-width: none;
+    }
+
+    .ugc-ticker-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .ugc-ticker-card {
+      flex-shrink: 0;
+      width: 110px;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ugc-ticker-card img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .ugc-ticker-card .ugc-badge-pill {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(4px);
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 2px 4px;
+      border-radius: 6px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main Form Card */
+    .ugc-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 26px;
+      padding: 26px 20px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 480px) {
+      .ugc-card {
+        padding: 32px 28px;
+      }
+    }
+
+    /* Product Ribbon */
+    .ugc-prod-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-bottom: 22px;
+    }
+
+    .ugc-prod-img {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ugc-prod-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .ugc-verified-tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #38bdf8;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Star Rating */
+    .ugc-rating-hero {
+      text-align: center;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px 12px;
+      margin-bottom: 22px;
+    }
+
+    .ugc-rating-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .ugc-stars {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .ugc-star-btn {
+      background: none;
+      border: none;
+      font-size: 38px;
+      color: #334155;
+      cursor: pointer;
+      line-height: 1;
+      transition: transform 0.18s, color 0.15s;
+      outline: none;
+    }
+
+    .ugc-star-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .ugc-star-btn.is-active {
+      color: #fbbf24;
+      text-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+    }
+
+    .ugc-feedback-txt {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #f43f5e;
+    }
+
+    /* Big Highlight Media Upload */
+    .ugc-upload-hero {
+      border: 2px dashed #ec4899;
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(139, 92, 246, 0.08));
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 10px;
+      transition: all 0.2s;
+    }
+
+    .ugc-upload-hero:hover {
+      border-color: #f43f5e;
+      background: rgba(236, 72, 153, 0.15);
+    }
+
+    .ugc-upload-hero input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .ugc-upload-badge {
+      display: inline-block;
+      background: #f43f5e;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .ugc-upload-heading {
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .ugc-upload-sub {
+      font-size: 12px;
+      color: #cbd5e1;
+    }
+
+    .ugc-previews {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .ugc-thumb {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .ugc-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .ugc-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #ffffff;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* Text & Inputs */
+    .ugc-field {
+      margin-bottom: 18px;
+    }
+
+    .ugc-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .ugc-textarea,
+    .ugc-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 13px 15px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .ugc-textarea:focus,
+    .ugc-input:focus {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+    }
+
+    .ugc-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 480px) {
+      .ugc-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Social Share Box */
+    .ugc-insta-banner {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(139, 92, 246, 0.15));
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .ugc-insta-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .ugc-insta-txt {
+      font-size: 12px;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+
+    .ugc-insta-txt b {
+      color: #f472b6;
+    }
+
+    /* Submit CTA */
+    .ugc-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #8b5cf6 100%);
+      color: #ffffff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.5);
+      transition: all 0.2s;
+    }
+
+    .ugc-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px -5px rgba(244, 63, 94, 0.7);
+    }
+
+    /* Success Card */
+    .ugc-success {
+      display: none;
+      text-align: center;
+      padding: 30px 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ugc-root">
+    <div class="ugc-container">
+      
+      <!-- Top Social Proof -->
+      <div class="ugc-trust-bar">
+        <div class="ugc-trust-avatars">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" alt="Customer" />
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&auto=format&fit=crop&q=80" alt="Customer" />
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&auto=format&fit=crop&q=80" alt="Customer" />
+          <div class="ugc-trust-txt">
+            14,200+ Verified Unboxings
+          </div>
+        </div>
+        <div class="ugc-trust-rating">
+          <span>★ 4.9 / 5.0</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="ugc-header">
+        <h1 class="ugc-title" id="greeting-name">Show Your Unboxing Moment!</h1>
+        <p class="ugc-subtitle">Your photos & thoughts inspire thousands of sweet surprise gifts everyday.</p>
+      </div>
+
+      <!-- Live Customer Photo Inspiration Reel -->
+      <div class="ugc-ticker-wrap">
+        <div class="ugc-ticker-label">
+          <span>✨</span>
+          <span>Recent Unboxing Uploads by Customers</span>
+        </div>
+        <div class="ugc-ticker-scroll">
+          <div class="ugc-ticker-card">
+            <img src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200" alt="Review 1" />
+            <div class="ugc-badge-pill">Rohit • 5★</div>
+          </div>
+          <div class="ugc-ticker-card">
+            <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=200" alt="Review 2" />
+            <div class="ugc-badge-pill">Sneha • 5★</div>
+          </div>
+          <div class="ugc-ticker-card">
+            <img src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=200" alt="Review 3" />
+            <div class="ugc-badge-pill">Kabir • 5★</div>
+          </div>
+          <div class="ugc-ticker-card">
+            <img src="https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=200" alt="Review 4" />
+            <div class="ugc-badge-pill">Divya • 5★</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Form -->
+      <div class="ugc-card">
+        
+        <div class="ugc-success" id="success-view">
+          <div style="font-size:52px; margin-bottom:12px;">🌟💖✨</div>
+          <h2 style="font-family:'Outfit',sans-serif; font-size:24px; color:#ffffff; margin-bottom:8px;">You're on the Wall of Love!</h2>
+          <p style="color:#94a3b8; font-size:14px; line-height:1.6; max-width:380px; margin:0 auto 20px;">
+            Your photos and honest review are now uploaded to our unboxing feed! Thank you for being a wonderful part of the Rebel family.
+          </p>
+          <button onclick="location.reload()" style="background:#1e293b; color:#ffffff; border:1px solid rgba(255,255,255,0.2); padding:12px 24px; border-radius:999px; font-weight:700; cursor:pointer;">
+            Upload for Another Order
+          </button>
+        </div>
+
+        <form id="review-form">
+          <!-- Product Row -->
+          <div class="ugc-prod-bar">
+            <img id="product-image" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" alt="Product" class="ugc-prod-img" />
+            <div style="flex:1; min-width:0;">
+              <div class="ugc-prod-title" id="product-title">Personalized Spotify Acrylic Plaque</div>
+              <div class="ugc-verified-tag" id="order-badge">
+                <span>✓</span>
+                <span id="order-badge-text">Order #1042 Verified Buyer</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Star Rating -->
+          <div class="ugc-rating-hero">
+            <span class="ugc-rating-label">How would you rate this gift?</span>
+            <div class="ugc-stars">
+              <button type="button" class="ugc-star-btn" data-val="1">★</button>
+              <button type="button" class="ugc-star-btn" data-val="2">★</button>
+              <button type="button" class="ugc-star-btn" data-val="3">★</button>
+              <button type="button" class="ugc-star-btn" data-val="4">★</button>
+              <button type="button" class="ugc-star-btn is-active" data-val="5">★</button>
+            </div>
+            <div class="ugc-feedback-txt" id="feedback-txt">
+              🌟 Loved it! 100% 5-Star Gift
+            </div>
+          </div>
+
+          <!-- Media Upload Hero -->
+          <div class="ugc-field">
+            <div class="ugc-upload-hero">
+              <input type="file" id="photo-upload" accept="image/*" multiple />
+              <div class="ugc-upload-badge">🔥 Most Helpful For Buyers</div>
+              <div class="ugc-upload-heading">📸 Upload Unboxing Photos & Videos</div>
+              <div class="ugc-upload-sub">Show how the acrylic shines under lighting & packaging</div>
+            </div>
+            <div class="ugc-previews" id="preview-grid"></div>
+          </div>
+
+          <!-- Review Note -->
+          <div class="ugc-field">
+            <label class="ugc-label">Write your experience</label>
+            <textarea class="ugc-textarea" id="review-body" rows="3" placeholder="Tell everyone about the print resolution, packaging, and the reaction of the person who opened it! 🥹❤️" required></textarea>
+          </div>
+
+          <!-- Name & Email -->
+          <div class="ugc-grid-2">
+            <div>
+              <label class="ugc-label">Your Name</label>
+              <input class="ugc-input" id="cust-name" type="text" placeholder="e.g. Sahil Kapoor" required />
+            </div>
+            <div>
+              <label class="ugc-label">Email</label>
+              <input class="ugc-input" id="cust-email" type="email" placeholder="e.g. sahil@gmail.com" required />
+            </div>
+          </div>
+
+          <!-- Instagram Tag Banner -->
+          <div class="ugc-insta-banner">
+            <div class="ugc-insta-icon">📸</div>
+            <div class="ugc-insta-txt">
+              Tag <b>@rebelgifts</b> in your Instagram unboxing story to get entered into our <b>₹2,500 Monthly Hamper Giveaway</b>!
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="ugc-submit" id="submit-btn">
+            <span>Post Review to Wall of Love 💖</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "Sahil";
+      const product = urlParams.get("product") || "Personalized Spotify Acrylic Plaque";
+      const img = urlParams.get("img");
+      const order = urlParams.get("order") || urlParams.get("order_name") || "#1042";
+
+      if (name) {
+        document.getElementById("greeting-name").textContent = `Show Your Unboxing, ${name.split(" ")[0]}! 📸`;
+        document.getElementById("cust-name").value = name;
+        document.getElementById("cust-email").value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("product-title").textContent = product;
+      if (img) document.getElementById("product-image").src = img;
+      if (order) document.getElementById("order-badge-text").textContent = `Order ${order} Verified Buyer`;
+
+      // Stars
+      let rating = 5;
+      const stars = document.querySelectorAll(".ugc-star-btn");
+      const feedback = document.getElementById("feedback-txt");
+
+      const feedbacks = {
+        1: "Disappointed with quality",
+        2: "Could be improved",
+        3: "Decent standard finish",
+        4: "Very good gift!",
+        5: "🌟 Loved it! 100% 5-Star Gift"
+      };
+
+      function setRating(val) {
+        stars.forEach(btn => {
+          const v = parseInt(btn.dataset.val);
+          btn.classList.toggle("is-active", v <= val);
+        });
+        feedback.textContent = feedbacks[val];
+      }
+
+      stars.forEach(btn => {
+        const val = parseInt(btn.dataset.val);
+        btn.addEventListener("mouseenter", () => setRating(val));
+        btn.addEventListener("mouseleave", () => setRating(rating));
+        btn.addEventListener("click", () => {
+          rating = val;
+          setRating(val);
+        });
+      });
+
+      // Photo upload
+      const upload = document.getElementById("photo-upload");
+      const grid = document.getElementById("preview-grid");
+      upload.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const div = document.createElement("div");
+            div.className = "ugc-thumb";
+            div.innerHTML = `<img src="${ev.target.result}" /><button type="button" class="ugc-del">✕</button>`;
+            div.querySelector("button").onclick = () => div.remove();
+            grid.appendChild(div);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+
+      // Submit
+      const form = document.getElementById("review-form");
+      const successView = document.getElementById("success-view");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Posting to Wall of Love... 📸";
+        setTimeout(() => {
+          form.style.display = "none";
+          successView.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 700);
+      });
+    })();
+  </script>
+</body>
+</html>

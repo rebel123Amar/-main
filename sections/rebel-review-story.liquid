@@ -1,0 +1,170 @@
+{% comment %}
+  Rebel Gifts — Option 3: Interactive Multi-Step Story & Reward Section
+{% endcomment %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{% style %}
+  #rebel-rev-story-{{ sec_id }} {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fef3c7 50%, #f0fdf4 100%);
+    padding: 36px 16px 80px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .story-wrap {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .story-card-sec {
+    background: #ffffff;
+    border-radius: 26px;
+    padding: 28px 22px;
+    border: 2px solid #fce7f3;
+    box-shadow: 0 16px 40px -10px rgba(236, 72, 153, 0.15);
+  }
+
+  .story-emoji-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 14px 0 20px;
+  }
+
+  .story-emoji-btn-sec {
+    background: #fff1f2;
+    border: 2px solid #fecdd3;
+    border-radius: 16px;
+    padding: 10px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 24px;
+    transition: all 0.2s;
+  }
+
+  .story-emoji-btn-sec.is-active {
+    background: #ec4899;
+    border-color: #db2777;
+    transform: scale(1.1);
+  }
+
+  .story-btn-pink {
+    width: 100%;
+    background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+    color: #ffffff;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px -3px rgba(236, 72, 153, 0.4);
+    margin-top: 14px;
+  }
+{% endstyle %}
+
+<div id="rebel-rev-story-{{ sec_id }}">
+  <div class="story-wrap">
+    <div class="story-card-sec">
+      <div id="story-success-{{ sec_id }}" style="display:none; text-align:center; padding:24px 10px;">
+        <div style="font-size:46px; margin-bottom:8px;">🎉🎁🎈</div>
+        <h2 style="font-size:22px; color:#831843; margin-bottom:8px;">Thank You So Much!</h2>
+        <p style="font-size:14px; color:#475569; margin-bottom:14px;">Here is your ₹150 off reward code:</p>
+        <div style="background:#fef3c7; border:2px dashed #f59e0b; padding:12px; border-radius:14px; font-weight:800; font-size:22px; color:#b45309; display:inline-block; margin-bottom:16px;">
+          GIFTLOVE150
+        </div>
+      </div>
+
+      <div id="story-form-wrap-{{ sec_id }}">
+        <div style="background:#fef3c7; border:1px solid #fcd34d; color:#92400e; padding:8px 12px; border-radius:12px; font-size:12.5px; font-weight:700; margin-bottom:16px;">
+          🎁 Complete review to unlock ₹150 Voucher!
+        </div>
+
+        <h2 style="font-size:22px; color:#831843; margin-bottom:4px;" id="story-name-{{ sec_id }}">How was your gift experience? 💖</h2>
+        <p style="font-size:13.5px; color:#64748b; margin-bottom:12px;">Pick your reaction:</p>
+
+        <div class="story-emoji-row" id="story-emojis-{{ sec_id }}">
+          <div class="story-emoji-btn-sec" data-val="1">😢</div>
+          <div class="story-emoji-btn-sec" data-val="2">😐</div>
+          <div class="story-emoji-btn-sec" data-val="3">🙂</div>
+          <div class="story-emoji-btn-sec" data-val="4">😍</div>
+          <div class="story-emoji-btn-sec is-active" data-val="5">🤩</div>
+        </div>
+
+        <label style="font-size:13px; font-weight:700; color:#1e1b4b; display:block; margin-bottom:6px;">Tell the story behind your gift 💌</label>
+        <textarea id="story-body-{{ sec_id }}" rows="3" style="width:100%; border:2px solid #f1f5f9; background:#f8fafc; border-radius:14px; padding:12px; font-size:14px; outline:none; box-sizing:border-box; margin-bottom:14px;" placeholder="What was their reaction when they opened the unboxing package?"></textarea>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+          <input id="story-cust-name-{{ sec_id }}" type="text" placeholder="Your Name" style="border:2px solid #f1f5f9; background:#f8fafc; border-radius:12px; padding:10px 12px; font-size:13px; width:100%; box-sizing:border-box;" required />
+          <input id="story-cust-email-{{ sec_id }}" type="email" placeholder="Email" style="border:2px solid #f1f5f9; background:#f8fafc; border-radius:12px; padding:10px 12px; font-size:13px; width:100%; box-sizing:border-box;" required />
+        </div>
+
+        <button type="button" class="story-btn-pink" id="story-submit-btn-{{ sec_id }}">
+          Submit & Claim ₹150 Voucher 💌
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const sec = "{{ sec_id }}";
+      const appUrl = "{{ app_url }}";
+      const shop = "{{ current_shop }}";
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "";
+      if (name) {
+        document.getElementById("story-name-" + sec).textContent = `How was your gift experience, ${name.split(" ")[0]}? 💖`;
+        document.getElementById("story-cust-name-" + sec).value = name;
+        document.getElementById("story-cust-email-" + sec).value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+
+      let rating = 5;
+      const emojis = document.querySelectorAll("#story-emojis-" + sec + " .story-emoji-btn-sec");
+      emojis.forEach(btn => {
+        btn.onclick = () => {
+          emojis.forEach(b => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          rating = parseInt(btn.dataset.val);
+        };
+      });
+
+      document.getElementById("story-submit-btn-" + sec).onclick = async () => {
+        try {
+          await fetch(appUrl + "/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop,
+              authorName: document.getElementById("story-cust-name-" + sec).value,
+              authorEmail: document.getElementById("story-cust-email-" + sec).value,
+              rating,
+              title: "Story Review & Unboxing",
+              reviewBody: document.getElementById("story-body-" + sec).value
+            })
+          });
+        } catch(err) {}
+
+        document.getElementById("story-form-wrap-" + sec).style.display = "none";
+        document.getElementById("story-success-" + sec).style.display = "block";
+      };
+    })();
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Rebel Review (Story Flow)",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Rebel Review (Interactive Story & Coupon)"
+    }
+  ]
+}
+{% endschema %}

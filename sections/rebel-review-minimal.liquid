@@ -1,0 +1,190 @@
+{% comment %}
+  Rebel Gifts — Option 2: Minimal Editorial Studio Edition Section
+{% endcomment %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{% style %}
+  #rebel-rev-min-{{ sec_id }} {
+    background: #f7f6f2;
+    padding: 40px 16px 80px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1c1917;
+  }
+
+  .min-wrap {
+    width: 100%;
+    max-width: 530px;
+  }
+
+  .min-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px 24px;
+    border: 1px solid #e7e5e4;
+    box-shadow: 0 10px 30px -10px rgba(28, 25, 23, 0.06);
+  }
+
+  .min-tiles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 12px 0 16px;
+  }
+
+  .min-tile {
+    background: #fafaf9;
+    border: 1.5px solid #e7e5e4;
+    border-radius: 12px;
+    padding: 12px 0;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .min-tile.is-active {
+    background: #1c1917;
+    border-color: #1c1917;
+    color: #ffffff;
+  }
+
+  .min-input, .min-textarea {
+    width: 100%;
+    background: #fafaf9;
+    border: 1px solid #e7e5e4;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #1c1917;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+  }
+
+  .min-input:focus, .min-textarea:focus {
+    background: #ffffff;
+    border-color: #1c1917;
+  }
+
+  .min-submit {
+    width: 100%;
+    background: #1c1917;
+    color: #ffffff;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+{% endstyle %}
+
+<div id="rebel-rev-min-{{ sec_id }}">
+  <div class="min-wrap">
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:700; color:#78716c; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">● Rebel Studio Review</div>
+      <h1 style="font-size:26px; font-weight:700; margin:0 0 6px;" id="min-name-{{ sec_id }}">Review Your Order</h1>
+      <p style="font-size:14px; color:#78716c; margin:0;">Share your honest impression on finishing and print clarity.</p>
+    </div>
+
+    <div class="min-card">
+      <div id="min-success-{{ sec_id }}" style="display:none; text-align:center; padding:30px 10px;">
+        <div style="font-size:32px; margin-bottom:8px;">✓</div>
+        <h2 style="font-size:20px; font-weight:700; margin-bottom:8px;">Feedback Published</h2>
+        <p style="color:#78716c; font-size:14px;">Your review has been verified and recorded.</p>
+      </div>
+
+      <form id="min-form-{{ sec_id }}">
+        <div style="font-size:13px; font-weight:700; color:#78716c; text-transform:uppercase;">Overall Score</div>
+        <div class="min-tiles" id="min-tiles-{{ sec_id }}">
+          <div class="min-tile" data-val="1">1 ★</div>
+          <div class="min-tile" data-val="2">2 ★</div>
+          <div class="min-tile" data-val="3">3 ★</div>
+          <div class="min-tile" data-val="4">4 ★</div>
+          <div class="min-tile is-active" data-val="5">5 ★</div>
+        </div>
+
+        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Your Review</label>
+        <textarea class="min-textarea" id="min-body-{{ sec_id }}" rows="4" placeholder="How was the print quality, acrylic cut, and delivery speed?" required></textarea>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div>
+            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Your Name</label>
+            <input class="min-input" id="min-cust-name-{{ sec_id }}" type="text" placeholder="Name" required />
+          </div>
+          <div>
+            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">Email</label>
+            <input class="min-input" id="min-cust-email-{{ sec_id }}" type="email" placeholder="Email" required />
+          </div>
+        </div>
+
+        <button type="submit" class="min-submit" id="min-btn-{{ sec_id }}">Publish Review →</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const sec = "{{ sec_id }}";
+      const appUrl = "{{ app_url }}";
+      const shop = "{{ current_shop }}";
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "";
+      if (name) {
+        document.getElementById("min-name-" + sec).textContent = `Reviewing as ${name}`;
+        document.getElementById("min-cust-name-" + sec).value = name;
+        document.getElementById("min-cust-email-" + sec).value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+
+      let rating = 5;
+      const tiles = document.querySelectorAll("#min-tiles-" + sec + " .min-tile");
+      tiles.forEach(t => {
+        t.onclick = () => {
+          tiles.forEach(el => el.classList.remove("is-active"));
+          t.classList.add("is-active");
+          rating = parseInt(t.dataset.val);
+        };
+      });
+
+      const form = document.getElementById("min-form-" + sec);
+      const success = document.getElementById("min-success-" + sec);
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await fetch(appUrl + "/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop,
+              authorName: document.getElementById("min-cust-name-" + sec).value,
+              authorEmail: document.getElementById("min-cust-email-" + sec).value,
+              rating,
+              title: "Verified Studio Review",
+              reviewBody: document.getElementById("min-body-" + sec).value
+            })
+          });
+        } catch(err) {}
+        form.style.display = "none";
+        success.style.display = "block";
+      };
+    })();
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Rebel Review (Minimal)",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Rebel Review (Minimal Editorial)"
+    }
+  ]
+}
+{% endschema %}

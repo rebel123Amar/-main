@@ -1,0 +1,181 @@
+{% comment %}
+  Rebel Gifts — Option 4: UGC Social Proof & Wall of Love Media Section
+{% endcomment %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{% style %}
+  #rebel-rev-ugc-{{ sec_id }} {
+    background: 
+      radial-gradient(circle at 10% 10%, rgba(244, 63, 94, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.18) 0%, transparent 45%),
+      #0b0f19;
+    padding: 36px 16px 80px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f8fafc;
+  }
+
+  .ugc-sec-wrap {
+    width: 100%;
+    max-width: 530px;
+  }
+
+  .ugc-sec-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 26px;
+    padding: 26px 20px;
+    backdrop-filter: blur(20px);
+  }
+
+  .ugc-sec-stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .ugc-sec-star-btn {
+    background: none;
+    border: none;
+    font-size: 36px;
+    color: #334155;
+    cursor: pointer;
+    line-height: 1;
+    transition: transform 0.15s;
+  }
+
+  .ugc-sec-star-btn.is-active {
+    color: #fbbf24;
+    text-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
+  }
+
+  .ugc-sec-input, .ugc-sec-textarea {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #ffffff;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    margin-bottom: 14px;
+  }
+
+  .ugc-sec-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 15.5px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+{% endstyle %}
+
+<div id="rebel-rev-ugc-{{ sec_id }}">
+  <div class="ugc-sec-wrap">
+    <div style="text-align:center; margin-bottom:20px;">
+      <h1 style="font-size:26px; font-weight:800; margin:0 0 6px;" id="ugc-title-{{ sec_id }}">Show Your Unboxing Moment! 📸</h1>
+      <p style="font-size:14px; color:#94a3b8; margin:0;">Join 14,200+ verified customer reviews</p>
+    </div>
+
+    <div class="ugc-sec-card">
+      <div id="ugc-success-{{ sec_id }}" style="display:none; text-align:center; padding:30px 10px;">
+        <div style="font-size:48px; margin-bottom:10px;">🌟💖📸</div>
+        <h2 style="font-size:22px; color:#ffffff; margin-bottom:8px;">You're on the Wall of Love!</h2>
+        <p style="color:#94a3b8; font-size:14px;">Your review has been verified and posted.</p>
+      </div>
+
+      <form id="ugc-form-{{ sec_id }}">
+        <div class="ugc-sec-stars" id="ugc-stars-{{ sec_id }}">
+          <button type="button" class="ugc-sec-star-btn" data-val="1">★</button>
+          <button type="button" class="ugc-sec-star-btn" data-val="2">★</button>
+          <button type="button" class="ugc-sec-star-btn" data-val="3">★</button>
+          <button type="button" class="ugc-sec-star-btn" data-val="4">★</button>
+          <button type="button" class="ugc-sec-star-btn is-active" data-val="5">★</button>
+        </div>
+
+        <label style="font-size:13px; font-weight:700; color:#e2e8f0; display:block; margin-bottom:6px;">Your Unboxing Experience</label>
+        <textarea class="ugc-sec-textarea" id="ugc-body-{{ sec_id }}" rows="3" placeholder="Tell everyone how the acrylic plaque looked in person!" required></textarea>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <input class="ugc-sec-input" id="ugc-cust-name-{{ sec_id }}" type="text" placeholder="Name" required />
+          <input class="ugc-sec-input" id="ugc-cust-email-{{ sec_id }}" type="email" placeholder="Email" required />
+        </div>
+
+        <button type="submit" class="ugc-sec-submit" id="ugc-btn-{{ sec_id }}">
+          Post Review to Wall of Love 💖
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const sec = "{{ sec_id }}";
+      const appUrl = "{{ app_url }}";
+      const shop = "{{ current_shop }}";
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "";
+      if (name) {
+        document.getElementById("ugc-title-" + sec).textContent = `Show Your Unboxing, ${name.split(" ")[0]}! 📸`;
+        document.getElementById("ugc-cust-name-" + sec).value = name;
+        document.getElementById("ugc-cust-email-" + sec).value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+
+      let rating = 5;
+      const stars = document.querySelectorAll("#ugc-stars-" + sec + " .ugc-sec-star-btn");
+      stars.forEach(btn => {
+        btn.onclick = () => {
+          stars.forEach(b => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          rating = parseInt(btn.dataset.val);
+        };
+      });
+
+      const form = document.getElementById("ugc-form-" + sec);
+      const success = document.getElementById("ugc-success-" + sec);
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        try {
+          await fetch(appUrl + "/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop,
+              authorName: document.getElementById("ugc-cust-name-" + sec).value,
+              authorEmail: document.getElementById("ugc-cust-email-" + sec).value,
+              rating,
+              title: "Wall of Love UGC Review",
+              reviewBody: document.getElementById("ugc-body-" + sec).value
+            })
+          });
+        } catch(err) {}
+        form.style.display = "none";
+        success.style.display = "block";
+      };
+    })();
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Rebel Review (UGC Wall)",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Rebel Review (UGC Social Wall)"
+    }
+  ]
+}
+{% endschema %}

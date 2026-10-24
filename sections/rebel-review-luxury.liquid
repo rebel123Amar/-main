@@ -1,0 +1,416 @@
+{% comment %}
+  Rebel Gifts — Option 1: Midnight Luxury & Gold Edition Section
+  Allows customers to review their delivered order from WhatsApp link
+{% endcomment %}
+
+{%- assign sec_id = section.id | replace: '_', '' | downcase -%}
+{%- assign app_url = "https://main-pink-phi.vercel.app" -%}
+{%- assign current_shop = shop.permanent_domain | default: shop.domain -%}
+
+{% style %}
+  #rebel-rev-lux-{{ sec_id }} {
+    background: 
+      radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.18) 0%, transparent 55%),
+      radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.1) 0%, transparent 40%),
+      #070b14;
+    padding: 40px 16px 80px;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f1f5f9;
+  }
+
+  .lux-wrap {
+    width: 100%;
+    max-width: 530px;
+  }
+
+  .lux-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .lux-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.05));
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fbbf24;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .lux-title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #ffffff;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .lux-subtitle {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .lux-card {
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 26px;
+    padding: 26px 20px;
+    border: 1px solid rgba(245, 158, 11, 0.22);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.1);
+  }
+
+  @media (min-width: 480px) {
+    .lux-card {
+      padding: 34px 28px;
+    }
+  }
+
+  .lux-prod {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 18px;
+    margin-bottom: 24px;
+  }
+
+  .lux-prod-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #020617;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    flex-shrink: 0;
+  }
+
+  .lux-prod-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .lux-order-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .lux-stars-box {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .lux-stars-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .lux-star-btn {
+    background: none;
+    border: none;
+    font-size: 38px;
+    line-height: 1;
+    cursor: pointer;
+    color: #334155;
+    transition: all 0.18s ease;
+    padding: 2px;
+    outline: none;
+  }
+
+  .lux-star-btn:hover {
+    transform: scale(1.25);
+  }
+
+  .lux-star-btn.is-active {
+    color: #fbbf24;
+    text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+  }
+
+  .lux-star-sentiment {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+
+  .lux-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .lux-textarea,
+  .lux-input {
+    width: 100%;
+    background: rgba(2, 6, 23, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 13px 15px;
+    font-size: 14px;
+    color: #ffffff;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s;
+  }
+
+  .lux-textarea:focus,
+  .lux-input:focus {
+    border-color: #fbbf24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+  }
+
+  .lux-upload-box {
+    border: 1.5px dashed rgba(245, 158, 11, 0.4);
+    background: rgba(30, 41, 59, 0.35);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .lux-upload-box input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .lux-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .lux-preview-item {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+
+  .lux-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .lux-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    color: #0b0f19;
+    border: none;
+    padding: 16px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.5);
+    transition: all 0.2s;
+    font-family: inherit;
+    margin-top: 14px;
+  }
+
+  .lux-submit-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .lux-success {
+    display: none;
+    text-align: center;
+    padding: 30px 10px;
+  }
+{% endstyle %}
+
+<div id="rebel-rev-lux-{{ sec_id }}">
+  <div class="lux-wrap">
+    <div class="lux-header">
+      <div class="lux-badge">✦ Rebel Atelier — VIP Review ✦</div>
+      <h1 class="lux-title" id="lux-greeting-name-{{ sec_id }}">Exceptional Experience</h1>
+      <p class="lux-subtitle">How did your bespoke gift turn out? Your feedback shapes our finest craft.</p>
+    </div>
+
+    <div class="lux-card">
+      <div class="lux-success" id="lux-success-{{ sec_id }}">
+        <div style="font-size:42px; margin-bottom:12px;">✦</div>
+        <h2 style="font-size:24px; color:#ffffff; margin-bottom:8px;">Thank You, Connoisseur</h2>
+        <p style="color:#94a3b8; font-size:14px; line-height:1.6; max-width:380px; margin:0 auto 20px;">
+          Your review and unboxing photographs have been saved. Your VIP discount code <b>REBELVIP15</b> is ready!
+        </p>
+        <button onclick="location.reload()" style="background:#1e293b; color:#fbbf24; border:1px solid rgba(245,158,11,0.3); padding:12px 24px; border-radius:999px; font-weight:700; cursor:pointer;">
+          Submit Another Review
+        </button>
+      </div>
+
+      <form id="lux-form-{{ sec_id }}">
+        <div class="lux-prod">
+          <img id="lux-prod-img-{{ sec_id }}" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" alt="Product" class="lux-prod-img" />
+          <div style="flex:1; min-width:0;">
+            <div class="lux-prod-title" id="lux-prod-title-{{ sec_id }}">Personalized Gift</div>
+            <span class="lux-order-tag" id="lux-order-badge-{{ sec_id }}">Order Verified Purchase</span>
+          </div>
+        </div>
+
+        <div class="lux-stars-box">
+          <div class="lux-stars-row" id="lux-stars-row-{{ sec_id }}">
+            <button type="button" class="lux-star-btn" data-val="1">★</button>
+            <button type="button" class="lux-star-btn" data-val="2">★</button>
+            <button type="button" class="lux-star-btn" data-val="3">★</button>
+            <button type="button" class="lux-star-btn" data-val="4">★</button>
+            <button type="button" class="lux-star-btn is-active" data-val="5">★</button>
+          </div>
+          <div class="lux-star-sentiment" id="lux-sentiment-{{ sec_id }}">Pure Luxury & Loved it!</div>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label class="lux-label">Unboxing Experience & Craftsmanship Feedback</label>
+          <textarea class="lux-textarea" id="lux-review-body-{{ sec_id }}" rows="4" placeholder="Detail the precision of the engraving, finishing, lighting, and packaging..." required></textarea>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <label class="lux-label">Photographic Proof & Showcase (Optional)</label>
+          <div class="lux-upload-box">
+            <input type="file" id="lux-photo-upload-{{ sec_id }}" accept="image/*" multiple />
+            <div style="font-size:28px; margin-bottom:4px;">📸</div>
+            <div style="font-size:13px; font-weight:700; color:#fbbf24;">Upload Unboxing Photographs</div>
+          </div>
+          <div class="lux-preview-grid" id="lux-preview-grid-{{ sec_id }}"></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+          <div>
+            <label class="lux-label">Your Name</label>
+            <input class="lux-input" id="lux-cust-name-{{ sec_id }}" type="text" placeholder="Your Name" required />
+          </div>
+          <div>
+            <label class="lux-label">Email</label>
+            <input class="lux-input" id="lux-cust-email-{{ sec_id }}" type="email" placeholder="Your Email" required />
+          </div>
+        </div>
+
+        <button type="submit" class="lux-submit-btn" id="lux-submit-btn-{{ sec_id }}">
+          Seal & Submit VIP Review ✦
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const sec = "{{ sec_id }}";
+      const appUrl = "{{ app_url }}";
+      const shop = "{{ current_shop }}";
+      const urlParams = new URLSearchParams(window.location.search);
+
+      const name = urlParams.get("name") || "";
+      const product = urlParams.get("product") || "";
+      const img = urlParams.get("img") || "";
+      const order = urlParams.get("order") || urlParams.get("order_name") || "";
+
+      if (name) {
+        document.getElementById("lux-greeting-name-" + sec).textContent = `Welcome, ${name.split(" ")[0]} ✦`;
+        document.getElementById("lux-cust-name-" + sec).value = name;
+        document.getElementById("lux-cust-email-" + sec).value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("lux-prod-title-" + sec).textContent = product;
+      if (img) document.getElementById("lux-prod-img-" + sec).src = img;
+      if (order) document.getElementById("lux-order-badge-" + sec).textContent = `Order ${order} Verified`;
+
+      let rating = 5;
+      const starBtns = document.querySelectorAll("#lux-stars-row-" + sec + " .lux-star-btn");
+      const sentiment = document.getElementById("lux-sentiment-" + sec);
+      const labels = { 1: "Critical Issues", 2: "Could be better", 3: "Satisfied", 4: "Very Impressive", 5: "Pure Luxury & Loved it!" };
+
+      function setRating(val) {
+        starBtns.forEach(b => b.classList.toggle("is-active", parseInt(b.dataset.val) <= val));
+        sentiment.textContent = labels[val];
+      }
+
+      starBtns.forEach(b => {
+        const val = parseInt(b.dataset.val);
+        b.onclick = () => { rating = val; setRating(val); };
+      });
+
+      const form = document.getElementById("lux-form-" + sec);
+      const success = document.getElementById("lux-success-" + sec);
+      form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("lux-submit-btn-" + sec);
+        btn.disabled = true;
+        btn.textContent = "Securing Review... ✦";
+
+        try {
+          await fetch(appUrl + "/api/reviews", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              shop,
+              authorName: document.getElementById("lux-cust-name-" + sec).value,
+              authorEmail: document.getElementById("lux-cust-email-" + sec).value,
+              rating,
+              title: (product || "Rebel Gift") + " — VIP Review",
+              reviewBody: document.getElementById("lux-review-body-" + sec).value,
+              orderName: order
+            })
+          });
+        } catch (err) {}
+
+        form.style.display = "none";
+        success.style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+    })();
+  </script>
+</div>
+
+{% schema %}
+{
+  "name": "Rebel Review (Luxury)",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Rebel Review (Luxury Midnight)"
+    }
+  ]
+}
+{% endschema %}

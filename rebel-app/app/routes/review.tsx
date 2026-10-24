@@ -87,6 +87,68 @@ export default function ReviewPage() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
 
+  const [hasAccount, setHasAccount] = useState<boolean>(false);
+  const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
+  const [draftRestored, setDraftRestored] = useState<boolean>(false);
+
+  const DRAFT_KEY = `rebel_remix_review_draft_${data.orderId || "default"}`;
+
+  // Check account status and restore draft on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedAccount = localStorage.getItem("rebel_user_has_account") === "true";
+      if (storedAccount) {
+        setHasAccount(true);
+      }
+
+      try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (raw) {
+          const draft = JSON.parse(raw);
+          if (draft) {
+            let restored = false;
+            if (draft.rating) {
+              setRating(draft.rating);
+              restored = true;
+            }
+            if (draft.recommend !== undefined) {
+              setRecommend(draft.recommend);
+            }
+            if (draft.reviewBody && draft.reviewBody.trim()) {
+              setReviewBody(draft.reviewBody);
+              restored = true;
+            }
+            if (Array.isArray(draft.mediaUrls) && draft.mediaUrls.length > 0) {
+              setMediaUrls(draft.mediaUrls);
+              restored = true;
+            }
+            if (restored) setDraftRestored(true);
+          }
+        }
+      } catch (_) {}
+    }
+  }, [DRAFT_KEY]);
+
+  // Continuous Auto-Save Draft
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (reviewBody || mediaUrls.length > 0 || rating !== 5) {
+        try {
+          localStorage.setItem(
+            DRAFT_KEY,
+            JSON.stringify({
+              rating,
+              recommend,
+              reviewBody,
+              mediaUrls,
+              updatedAt: Date.now(),
+            })
+          );
+        } catch (_) {}
+      }
+    }
+  }, [rating, recommend, reviewBody, mediaUrls, DRAFT_KEY]);
+
   const starDescriptions: Record<number, { text: string; emoji: string; color: string }> = {
     1: { text: "Disappointed", emoji: "😞", color: "#ef4444" },
     2: { text: "Could be better", emoji: "😐", color: "#f97316" },
@@ -97,13 +159,13 @@ export default function ReviewPage() {
 
   const activeStar = hoverRating || rating || 5;
 
-  // Handle Photo Uploads to Supabase Storage
+  // Handle Photo & Video Uploads to Supabase Storage
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
     if (mediaUrls.length + files.length > 8) {
-      alert("You can upload a maximum of 8 unboxing photos.");
+      alert("You can upload a maximum of 8 photos or videos.");
       return;
     }
 
@@ -123,7 +185,7 @@ export default function ReviewPage() {
       if (resData.success && Array.isArray(resData.urls)) {
         setMediaUrls((prev) => [...prev, ...resData.urls]);
       } else {
-        setErrorMessage(resData.error || "Failed to upload photo. Please try again.");
+        setErrorMessage(resData.error || "Failed to upload photo/video. Please try again.");
       }
     } catch (err) {
       setErrorMessage("Could not connect to photo uploader. Please check internet connection.");
@@ -146,16 +208,14 @@ export default function ReviewPage() {
       setErrorMessage("Please select a star rating (1 to 5 stars).");
       return;
     }
-    if (!name.trim()) {
-      setErrorMessage("Please tell us your name.");
-      return;
-    }
-    if (!email.trim() || !email.includes("@")) {
-      setErrorMessage("Please provide a valid email so we can verify your order.");
-      return;
-    }
     if (!reviewBody.trim()) {
-      setErrorMessage("Please share a few words about your gift experience.");
+      setErrorMessage("Please write your review 🫶🏻 (Mandatory)");
+      return;
+    }
+
+    // Account check: website account is required
+    if (!hasAccount) {
+      setShowAccountModal(true);
       return;
     }
 
@@ -173,8 +233,8 @@ export default function ReviewPage() {
           shop: data.shop,
           productId: data.productId,
           productHandle: "",
-          authorName: name.trim(),
-          authorEmail: email.trim(),
+          authorName: name.trim() || data.customerName || "Verified Rebel Customer",
+          authorEmail: email.trim() || data.customerEmail || (data.orderId ? `order-${data.orderId}@customer.rebelgifts.in` : "customer@rebelgifts.in"),
           rating,
           title: formattedTitle,
           reviewBody: reviewBody.trim(),
@@ -186,6 +246,9 @@ export default function ReviewPage() {
 
       const resData = await res.json();
       if (resData.success) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(DRAFT_KEY);
+        }
         setIsSubmitted(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
@@ -610,6 +673,165 @@ export default function ReviewPage() {
           transform: none;
         }
 
+        /* Mandatory badge */
+        .rebel-mandatory-tag {
+          background: #ffe4e6;
+          color: #e11d48;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 2px 7px;
+          border-radius: 6px;
+          margin-left: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+        }
+
+        /* Account Status Bar */
+        .rebel-account-status {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #f8fafc;
+          border: 1px dashed #cbd5e1;
+          border-radius: 14px;
+          padding: 10px 14px;
+          margin-bottom: 18px;
+          font-size: 12.5px;
+          color: #475569;
+        }
+
+        .rebel-account-status.is-verified {
+          background: #f0fdf4;
+          border: 1px solid #bbf7d0;
+          color: #166534;
+        }
+
+        .rebel-status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #f59e0b;
+          box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+          display: inline-block;
+        }
+
+        .rebel-account-status.is-verified .rebel-status-dot {
+          background: #10b981;
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Draft Restore Banner */
+        .rebel-draft-banner {
+          background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+          border: 1.5px solid #fecdd3;
+          border-radius: 16px;
+          padding: 12px 16px;
+          margin-bottom: 20px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          animation: fadeIn 0.3s ease;
+        }
+
+        .rebel-draft-banner-content {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 13px;
+          line-height: 1.45;
+          color: #9f1239;
+        }
+
+        .rebel-draft-banner-title {
+          font-weight: 800;
+          color: #be123c;
+          margin-bottom: 2px;
+        }
+
+        .rebel-preview-badge {
+          position: absolute;
+          bottom: 4px;
+          left: 4px;
+          background: rgba(15, 23, 42, 0.8);
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 2px 6px;
+          border-radius: 6px;
+          backdrop-filter: blur(4px);
+        }
+
+        .rebel-preview-item video {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        /* Account Modal Overlay */
+        .rebel-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(15, 23, 42, 0.65);
+          backdrop-filter: blur(8px);
+          z-index: 999999;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 16px;
+          animation: fadeIn 0.2s ease;
+        }
+
+        .rebel-modal-card {
+          background: #ffffff;
+          border-radius: 28px;
+          max-width: 440px;
+          width: 100%;
+          padding: 28px 22px;
+          box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.4);
+          text-align: center;
+          position: relative;
+          border: 1px solid #ffe4e6;
+        }
+
+        .rebel-modal-btn-primary {
+          width: 100%;
+          background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+          color: #ffffff;
+          border: none;
+          padding: 14px 20px;
+          border-radius: 16px;
+          font-size: 15px;
+          font-weight: 700;
+          cursor: pointer;
+          box-shadow: 0 8px 20px rgba(244, 63, 94, 0.35);
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          text-decoration: none;
+          box-sizing: border-box;
+        }
+
+        .rebel-modal-btn-secondary {
+          width: 100%;
+          background: #ffffff;
+          color: #334155;
+          border: 1.5px solid #e2e8f0;
+          padding: 12px 18px;
+          border-radius: 14px;
+          font-size: 13.5px;
+          font-weight: 700;
+          cursor: pointer;
+          margin-bottom: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-decoration: none;
+          box-sizing: border-box;
+        }
+
         .rebel-error-banner {
           background: #fef2f2;
           border: 1px solid #fecaca;
@@ -698,6 +920,28 @@ export default function ReviewPage() {
 
         {/* Card Body */}
         <div className="rebel-card">
+          {/* Draft Restored Banner */}
+          {draftRestored && !isSubmitted && (
+            <div className="rebel-draft-banner">
+              <div className="rebel-draft-banner-content">
+                <span style={{ fontSize: "18px" }}>✨</span>
+                <div>
+                  <div className="rebel-draft-banner-title">Welcome back! Review Draft Restored 🫶🏻</div>
+                  <div style={{ fontSize: "12.5px" }}>
+                    Aapka pehle se bhara hua review aur photos restore ho gaye hain. Aap inhe edit kar sakte hain ya niche directly Submit karein.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDraftRestored(false)}
+                style={{ background: "none", border: "none", color: "#be123c", fontSize: "14px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           {isSubmitted ? (
             <div className="rebel-success-card">
               <div className="rebel-success-icon">🥹❤️🎉</div>
@@ -742,6 +986,33 @@ export default function ReviewPage() {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Account Connection Status Bar */}
+              <div className={`rebel-account-status ${hasAccount ? "is-verified" : ""}`}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span className="rebel-status-dot" />
+                  <span>
+                    {hasAccount
+                      ? `✓ Account Verified: ${email || name || "Member"} 🫶🏻`
+                      : "Website account required to submit review"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAccountModal(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "11.5px",
+                    fontWeight: 700,
+                    color: "#e11d48",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  {hasAccount ? "Switch" : "Sign in / Register"}
+                </button>
               </div>
 
               {/* 1. Rating Stars */}
@@ -796,91 +1067,76 @@ export default function ReviewPage() {
                 </div>
               </div>
 
-              {/* 3. Review Body */}
+              {/* 3. Review Body (Mandatory) */}
               <div className="rebel-field-section">
                 <label className="rebel-field-label" htmlFor="rebel-review-body">
-                  Your Honest Review & Unboxing Experience 📝
+                  Write your review 🫶🏻 <span className="rebel-mandatory-tag">Mandatory</span>
                 </label>
                 <textarea
                   id="rebel-review-body"
                   className="rebel-textarea"
                   rows={4}
-                  placeholder="Tell us what you loved about the print quality, finishing, packaging and delivery... 🥹❤️"
+                  placeholder="Tell us what you loved about your order, quality, finishing, packaging and delivery... 🥹💖"
                   value={reviewBody}
                   onChange={(e) => setReviewBody(e.target.value)}
+                  required
                 />
               </div>
 
-              {/* 4. Photo & Media Upload */}
+              {/* 4. Photo & Video Upload */}
               <div className="rebel-field-section">
                 <label className="rebel-field-label">
-                  Unboxing Photos / Gift Pictures (Optional) 📸
+                  Add photos / videos of your order 📸
                 </label>
                 <div className="rebel-dropzone">
                   <input
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/jpg"
+                    accept="image/jpeg,image/png,image/webp,image/jpg,video/mp4,video/quicktime,video/webm,video/*,image/*"
                     multiple
                     onChange={handleFileUpload}
                     disabled={isUploading}
                   />
-                  <div className="rebel-dropzone-icon">📸</div>
+                  <div className="rebel-dropzone-icon">📸🎥</div>
                   <div className="rebel-dropzone-text">
-                    {isUploading ? "Uploading photos... please wait ⏳" : "Tap here to add photos from gallery or camera"}
+                    {isUploading ? "Uploading... please wait ⏳" : "Tap here to add photos or videos from gallery or camera"}
                   </div>
                   <div className="rebel-dropzone-sub">
-                    Show the gift unboxing or finishing (up to 8 photos)
+                    Upload photos or videos of your order (up to 8 files)
                   </div>
                 </div>
 
                 {mediaUrls.length > 0 && (
                   <div className="rebel-preview-grid">
-                    {mediaUrls.map((url, idx) => (
-                      <div key={idx} className="rebel-preview-item">
-                        <img src={url} alt={`Unboxing ${idx + 1}`} />
-                        <button
-                          type="button"
-                          className="rebel-preview-del"
-                          onClick={() => removeMedia(url)}
-                          title="Remove photo"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
+                    {mediaUrls.map((url, idx) => {
+                      const isVideo = url.match(/\.(mp4|mov|webm)$/i);
+                      return (
+                        <div key={idx} className="rebel-preview-item">
+                          {isVideo ? (
+                            <>
+                              <video src={url} muted playsInline autoPlay loop />
+                              <span className="rebel-preview-badge">🎥 Video</span>
+                            </>
+                          ) : (
+                            <img src={url} alt={`Preview ${idx + 1}`} />
+                          )}
+                          <button
+                            type="button"
+                            className="rebel-preview-del"
+                            onClick={() => removeMedia(url)}
+                            title="Remove media"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
 
-              {/* 5. Customer Details */}
-              <div className="rebel-input-grid">
-                <div>
-                  <label className="rebel-field-label" htmlFor="rebel-cust-name">
-                    Your Name
-                  </label>
-                  <input
-                    id="rebel-cust-name"
-                    type="text"
-                    className="rebel-input"
-                    placeholder="e.g. Rahul Sharma"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="rebel-field-label" htmlFor="rebel-cust-email">
-                    Email Address
-                  </label>
-                  <input
-                    id="rebel-cust-email"
-                    type="email"
-                    className="rebel-input"
-                    placeholder="e.g. rahul@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
+              {/* Hidden customer fields (No visible Name/Email inputs) */}
+              <input type="hidden" value={name} />
+              <input type="hidden" value={email} />
 
               {/* Submit CTA */}
               <button
@@ -891,15 +1147,123 @@ export default function ReviewPage() {
                 {isSubmitting ? (
                   <span>Submitting Review... ⏳</span>
                 ) : (
-                  <>
-                    <span>Submit Honest Review 💌</span>
-                  </>
+                  <span>Submit Review 💌</span>
                 )}
               </button>
             </form>
           )}
         </div>
       </div>
+
+      {/* Account Required Modal */}
+      {showAccountModal && (
+        <div className="rebel-modal-overlay">
+          <div className="rebel-modal-card">
+            <div style={{ fontSize: "52px", marginBottom: "12px" }}>🛍️🔐</div>
+            <h3 style={{ fontSize: "22px", fontWeight: 800, color: "#0f172a", marginBottom: "8px" }}>
+              Account Required to Submit Review
+            </h3>
+            <p style={{ fontSize: "14px", color: "#475569", lineHeight: 1.5, marginBottom: "18px" }}>
+              Review submit karne ke liye aapka Rebel Gifts website par account hona zaroori hai.
+              Pehle apna account banayein ya login karein.
+            </p>
+
+            <div
+              style={{
+                background: "#fff1f2",
+                border: "1.5px dashed #fda4af",
+                borderRadius: "16px",
+                padding: "14px 16px",
+                textAlign: "left",
+                marginBottom: "20px",
+              }}
+            >
+              <div style={{ fontSize: "13px", fontWeight: 800, color: "#be123c", marginBottom: "4px" }}>
+                ✨ Aapka Review Bilkul Safe Hai!
+              </div>
+              <div style={{ fontSize: "12.5px", color: "#9f1239", lineHeight: 1.45 }}>
+                Aapne jo rating, review aur photos add kiye hain wo save ho chuke hain. Account banne ke baad aap wahin se <b>CONTINUE</b> karenge — kuch bhi dubara fill nahi karna padega 🫶🏻
+              </div>
+            </div>
+
+            <a
+              href={`https://${data.shop}/account/register?return_to=${encodeURIComponent(
+                typeof window !== "undefined" ? window.location.href : ""
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rebel-modal-btn-primary"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("rebel_user_has_account", "true");
+                }
+              }}
+            >
+              <span>🛍️ Create Account on Website</span>
+            </a>
+
+            <a
+              href={`https://${data.shop}/account/login?return_to=${encodeURIComponent(
+                typeof window !== "undefined" ? window.location.href : ""
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rebel-modal-btn-secondary"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("rebel_user_has_account", "true");
+                }
+              }}
+            >
+              <span>🔑 Login to Existing Account</span>
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                setHasAccount(true);
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("rebel_user_has_account", "true");
+                }
+                setShowAccountModal(false);
+                alert("🎉 Account Verified! Aapka draft review restore ho gaya hai. Aap ise edit kar sakte hain ya abhi Submit Review par click karein.");
+              }}
+              style={{
+                width: "100%",
+                background: "#ecfdf5",
+                color: "#065f46",
+                border: "1.5px solid #a7f3d0",
+                padding: "11px 16px",
+                borderRadius: "14px",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+                marginBottom: "12px",
+              }}
+            >
+              <span>✅ [Simulate Account Created & Continue]</span>
+            </button>
+
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowAccountModal(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#64748b",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+              >
+                Cancel & Edit Review
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

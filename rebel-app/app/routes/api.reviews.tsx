@@ -194,8 +194,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ success: true }, { headers: CORS_HEADERS }); // silently discard spam
   }
 
+  // Fallbacks for author details when submitted through account verification
+  const resolvedAuthorName = (authorName || "").trim() || "Verified Rebel Customer";
+  const resolvedAuthorEmail = (authorEmail || "").trim() || (orderId ? `order-${orderId}@customer.rebelgifts.in` : "customer@rebelgifts.in");
+
   // Validation
-  if (!shop || !productId || !authorName || !authorEmail || !rating || !reviewBody) {
+  if (!shop || !productId || !rating || !reviewBody) {
     return json(
       { error: "Missing required fields" },
       { status: 400, headers: CORS_HEADERS }
@@ -209,7 +213,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     );
   }
 
-  if (!authorEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+  if (!resolvedAuthorEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
     return json(
       { error: "Invalid email address" },
       { status: 400, headers: CORS_HEADERS }
@@ -247,8 +251,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       shopDomain: resolvedShop,
       productId: String(productId),
       productHandle: productHandle || "",
-      authorName: authorName.substring(0, 100),
-      authorEmail: authorEmail.substring(0, 200),
+      authorName: resolvedAuthorName.substring(0, 100),
+      authorEmail: resolvedAuthorEmail.substring(0, 200),
       rating: Math.floor(Number(rating)),
       title: finalTitle.substring(0, 200),
       body: reviewBody.substring(0, 5000),

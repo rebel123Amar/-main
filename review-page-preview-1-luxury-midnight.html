@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>VIP Order Review — Rebel Atelier ✦ Luxury Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #060911;
+      color: #f1f5f9;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    .lux-root {
+      min-height: 100vh;
+      background: 
+        radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.18) 0%, transparent 55%),
+        radial-gradient(circle at 85% 30%, rgba(245, 158, 11, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 15% 70%, rgba(225, 29, 72, 0.08) 0%, transparent 45%),
+        #070b14;
+      padding: 32px 16px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Ambient Gold Glow Orbs */
+    .lux-root::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(ellipse at center, rgba(245, 158, 11, 0.22), transparent 70%);
+      filter: blur(50px);
+      pointer-events: none;
+    }
+
+    .lux-container {
+      width: 100%;
+      max-width: 520px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Brand Header */
+    .lux-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .lux-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.05));
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+      margin-bottom: 14px;
+      backdrop-filter: blur(10px);
+    }
+
+    .lux-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #ffffff;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+      background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .lux-subtitle {
+      font-size: 14px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    /* Main Luxury Glass Card */
+    .lux-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 28px;
+      padding: 26px 22px;
+      border: 1px solid rgba(245, 158, 11, 0.22);
+      box-shadow: 
+        0 25px 60px -15px rgba(0, 0, 0, 0.8),
+        0 0 40px -10px rgba(245, 158, 11, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    @media (min-width: 480px) {
+      .lux-card {
+        padding: 34px 30px;
+      }
+    }
+
+    /* Product Showcase Bar */
+    .lux-prod {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 18px;
+      margin-bottom: 24px;
+    }
+
+    .lux-prod-img-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #020617;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .lux-prod-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .lux-prod-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lux-prod-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .lux-order-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 3px 9px;
+      border-radius: 6px;
+    }
+
+    /* Interactive Gold Stars */
+    .lux-stars-box {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.5), rgba(15, 23, 42, 0.7));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 18px 14px 16px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .lux-stars-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      display: block;
+      letter-spacing: 0.02em;
+    }
+
+    .lux-stars-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .lux-star-btn {
+      background: none;
+      border: none;
+      font-size: 42px;
+      line-height: 1;
+      cursor: pointer;
+      color: #334155;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      padding: 2px;
+      outline: none;
+    }
+
+    .lux-star-btn:hover {
+      transform: scale(1.25) translateY(-2px);
+    }
+
+    .lux-star-btn.is-active {
+      color: #fbbf24;
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 35px rgba(245, 158, 11, 0.3);
+    }
+
+    .lux-star-sentiment {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fbbf24;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Fast Experience Tags */
+    .lux-tag-group {
+      margin-bottom: 20px;
+    }
+
+    .lux-tag-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .lux-tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .lux-tag-chip {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #cbd5e1;
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .lux-tag-chip:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+      color: #ffffff;
+    }
+
+    .lux-tag-chip.is-selected {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+      border-color: #fbbf24;
+      color: #fbbf24;
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+    }
+
+    /* Inputs & Textarea */
+    .lux-field {
+      margin-bottom: 20px;
+    }
+
+    .lux-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .lux-textarea,
+    .lux-input {
+      width: 100%;
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 13px 15px;
+      font-size: 14px;
+      color: #ffffff;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .lux-textarea:focus,
+    .lux-input:focus {
+      border-color: #fbbf24;
+      box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+      background: rgba(2, 6, 23, 0.95);
+    }
+
+    .lux-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 480px) {
+      .lux-grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Photo Upload Dropzone */
+    .lux-upload-box {
+      border: 1.5px dashed rgba(245, 158, 11, 0.4);
+      background: rgba(30, 41, 59, 0.35);
+      border-radius: 18px;
+      padding: 22px 16px;
+      text-align: center;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .lux-upload-box:hover {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: #fbbf24;
+    }
+
+    .lux-upload-box input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .lux-upload-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+
+    .lux-upload-txt {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 3px;
+    }
+
+    .lux-upload-sub {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .lux-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .lux-preview-item {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .lux-preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .lux-preview-del {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.8);
+      color: #ffffff;
+      border: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* Recommend Toggle */
+    .lux-rec-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .lux-rec-btn {
+      flex: 1;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .lux-rec-btn.is-active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.15));
+      border-color: #fbbf24;
+      color: #fbbf24;
+      box-shadow: 0 0 16px rgba(251, 191, 36, 0.15);
+    }
+
+    /* Submit CTA */
+    .lux-submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+      color: #0b0f19;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 15.5px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.5);
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .lux-submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 35px -5px rgba(245, 158, 11, 0.65);
+    }
+
+    /* Success Card */
+    .lux-success {
+      display: none;
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .lux-vip-medal {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 18px;
+      background: radial-gradient(circle, #fbbf24, #d97706);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      box-shadow: 0 0 35px rgba(251, 191, 36, 0.5);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .lux-vip-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1px dashed #fbbf24;
+      border-radius: 18px;
+      padding: 16px;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .lux-vip-code {
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: #fbbf24;
+      letter-spacing: 0.15em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="lux-root">
+    <div class="lux-container">
+      <!-- Header -->
+      <div class="lux-header">
+        <div class="lux-badge">
+          <span>✦</span>
+          <span>Rebel Atelier — VIP Review</span>
+          <span>✦</span>
+        </div>
+        <h1 class="lux-title" id="greeting-name">Exceptional Experience</h1>
+        <p class="lux-subtitle">
+          How did your bespoke gift turn out? Your feedback shapes our finest craft.
+        </p>
+      </div>
+
+      <!-- Card -->
+      <div class="lux-card">
+        <div class="lux-success" id="success-view">
+          <div class="lux-vip-medal">✦</div>
+          <h2 style="font-family:'Playfair Display',serif; font-size: 26px; color:#ffffff; margin-bottom:8px;">
+            Thank You, Connoisseur
+          </h2>
+          <p style="color: #94a3b8; font-size: 14.5px; line-height: 1.6; max-width: 380px; margin: 0 auto;">
+            Your review and photos have been archived into our verified gallery. Here is your VIP appreciation reward:
+          </p>
+
+          <div class="lux-vip-card">
+            <div style="font-size: 11px; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px;">Exclusive 15% VIP Gifting Voucher</div>
+            <div class="lux-vip-code">REBELVIP15</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Valid on your next bespoke personalized order</div>
+          </div>
+
+          <button onclick="location.reload()" style="background:#1e293b; color:#fbbf24; border:1px solid rgba(245,158,11,0.3); padding:12px 24px; border-radius:999px; font-weight:700; cursor:pointer; font-size:13.5px;">
+            Submit Another Feedback
+          </button>
+        </div>
+
+        <form id="review-form">
+          <!-- Product Info -->
+          <div class="lux-prod">
+            <div class="lux-prod-img-box">
+              <img id="product-image" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" alt="Product" class="lux-prod-img" />
+            </div>
+            <div class="lux-prod-info">
+              <div class="lux-prod-title" id="product-title">Personalized Spotify Acrylic Plaque</div>
+              <span class="lux-order-tag" id="order-badge">
+                <span>✦</span>
+                <span id="order-badge-text">Order #1042 Verified Purchase</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Star Rating -->
+          <div class="lux-stars-box">
+            <span class="lux-stars-label">Rate Your Bespoke Craftsmanship</span>
+            <div class="lux-stars-row">
+              <button type="button" class="lux-star-btn" data-val="1">★</button>
+              <button type="button" class="lux-star-btn" data-val="2">★</button>
+              <button type="button" class="lux-star-btn" data-val="3">★</button>
+              <button type="button" class="lux-star-btn" data-val="4">★</button>
+              <button type="button" class="lux-star-btn is-active" data-val="5">★</button>
+            </div>
+            <div class="lux-star-sentiment" id="star-sentiment">
+              <span>✦</span>
+              <span>Pure Luxury & Loved it!</span>
+            </div>
+          </div>
+
+          <!-- Highlight Chips -->
+          <div class="lux-tag-group">
+            <span class="lux-tag-label">What Stood Out Most?</span>
+            <div class="lux-tags-list">
+              <div class="lux-tag-chip is-selected">✦ Crystal Clear Acrylic</div>
+              <div class="lux-tag-chip is-selected">✦ Luxury Velvet Box</div>
+              <div class="lux-tag-chip">✦ Perfect Lighting Base</div>
+              <div class="lux-tag-chip">✦ Lightning Fast Delivery</div>
+              <div class="lux-tag-chip">✦ 100% Exact Photo Quality</div>
+            </div>
+          </div>
+
+          <!-- Recommend -->
+          <div class="lux-field">
+            <label class="lux-label">Would you recommend Rebel Atelier to close friends?</label>
+            <div class="lux-rec-row">
+              <button type="button" class="lux-rec-btn is-active" id="rec-yes">✦ Yes, Highly Recommended</button>
+              <button type="button" class="lux-rec-btn" id="rec-no">Maybe Later</button>
+            </div>
+          </div>
+
+          <!-- Review Text -->
+          <div class="lux-field">
+            <label class="lux-label">Your Unboxing Experience & Craftsmanship Feedback</label>
+            <textarea class="lux-textarea" id="review-body" rows="4" placeholder="Detail the precision of the engraving, finishing, lighting, and packaging..." required></textarea>
+          </div>
+
+          <!-- Photo Upload -->
+          <div class="lux-field">
+            <label class="lux-label">Photographic Proof & Showcase (Optional)</label>
+            <div class="lux-upload-box">
+              <input type="file" id="photo-upload" accept="image/*" multiple />
+              <div class="lux-upload-icon">📸</div>
+              <div class="lux-upload-txt">Upload Unboxing Photographs</div>
+              <div class="lux-upload-sub">Capture the crystal reflection and ambient glow</div>
+            </div>
+            <div class="lux-preview-grid" id="preview-grid"></div>
+          </div>
+
+          <!-- User Details -->
+          <div class="lux-grid-2">
+            <div>
+              <label class="lux-label">Your Name</label>
+              <input class="lux-input" id="cust-name" type="text" placeholder="e.g. Vikram Singhania" required />
+            </div>
+            <div>
+              <label class="lux-label">Email Address</label>
+              <input class="lux-input" id="cust-email" type="email" placeholder="e.g. vikram@atelier.com" required />
+            </div>
+          </div>
+
+          <!-- Submit CTA -->
+          <button type="submit" class="lux-submit-btn" id="submit-btn">
+            <span>Seal & Submit VIP Review ✦</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "Vikram";
+      const product = urlParams.get("product") || "Personalized Spotify Acrylic Plaque";
+      const img = urlParams.get("img");
+      const order = urlParams.get("order") || urlParams.get("order_name") || "#1042";
+
+      if (name) {
+        document.getElementById("greeting-name").textContent = `Welcome, ${name.split(" ")[0]} ✦`;
+        document.getElementById("cust-name").value = name;
+        document.getElementById("cust-email").value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("product-title").textContent = product;
+      if (img) document.getElementById("product-image").src = img;
+      if (order) document.getElementById("order-badge-text").textContent = `Order ${order} Verified Purchase`;
+
+      let rating = 5;
+      const starBtns = document.querySelectorAll(".lux-star-btn");
+      const sentiment = document.getElementById("star-sentiment");
+
+      const sentiments = {
+        1: "Needs Critical Improvement",
+        2: "Below Expectations",
+        3: "Fair Craftsmanship",
+        4: "Very Impressive Quality",
+        5: "Pure Luxury & Loved it!"
+      };
+
+      function setRating(val) {
+        starBtns.forEach(btn => {
+          const v = parseInt(btn.dataset.val);
+          btn.classList.toggle("is-active", v <= val);
+        });
+        sentiment.innerHTML = `<span>✦</span> <span>${sentiments[val]}</span>`;
+      }
+
+      starBtns.forEach(btn => {
+        const val = parseInt(btn.dataset.val);
+        btn.addEventListener("mouseenter", () => setRating(val));
+        btn.addEventListener("mouseleave", () => setRating(rating));
+        btn.addEventListener("click", () => {
+          rating = val;
+          setRating(val);
+        });
+      });
+
+      // Tag chips toggle
+      document.querySelectorAll(".lux-tag-chip").forEach(chip => {
+        chip.addEventListener("click", () => chip.classList.toggle("is-selected"));
+      });
+
+      // Recommend toggle
+      const recYes = document.getElementById("rec-yes");
+      const recNo = document.getElementById("rec-no");
+      recYes.addEventListener("click", () => {
+        recYes.classList.add("is-active");
+        recNo.classList.remove("is-active");
+      });
+      recNo.addEventListener("click", () => {
+        recNo.classList.add("is-active");
+        recYes.classList.remove("is-active");
+      });
+
+      // Upload preview
+      const upload = document.getElementById("photo-upload");
+      const grid = document.getElementById("preview-grid");
+      upload.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const div = document.createElement("div");
+            div.className = "lux-preview-item";
+            div.innerHTML = `<img src="${ev.target.result}" /><button type="button" class="lux-preview-del">✕</button>`;
+            div.querySelector("button").onclick = () => div.remove();
+            grid.appendChild(div);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+
+      // Submit
+      const form = document.getElementById("review-form");
+      const successView = document.getElementById("success-view");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Securing VIP Review... ✦";
+        setTimeout(() => {
+          form.style.display = "none";
+          successView.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 750);
+      });
+    })();
+  </script>
+</body>
+</html>

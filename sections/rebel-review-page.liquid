@@ -304,12 +304,204 @@
     text-align: center;
     padding: 36px 16px;
   }
+
+  /* Mandatory badge */
+  .rebel-rev-page__mandatory {
+    background: #ffe4e6;
+    color: #e11d48;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    margin-left: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Account status bar */
+  .rebel-rev-page__account-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 12.5px;
+    color: #475569;
+  }
+
+  .rebel-rev-page__account-status.is-verified {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+
+  .rebel-rev-page__status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    display: inline-block;
+  }
+
+  .rebel-rev-page__account-status.is-verified .rebel-rev-page__status-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  /* Draft restored banner */
+  .rebel-rev-page__draft-banner {
+    background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
+    border: 1.5px solid #fecdd3;
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .rebel-rev-page__draft-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #9f1239;
+  }
+
+  .rebel-rev-page__draft-title {
+    font-weight: 800;
+    color: #be123c;
+    margin-bottom: 2px;
+  }
+
+  /* Video thumbnail badge */
+  .rebel-rev-page__video-badge {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    background: rgba(15, 23, 42, 0.8);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Account Modal */
+  .rebel-rev-page__modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .rebel-rev-page__modal-card {
+    background: #ffffff;
+    border-radius: 28px;
+    max-width: 440px;
+    width: 100%;
+    padding: 28px 22px;
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    position: relative;
+    border: 1px solid #ffe4e6;
+  }
+
+  .rebel-rev-page__modal-icon {
+    font-size: 52px;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+
+  .rebel-rev-page__modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .rebel-rev-page__modal-desc {
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+
+  .rebel-rev-page__modal-safe {
+    background: #fff1f2;
+    border: 1.5px dashed #fda4af;
+    border-radius: 16px;
+    padding: 14px 16px;
+    text-align: left;
+    margin-bottom: 20px;
+  }
+
+  .rebel-rev-page__modal-btn-pri {
+    width: 100%;
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    color: #ffffff;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.35);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .rebel-rev-page__modal-btn-sec {
+    width: 100%;
+    background: #ffffff;
+    color: #334155;
+    border: 1.5px solid #e2e8f0;
+    padding: 12px 18px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
 {% endstyle %}
+
+{%- assign is_logged_in = false -%}
+{%- if customer -%}
+  {%- assign is_logged_in = true -%}
+{%- endif -%}
 
 <div
   id="rebel-review-sec-{{ sec_id }}"
   data-shop="{{ current_shop }}"
   data-app-url="{{ app_url }}"
+  data-logged-in="{% if customer %}true{% else %}false{% endif %}"
+  data-customer-name="{{ customer.name | escape }}"
+  data-customer-email="{{ customer.email | escape }}"
+  data-login-url="{{ routes.account_login_url | default: '/account/login' }}"
+  data-register-url="{{ routes.account_register_url | default: '/account/register' }}"
 >
   <div class="rebel-rev-page__wrap">
     <!-- Header -->
@@ -330,11 +522,25 @@
 
     <!-- Main Card -->
     <div class="rebel-rev-page__card">
+      <!-- Draft Restored Banner -->
+      <div class="rebel-rev-page__draft-banner" id="rebel-draft-banner" style="display:none;">
+        <div class="rebel-rev-page__draft-content">
+          <span style="font-size:18px;">✨</span>
+          <div>
+            <div class="rebel-rev-page__draft-title">Welcome back! Review Draft Restored 🫶🏻</div>
+            <div style="font-size:12.5px;">
+              Aapka pehle se bhara hua review aur photos restore ho gaye hain. Aap inhe edit kar sakte hain ya niche directly Submit karein.
+            </div>
+          </div>
+        </div>
+        <button type="button" id="rebel-draft-banner-close" style="background:none; border:none; color:#be123c; font-size:14px; cursor:pointer;">✕</button>
+      </div>
+
       <div class="rebel-rev-page__success" id="rebel-page-success">
         <div style="font-size:56px; margin-bottom:16px;">🥹❤️🎉</div>
         <h2 style="font-size:24px; font-weight:800; color:#0f172a; margin-bottom:8px;">Thank You So Much!</h2>
         <p style="font-size:14.5px; color:#475569; line-height:1.6; max-width:380px; margin:0 auto 24px;">
-          Aapka honest review aur feedback successfully save ho gaya hai. Aapki khushi hi hamare liye sab kuch hai! 🫶🏻✨
+          Aapka review aur photos successfully save ho gaye hain. Aapki khushi hi hamare liye sab kuch hai! 🫶🏻✨
         </p>
         <a href="/" style="display:inline-flex; align-items:center; gap:8px; background:#0f172a; color:#fff; padding:14px 28px; border-radius:999px; text-decoration:none; font-size:14px; font-weight:700;">
           <span>Visit Rebel Gifts Store</span>
@@ -363,6 +569,17 @@
               ✓ Verified Purchase
             </span>
           </div>
+        </div>
+
+        <!-- Account Connection Status Bar -->
+        <div class="rebel-rev-page__account-status" id="rebel-account-bar">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="rebel-rev-page__status-dot" id="rebel-account-dot"></span>
+            <span id="rebel-account-text">Website account required to submit review</span>
+          </div>
+          <button type="button" id="rebel-account-btn" style="background:none; border:none; font-size:11.5px; font-weight:700; color:#e11d48; cursor:pointer; text-decoration:underline;">
+            Sign in
+          </button>
         </div>
 
         <!-- Star Rating -->
@@ -397,54 +614,84 @@
           </div>
         </div>
 
-        <!-- Review Body -->
+        <!-- Review Body (Mandatory) -->
         <div class="rebel-rev-page__field">
           <label class="rebel-rev-page__label" for="rebel-page-textarea">
-            Your Honest Review & Unboxing Experience 📝
+            Write your review 🫶🏻 <span class="rebel-rev-page__mandatory">Mandatory</span>
           </label>
           <textarea
             id="rebel-page-textarea"
             class="rebel-rev-page__textarea"
             rows="4"
-            placeholder="Tell us what you loved about the print quality, finishing, packaging and delivery... 🥹❤️"
+            placeholder="Tell us what you loved about your order, quality, finishing, packaging and delivery... 🥹💖"
             required
           ></textarea>
         </div>
 
-        <!-- Photo Upload -->
+        <!-- Photo & Video Upload -->
         <div class="rebel-rev-page__field">
           <label class="rebel-rev-page__label">
-            Unboxing Photos / Gift Pictures (Optional) 📸
+            Add photos / videos of your order 📸
           </label>
           <div class="rebel-rev-page__dropzone">
-            <input type="file" id="rebel-page-fileinput" accept="image/jpeg,image/png,image/webp,image/jpg" multiple />
-            <div style="font-size:32px; margin-bottom:6px; line-height:1;">📸</div>
+            <input type="file" id="rebel-page-fileinput" accept="image/jpeg,image/png,image/webp,image/jpg,video/mp4,video/quicktime,video/webm,video/*,image/*" multiple />
+            <div style="font-size:32px; margin-bottom:6px; line-height:1;">📸🎥</div>
             <div style="font-size:13.5px; font-weight:700; color:#be123c;" id="rebel-page-droptext">
-              Tap here to add photos from gallery or camera
+              Tap here to add photos or videos from gallery or camera
             </div>
             <div style="font-size:12px; color:#9f1239; opacity:0.8;">
-              Show the gift unboxing or finishing (up to 8 photos)
+              Upload photos or videos of your order (up to 8 files)
             </div>
           </div>
           <div class="rebel-rev-page__previews" id="rebel-page-previews"></div>
         </div>
 
-        <!-- Customer Inputs -->
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-          <div>
-            <label class="rebel-rev-page__label">Your Name</label>
-            <input type="text" id="rebel-page-name" class="rebel-rev-page__input" placeholder="e.g. Rahul Sharma" required />
-          </div>
-          <div>
-            <label class="rebel-rev-page__label">Email Address</label>
-            <input type="email" id="rebel-page-email" class="rebel-rev-page__input" placeholder="e.g. rahul@example.com" required />
-          </div>
-        </div>
+        <!-- Hidden Customer Data (No visible Name/Email inputs) -->
+        <input type="hidden" id="rebel-page-name" value="" />
+        <input type="hidden" id="rebel-page-email" value="" />
 
         <button type="submit" class="rebel-rev-page__btn-submit" id="rebel-page-submit">
-          Submit Honest Review 💌
+          Submit Review 💌
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- Account Required Modal -->
+  <div class="rebel-rev-page__modal-overlay" id="rebel-account-modal">
+    <div class="rebel-rev-page__modal-card">
+      <div class="rebel-rev-page__modal-icon">🛍️🔐</div>
+      <h3 class="rebel-rev-page__modal-title">Account Required to Submit Review</h3>
+      <p class="rebel-rev-page__modal-desc">
+        Review submit karne ke liye aapka Rebel Gifts par account hona zaroori hai. Kripya pehle apna account banayein ya login karein.
+      </p>
+
+      <div class="rebel-rev-page__modal-safe">
+        <div style="font-size:13px; font-weight:800; color:#be123c; margin-bottom:4px;">
+          ✨ Aapka Review Bilkul Safe Hai!
+        </div>
+        <div style="font-size:12.5px; color:#9f1239; line-height:1.45;">
+          Aapne jo rating, review aur photos add kiye hain wo save ho chuke hain. Account banne ke baad aap wahin se <b>CONTINUE</b> karenge — kuch bhi dubara fill nahi karna padega 🫶🏻
+        </div>
+      </div>
+
+      <a href="#" class="rebel-rev-page__modal-btn-pri" id="rebel-modal-btn-reg">
+        <span>🛍️ Create Account on Website</span>
+      </a>
+
+      <a href="#" class="rebel-rev-page__modal-btn-sec" id="rebel-modal-btn-log">
+        <span>🔑 Login to Existing Account</span>
+      </a>
+
+      <button type="button" id="rebel-modal-btn-sim" style="width:100%; background:#ecfdf5; color:#065f46; border:1.5px solid #a7f3d0; padding:11px 16px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; margin-bottom:12px;">
+        <span>✅ [Simulate Account Created & Continue]</span>
+      </button>
+
+      <div>
+        <button type="button" id="rebel-modal-close" style="background:none; border:none; color:#64748b; font-size:13px; font-weight:600; cursor:pointer; text-decoration:underline;">
+          Cancel & Edit Review
+        </button>
+      </div>
     </div>
   </div>
 
@@ -455,12 +702,17 @@
 
       const shop = root.dataset.shop || window.location.hostname;
       const appUrl = root.dataset.appUrl || "https://main-pink-phi.vercel.app";
+      let isLoggedIn = root.dataset.loggedIn === "true";
+      const liquidCustName = root.dataset.customerName || "";
+      const liquidCustEmail = root.dataset.customerEmail || "";
+      const loginUrlBase = root.dataset.loginUrl || "/account/login";
+      const registerUrlBase = root.dataset.registerUrl || "/account/register";
 
       const urlParams = new URLSearchParams(window.location.search);
       const orderId = urlParams.get("order_id") || urlParams.get("orderId") || urlParams.get("review_order") || "";
       const orderName = urlParams.get("order_name") || urlParams.get("orderName") || (orderId ? "#" + orderId : "");
-      let customerName = urlParams.get("name") || urlParams.get("customer_name") || "";
-      let customerEmail = urlParams.get("email") || urlParams.get("customer_email") || "";
+      let customerName = urlParams.get("name") || urlParams.get("customer_name") || liquidCustName || "";
+      let customerEmail = urlParams.get("email") || urlParams.get("customer_email") || liquidCustEmail || "";
       let productTitle = urlParams.get("product_title") || urlParams.get("product") || urlParams.get("prod") || "";
       let productImg = urlParams.get("product_img") || urlParams.get("image") || urlParams.get("img") || "";
       let productId = urlParams.get("product_id") || urlParams.get("productId") || (orderId ? "order-" + orderId : "rebel-gift");
@@ -484,10 +736,20 @@
       const form = document.getElementById("rebel-page-form");
       const submitBtn = document.getElementById("rebel-page-submit");
       const successCard = document.getElementById("rebel-page-success");
+      const draftBanner = document.getElementById("rebel-draft-banner");
+      const draftBannerClose = document.getElementById("rebel-draft-banner-close");
+      const accountBar = document.getElementById("rebel-account-bar");
+      const accountText = document.getElementById("rebel-account-text");
+      const accountBtn = document.getElementById("rebel-account-btn");
+      const accountModal = document.getElementById("rebel-account-modal");
+      const modalBtnReg = document.getElementById("rebel-modal-btn-reg");
+      const modalBtnLog = document.getElementById("rebel-modal-btn-log");
+      const modalBtnSim = document.getElementById("rebel-modal-btn-sim");
+      const modalClose = document.getElementById("rebel-modal-close");
 
       let currentRating = 5;
       let wouldRecommend = true;
-      let uploadedImages = [];
+      let uploadedMedia = []; // Array of { type: 'image'|'video', url: string }
 
       const starLabels = {
         1: "Disappointed 😞",
@@ -498,11 +760,12 @@
       };
 
       // Set initial values
+      nameInput.value = customerName;
+      emailInput.value = customerEmail;
+
       if (customerName) {
         greetingEl.textContent = "Heyyy " + customerName.split(" ")[0] + "! 💌";
-        nameInput.value = customerName;
       }
-      if (customerEmail) emailInput.value = customerEmail;
       if (productTitle) prodTitleEl.textContent = productTitle;
       if (orderName) prodBadgeEl.textContent = "✓ " + orderName + " Verified Purchase";
 
@@ -511,6 +774,29 @@
         prodImgEl.style.display = "block";
         prodPlaceEl.style.display = "none";
       }
+
+      // Check account status
+      if (localStorage.getItem("rebel_user_has_account") === "true") {
+        isLoggedIn = true;
+      }
+
+      function updateAccountUI() {
+        if (isLoggedIn) {
+          accountBar.classList.add("is-verified");
+          accountText.innerHTML = "<b>✓ Account Verified:</b> " + (customerEmail || customerName || "Logged in") + " 🫶🏻";
+          accountBtn.textContent = "Switch";
+        } else {
+          accountBar.classList.remove("is-verified");
+          accountText.textContent = "Website account required to submit review";
+          accountBtn.textContent = "Sign in / Register";
+        }
+      }
+      updateAccountUI();
+
+      accountBtn.addEventListener("click", () => {
+        saveDraft();
+        openModal();
+      });
 
       // If missing product details and orderId exists, fetch from api.order-info
       if (orderId && (!productTitle || !productImg)) {
@@ -551,6 +837,7 @@
         btn.addEventListener("click", () => {
           currentRating = val;
           updateStars(val);
+          saveDraft();
         });
       });
 
@@ -559,19 +846,46 @@
         wouldRecommend = true;
         recYesBtn.classList.add("is-active");
         recNoBtn.classList.remove("is-active");
+        saveDraft();
       });
       recNoBtn?.addEventListener("click", () => {
         wouldRecommend = false;
         recNoBtn.classList.add("is-active");
         recYesBtn.classList.remove("is-active");
+        saveDraft();
       });
 
-      // Upload photos
+      // Render previews
+      function renderMediaPreviews() {
+        previewsWrap.innerHTML = "";
+        uploadedMedia.forEach((item, idx) => {
+          const thumb = document.createElement("div");
+          thumb.className = "rebel-rev-page__thumb";
+          if (item.type === "video") {
+            thumb.innerHTML = '<video src="' + item.url + '" muted playsinline autoplay loop style="width:100%;height:100%;object-fit:cover;"></video><span class="rebel-rev-page__video-badge">🎥 Video</span><button type="button" class="rebel-rev-page__thumb-del">✕</button>';
+          } else {
+            thumb.innerHTML = '<img src="' + item.url + '" alt="Order media" /><button type="button" class="rebel-rev-page__thumb-del">✕</button>';
+          }
+          thumb.querySelector(".rebel-rev-page__thumb-del").addEventListener("click", () => {
+            uploadedMedia.splice(idx, 1);
+            renderMediaPreviews();
+            saveDraft();
+          });
+          previewsWrap.appendChild(thumb);
+        });
+      }
+
+      // Upload photos & videos
       fileInput?.addEventListener("change", async (e) => {
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
 
-        dropText.textContent = "Uploading photos... please wait ⏳";
+        if (uploadedMedia.length + files.length > 8) {
+          alert("Maximum 8 photos ya videos add kar sakte hain.");
+          return;
+        }
+
+        dropText.textContent = "Uploading... please wait ⏳";
         const formData = new FormData();
         files.slice(0, 8).forEach((f) => formData.append("files", f));
 
@@ -582,35 +896,143 @@
           });
           const d = await res.json();
           if (d.success && Array.isArray(d.urls)) {
-            d.urls.forEach((url) => {
-              uploadedImages.push(url);
-              const thumb = document.createElement("div");
-              thumb.className = "rebel-rev-page__thumb";
-              thumb.innerHTML = '<img src="' + url + '" alt="Unboxing" /><button type="button" class="rebel-rev-page__thumb-del">✕</button>';
-              thumb.querySelector(".rebel-rev-page__thumb-del").addEventListener("click", () => {
-                uploadedImages = uploadedImages.filter((u) => u !== url);
-                thumb.remove();
+            d.urls.forEach((url, i) => {
+              const originalFile = files[i];
+              const isVideo = originalFile ? originalFile.type.startsWith("video/") : url.match(/\.(mp4|mov|webm)$/i);
+              uploadedMedia.push({
+                type: isVideo ? "video" : "image",
+                url: url
               });
-              previewsWrap.appendChild(thumb);
             });
+            renderMediaPreviews();
+            saveDraft();
           }
         } catch (err) {
-          alert("Photo upload error. Please check your connection.");
+          alert("Photo/video upload error. Please check your connection.");
         } finally {
-          dropText.textContent = "Tap here to add photos from gallery or camera";
+          dropText.textContent = "Tap here to add photos or videos from gallery or camera";
           e.target.value = "";
         }
+      });
+
+      // Draft Save & Restore
+      const DRAFT_KEY = "rebel_liquid_review_draft";
+
+      function saveDraft() {
+        const draft = {
+          rating: currentRating,
+          wouldRecommend: wouldRecommend,
+          reviewBody: textarea.value,
+          media: uploadedMedia,
+          savedAt: Date.now()
+        };
+        try {
+          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+        } catch (_) {}
+      }
+
+      textarea.addEventListener("input", saveDraft);
+
+      function restoreDraft() {
+        try {
+          const raw = localStorage.getItem(DRAFT_KEY);
+          if (!raw) return false;
+          const d = JSON.parse(raw);
+          if (!d) return false;
+
+          let restored = false;
+          if (d.rating) {
+            currentRating = d.rating;
+            updateStars(currentRating);
+            restored = true;
+          }
+          if (d.wouldRecommend !== undefined) {
+            wouldRecommend = d.wouldRecommend;
+            if (wouldRecommend) {
+              recYesBtn.classList.add("is-active");
+              recNoBtn.classList.remove("is-active");
+            } else {
+              recNoBtn.classList.add("is-active");
+              recYesBtn.classList.remove("is-active");
+            }
+          }
+          if (d.reviewBody && d.reviewBody.trim()) {
+            textarea.value = d.reviewBody;
+            restored = true;
+          }
+          if (Array.isArray(d.media) && d.media.length > 0) {
+            uploadedMedia = d.media;
+            renderMediaPreviews();
+            restored = true;
+          }
+
+          if (restored) {
+            draftBanner.style.display = "flex";
+          }
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      draftBannerClose?.addEventListener("click", () => {
+        draftBanner.style.display = "none";
+      });
+
+      restoreDraft();
+
+      // Modal functions
+      function openModal() {
+        accountModal.style.display = "flex";
+        modalBtnReg.href = registerUrlBase + "?return_to=" + encodeURIComponent(window.location.href);
+        modalBtnLog.href = loginUrlBase + "?return_to=" + encodeURIComponent(window.location.href);
+      }
+
+      function closeModal() {
+        accountModal.style.display = "none";
+      }
+
+      modalClose?.addEventListener("click", closeModal);
+
+      modalBtnReg?.addEventListener("click", () => {
+        saveDraft();
+        localStorage.setItem("rebel_user_has_account", "true");
+      });
+
+      modalBtnLog?.addEventListener("click", () => {
+        saveDraft();
+        localStorage.setItem("rebel_user_has_account", "true");
+      });
+
+      modalBtnSim?.addEventListener("click", () => {
+        isLoggedIn = true;
+        localStorage.setItem("rebel_user_has_account", "true");
+        if (!nameInput.value) nameInput.value = "Verified Member";
+        if (!emailInput.value) emailInput.value = "member@rebelgifts.in";
+        updateAccountUI();
+        closeModal();
+        restoreDraft();
+        alert("🎉 Account Verified! Aapka draft review safe hai. Aap ise edit kar sakte hain ya abhi Submit Review par click karein.");
       });
 
       // Submit Form
       form?.addEventListener("submit", async (e) => {
         e.preventDefault();
         const reviewText = textarea.value.trim();
-        const authorName = nameInput.value.trim();
-        const authorEmail = emailInput.value.trim();
+        const authorName = nameInput.value.trim() || customerName || "Rebel Customer";
+        const authorEmail = emailInput.value.trim() || customerEmail || (orderId ? "order-" + orderId + "@customer.rebelgifts.in" : "customer@rebelgifts.in");
 
+        // 1. Mandatory Review Body
         if (!reviewText) {
-          alert("Please write a few words about your gift experience.");
+          alert("Please write your review 🫶🏻 (Mandatory)");
+          textarea.focus();
+          return;
+        }
+
+        // 2. Account Check
+        if (!isLoggedIn) {
+          saveDraft();
+          openModal();
           return;
         }
 
@@ -618,6 +1040,7 @@
         submitBtn.textContent = "Submitting Review... ⏳";
 
         try {
+          const mediaUrlsToSend = uploadedMedia.map((m) => m.url);
           const res = await fetch(appUrl + "/api/reviews", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -630,7 +1053,7 @@
               rating: currentRating,
               title: (productTitle || "Rebel Gift") + (wouldRecommend ? " — Would Recommend! 🫶🏻" : ""),
               reviewBody: reviewText,
-              mediaUrls: uploadedImages,
+              mediaUrls: mediaUrlsToSend,
               orderId,
               orderName,
             }),
@@ -638,18 +1061,20 @@
 
           const resData = await res.json();
           if (resData.success) {
+            localStorage.removeItem(DRAFT_KEY);
             form.style.display = "none";
+            draftBanner.style.display = "none";
             successCard.style.display = "block";
             window.scrollTo({ top: 0, behavior: "smooth" });
           } else {
             alert(resData.error || "Submission failed. Please try again.");
             submitBtn.disabled = false;
-            submitBtn.textContent = "Submit Honest Review 💌";
+            submitBtn.textContent = "Submit Review 💌";
           }
         } catch (err) {
           alert("Network error. Please try again.");
           submitBtn.disabled = false;
-          submitBtn.textContent = "Submit Honest Review 💌";
+          submitBtn.textContent = "Submit Review 💌";
         }
       });
     })();

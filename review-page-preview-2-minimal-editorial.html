@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Rate Your Order — Minimal Editorial Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f7f6f2;
+      color: #1c1917;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    .edit-root {
+      min-height: 100vh;
+      padding: 40px 16px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: radial-gradient(circle at 50% 0%, #ece9e2 0%, #f7f6f2 70%);
+    }
+
+    .edit-container {
+      width: 100%;
+      max-width: 530px;
+    }
+
+    /* Minimal Top Navigation / Breadcrumb */
+    .edit-top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 0 4px;
+    }
+
+    .edit-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #78716c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .edit-order-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: #047857;
+      background: #d1fae5;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .edit-header {
+      margin-bottom: 24px;
+    }
+
+    .edit-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #1c1917;
+      margin-bottom: 6px;
+    }
+
+    .edit-subtitle {
+      font-size: 14px;
+      color: #78716c;
+    }
+
+    /* Main Pure White Card */
+    .edit-card {
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 28px 24px;
+      border: 1px solid #e7e5e4;
+      box-shadow: 0 10px 30px -10px rgba(28, 25, 23, 0.06), 0 2px 6px rgba(28, 25, 23, 0.02);
+    }
+
+    @media (min-width: 480px) {
+      .edit-card {
+        padding: 36px 32px;
+      }
+    }
+
+    /* Product Row Clean */
+    .edit-product-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f5f5f4;
+      margin-bottom: 24px;
+    }
+
+    .edit-product-img {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #f5f5f4;
+      border: 1px solid #e7e5e4;
+      flex-shrink: 0;
+    }
+
+    .edit-product-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .edit-product-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1c1917;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .edit-product-status {
+      font-size: 12.5px;
+      color: #78716c;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Segmented Rating Selector */
+    .edit-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #78716c;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .edit-rating-box {
+      margin-bottom: 24px;
+    }
+
+    .edit-rating-tiles {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .edit-rating-tile {
+      background: #fafaf9;
+      border: 1.5px solid #e7e5e4;
+      border-radius: 12px;
+      padding: 12px 0;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .edit-rating-tile:hover {
+      border-color: #a8a29e;
+      background: #f5f5f4;
+    }
+
+    .edit-rating-tile.is-active {
+      background: #1c1917;
+      border-color: #1c1917;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(28, 25, 23, 0.18);
+    }
+
+    .edit-tile-num {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1;
+    }
+
+    .edit-tile-star {
+      font-size: 12px;
+      color: #fbbf24;
+      line-height: 1;
+    }
+
+    .edit-rating-tile.is-active .edit-tile-star {
+      color: #f59e0b;
+    }
+
+    .edit-rating-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1c1917;
+      padding: 0 4px;
+    }
+
+    /* Clean Multi-Select Tags */
+    .edit-tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .edit-tag-btn {
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      color: #44403c;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .edit-tag-btn:hover {
+      border-color: #a8a29e;
+    }
+
+    .edit-tag-btn.is-selected {
+      background: #1c1917;
+      color: #ffffff;
+      border-color: #1c1917;
+    }
+
+    /* Minimal Input Styles */
+    .edit-input-field {
+      margin-bottom: 22px;
+    }
+
+    .edit-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1c1917;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .edit-textarea,
+    .edit-input {
+      width: 100%;
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: #1c1917;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+
+    .edit-textarea:focus,
+    .edit-input:focus {
+      background: #ffffff;
+      border-color: #1c1917;
+      box-shadow: 0 0 0 1px #1c1917;
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (min-width: 480px) {
+      .edit-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Clean Photo Dropzone */
+    .edit-dropzone {
+      border: 1.5px dashed #d6d3d1;
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+      background: #fafaf9;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .edit-dropzone:hover {
+      border-color: #1c1917;
+      background: #f5f5f4;
+    }
+
+    .edit-dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .edit-dropzone-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1c1917;
+      margin-bottom: 2px;
+    }
+
+    .edit-dropzone-sub {
+      font-size: 12px;
+      color: #78716c;
+    }
+
+    .edit-preview-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .edit-preview-thumb {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #e7e5e4;
+    }
+
+    .edit-preview-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .edit-del-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #ffffff;
+      border: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    /* Submit CTA */
+    .edit-submit {
+      width: 100%;
+      background: #1c1917;
+      color: #ffffff;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.15s, transform 0.1s;
+      font-family: inherit;
+    }
+
+    .edit-submit:hover {
+      background: #292524;
+      transform: translateY(-1px);
+    }
+
+    /* Success Screen */
+    .edit-success {
+      display: none;
+      text-align: center;
+      padding: 30px 10px;
+    }
+
+    .edit-success-circle {
+      width: 64px;
+      height: 64px;
+      background: #f5f5f4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+      border: 1px solid #e7e5e4;
+    }
+
+    .edit-footer-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #a8a29e;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="edit-root">
+    <div class="edit-container">
+      
+      <!-- Top Bar -->
+      <div class="edit-top-nav">
+        <div class="edit-brand">
+          <span>●</span>
+          <span>Rebel Studio</span>
+        </div>
+        <div class="edit-order-pill" id="order-badge">
+          <span>✓</span>
+          <span id="order-badge-text">Order #1042 Verified</span>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div class="edit-header">
+        <h1 class="edit-title" id="greeting-name">Review Your Order</h1>
+        <p class="edit-subtitle">Share your honest impressions on design precision, print clarity, and overall finish.</p>
+      </div>
+
+      <!-- Card -->
+      <div class="edit-card">
+        <div class="edit-success" id="success-view">
+          <div class="edit-success-circle">✓</div>
+          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; margin-bottom:8px;">Feedback Published</h2>
+          <p style="color:#78716c; font-size:14px; max-width:380px; margin:0 auto 24px; line-height:1.6;">
+            Your review is now saved and verified. We appreciate you taking the time to support our studio craftsmanship.
+          </p>
+          <button onclick="location.reload()" style="background:#fafaf9; border:1px solid #e7e5e4; padding:10px 20px; border-radius:10px; font-weight:600; font-size:13px; cursor:pointer;">
+            Review another product
+          </button>
+        </div>
+
+        <form id="review-form">
+          <!-- Product Row -->
+          <div class="edit-product-row">
+            <img id="product-image" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" alt="Product" class="edit-product-img" />
+            <div class="edit-product-meta">
+              <div class="edit-product-title" id="product-title">Personalized Spotify Acrylic Plaque</div>
+              <div class="edit-product-status">
+                <span>Delivered & Handcrafted</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overall Rating -->
+          <div class="edit-rating-box">
+            <span class="edit-section-title">Overall Score</span>
+            <div class="edit-rating-tiles">
+              <div class="edit-rating-tile" data-val="1">
+                <span class="edit-tile-num">1</span>
+                <span class="edit-tile-star">★</span>
+              </div>
+              <div class="edit-rating-tile" data-val="2">
+                <span class="edit-tile-num">2</span>
+                <span class="edit-tile-star">★</span>
+              </div>
+              <div class="edit-rating-tile" data-val="3">
+                <span class="edit-tile-num">3</span>
+                <span class="edit-tile-star">★</span>
+              </div>
+              <div class="edit-rating-tile" data-val="4">
+                <span class="edit-tile-num">4</span>
+                <span class="edit-tile-star">★</span>
+              </div>
+              <div class="edit-rating-tile is-active" data-val="5">
+                <span class="edit-tile-num">5</span>
+                <span class="edit-tile-star">★</span>
+              </div>
+            </div>
+            <div class="edit-rating-summary">
+              <span id="rating-desc">5.0 — Outstanding craftsmanship</span>
+              <span style="color:#78716c; font-size:12px;">Tap to select</span>
+            </div>
+          </div>
+
+          <!-- Quick Tags -->
+          <span class="edit-section-title">Key Highlights</span>
+          <div class="edit-tags-container">
+            <button type="button" class="edit-tag-btn is-selected">Crisp Print Clarity</button>
+            <button type="button" class="edit-tag-btn is-selected">Secure Packaging</button>
+            <button type="button" class="edit-tag-btn">On-Time Delivery</button>
+            <button type="button" class="edit-tag-btn">Premium Acrylic Thickness</button>
+            <button type="button" class="edit-tag-btn">Warm Wooden LED Base</button>
+          </div>
+
+          <!-- Written Review -->
+          <div class="edit-input-field">
+            <label class="edit-label">Detailed Notes</label>
+            <textarea class="edit-textarea" id="review-body" rows="4" placeholder="How was the unboxing moment? How did the recipient react to the personalized photo?" required></textarea>
+          </div>
+
+          <!-- Upload Photos -->
+          <div class="edit-input-field">
+            <label class="edit-label">Visual Impressions (Optional)</label>
+            <div class="edit-dropzone">
+              <input type="file" id="photo-upload" accept="image/*" multiple />
+              <div class="edit-dropzone-title">Drop photos here or click to browse</div>
+              <div class="edit-dropzone-sub">Upload unboxing shots or tabletop display pictures</div>
+            </div>
+            <div class="edit-preview-list" id="preview-grid"></div>
+          </div>
+
+          <!-- Name & Email -->
+          <div class="edit-grid">
+            <div>
+              <label class="edit-label">Full Name</label>
+              <input class="edit-input" id="cust-name" type="text" placeholder="e.g. Ananya Roy" required />
+            </div>
+            <div>
+              <label class="edit-label">Email Address</label>
+              <input class="edit-input" id="cust-email" type="email" placeholder="e.g. ananya@domain.com" required />
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="edit-submit" id="submit-btn">
+            Publish Review →
+          </button>
+        </form>
+      </div>
+
+      <div class="edit-footer-note">
+        🔒 Verified purchase encryption • Rebel Direct Review System
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "Ananya";
+      const product = urlParams.get("product") || "Personalized Spotify Acrylic Plaque";
+      const img = urlParams.get("img");
+      const order = urlParams.get("order") || urlParams.get("order_name") || "#1042";
+
+      if (name) {
+        document.getElementById("greeting-name").textContent = `Reviewing as ${name}`;
+        document.getElementById("cust-name").value = name;
+        document.getElementById("cust-email").value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("product-title").textContent = product;
+      if (img) document.getElementById("product-image").src = img;
+      if (order) document.getElementById("order-badge-text").textContent = `Order ${order} Verified`;
+
+      // Segmented rating
+      let currentVal = 5;
+      const tiles = document.querySelectorAll(".edit-rating-tile");
+      const desc = document.getElementById("rating-desc");
+
+      const descs = {
+        1: "1.0 — Significant issues encountered",
+        2: "2.0 — Room for refinement",
+        3: "3.0 — Satisfactory experience",
+        4: "4.0 — High quality & delighted",
+        5: "5.0 — Outstanding craftsmanship"
+      };
+
+      tiles.forEach(tile => {
+        tile.addEventListener("click", () => {
+          tiles.forEach(t => t.classList.remove("is-active"));
+          tile.classList.add("is-active");
+          currentVal = parseInt(tile.dataset.val);
+          desc.textContent = descs[currentVal];
+        });
+      });
+
+      // Tags toggle
+      document.querySelectorAll(".edit-tag-btn").forEach(btn => {
+        btn.addEventListener("click", () => btn.classList.toggle("is-selected"));
+      });
+
+      // Photo upload
+      const upload = document.getElementById("photo-upload");
+      const grid = document.getElementById("preview-grid");
+      upload.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const div = document.createElement("div");
+            div.className = "edit-preview-thumb";
+            div.innerHTML = `<img src="${ev.target.result}" /><button type="button" class="edit-del-btn">✕</button>`;
+            div.querySelector("button").onclick = () => div.remove();
+            grid.appendChild(div);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+
+      // Submit
+      const form = document.getElementById("review-form");
+      const successView = document.getElementById("success-view");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const btn = document.getElementById("submit-btn");
+        btn.disabled = true;
+        btn.textContent = "Publishing feedback...";
+        setTimeout(() => {
+          form.style.display = "none";
+          successView.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 700);
+      });
+    })();
+  </script>
+</body>
+</html>

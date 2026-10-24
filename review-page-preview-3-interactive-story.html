@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Your Unboxing Journey — Interactive Story Review 🎁</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fef3c7 50%, #f0fdf4 100%);
+      min-height: 100vh;
+      color: #1e1b4b;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .story-root {
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .story-container {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Top Progress Bar */
+    .story-progress-box {
+      margin-bottom: 20px;
+    }
+
+    .story-steps-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #9d174d;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .story-track {
+      height: 8px;
+      background: rgba(244, 114, 182, 0.25);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .story-fill {
+      height: 100%;
+      width: 33.33%;
+      background: linear-gradient(90deg, #ec4899, #f43f5e, #f59e0b);
+      border-radius: 999px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Main Interactive Card */
+    .story-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 20px 45px -10px rgba(236, 72, 153, 0.18), 0 8px 20px -5px rgba(0, 0, 0, 0.04);
+      border: 2px solid #fce7f3;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (min-width: 480px) {
+      .story-card {
+        padding: 34px 28px;
+      }
+    }
+
+    /* Floating Reward Teaser */
+    .story-reward-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #fef3c7, #fed7aa);
+      border: 1px solid #fcd34d;
+      color: #92400e;
+      padding: 8px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    /* Product Ribbon */
+    .story-prod-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #faf5ff;
+      border: 1px solid #f3e8ff;
+      border-radius: 16px;
+      padding: 10px 14px;
+      margin-bottom: 22px;
+    }
+
+    .story-prod-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #e9d5ff;
+    }
+
+    .story-prod-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #581c87;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .story-prod-order {
+      font-size: 11.5px;
+      color: #7e22ce;
+      font-weight: 600;
+    }
+
+    /* Step Views */
+    .story-step {
+      display: none;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .story-step.is-active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .story-step-heading {
+      font-family: 'Fredoka', cursive, sans-serif;
+      font-size: 24px;
+      color: #831843;
+      margin-bottom: 6px;
+      line-height: 1.25;
+    }
+
+    .story-step-sub {
+      font-size: 13.5px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    /* Emoji Mood Selector */
+    .story-emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .story-emoji-btn {
+      background: #fff1f2;
+      border: 2px solid #fecdd3;
+      border-radius: 18px;
+      padding: 12px 4px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      user-select: none;
+    }
+
+    .story-emoji-btn:hover {
+      transform: scale(1.1);
+      background: #ffe4e6;
+    }
+
+    .story-emoji-btn.is-active {
+      background: #ec4899;
+      border-color: #db2777;
+      transform: scale(1.12);
+      box-shadow: 0 6px 18px rgba(236, 72, 153, 0.35);
+    }
+
+    .story-emoji-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .story-emoji-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #9d174d;
+    }
+
+    .story-emoji-btn.is-active .story-emoji-label {
+      color: #ffffff;
+    }
+
+    .story-sentiment-banner {
+      background: #fdf2f8;
+      border: 1px solid #fbcfe8;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #be185d;
+      margin-bottom: 20px;
+    }
+
+    /* Tag Pills */
+    .story-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .story-pill {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .story-pill:hover {
+      border-color: #ec4899;
+    }
+
+    .story-pill.is-active {
+      background: #fdf2f8;
+      border-color: #ec4899;
+      color: #be185d;
+      font-weight: 700;
+    }
+
+    /* Textarea & Inputs */
+    .story-input-box {
+      margin-bottom: 18px;
+    }
+
+    .story-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e1b4b;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .story-textarea,
+    .story-input {
+      width: 100%;
+      border: 2px solid #f1f5f9;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 13px 15px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.15s;
+    }
+
+    .story-textarea:focus,
+    .story-input:focus {
+      background: #ffffff;
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+    }
+
+    /* Photo Drop */
+    .story-photo-drop {
+      border: 2.5px dashed #f472b6;
+      background: #fff5f7;
+      border-radius: 20px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .story-photo-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .story-thumb-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .story-thumb {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #fbcfe8;
+    }
+
+    .story-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Navigation Buttons */
+    .story-btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .story-next-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);
+      color: #ffffff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px -3px rgba(236, 72, 153, 0.4);
+      transition: transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .story-next-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .story-back-btn {
+      background: #f1f5f9;
+      color: #475569;
+      border: none;
+      padding: 16px 18px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Scratch Card Reward Screen */
+    .story-reward-box {
+      background: linear-gradient(135deg, #fdf2f8, #fef3c7);
+      border: 2px dashed #f59e0b;
+      border-radius: 20px;
+      padding: 22px 16px;
+      text-align: center;
+      margin: 18px 0;
+    }
+
+    .story-scratch-code {
+      font-family: 'Fredoka', cursive, sans-serif;
+      font-size: 26px;
+      color: #e11d48;
+      letter-spacing: 0.1em;
+      background: #ffffff;
+      padding: 10px 18px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 10px 0;
+      border: 1px solid #fecdd3;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="story-root">
+    <div class="story-container">
+      
+      <!-- Progress Bar -->
+      <div class="story-progress-box">
+        <div class="story-steps-labels">
+          <span id="step-label-1">1. Experience</span>
+          <span id="step-label-2">2. Unboxing Photos</span>
+          <span id="step-label-3">3. Claim ₹150</span>
+        </div>
+        <div class="story-track">
+          <div class="story-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Card -->
+      <div class="story-card">
+        
+        <!-- Reward Teaser -->
+        <div class="story-reward-badge">
+          <span>🎁</span>
+          <span><b>Special Gift</b>: Complete review to unlock ₹150 Voucher!</span>
+        </div>
+
+        <!-- Product Preview Ribbon -->
+        <div class="story-prod-box">
+          <img id="product-image" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=300" alt="Product" class="story-prod-img" />
+          <div style="flex:1; min-width:0;">
+            <div class="story-prod-title" id="product-title">Personalized Spotify Acrylic Plaque</div>
+            <div class="story-prod-order" id="order-badge">✓ Verified Delivered Order #1042</div>
+          </div>
+        </div>
+
+        <!-- STEP 1: Rate & Mood -->
+        <div class="story-step is-active" id="step-1">
+          <h2 class="story-step-heading" id="greeting-title">How was the gift, Pooja? 💖</h2>
+          <p class="story-step-sub">Pick the reaction that matched your unboxing moment:</p>
+
+          <div class="story-emoji-grid">
+            <div class="story-emoji-btn" data-val="1">
+              <span class="story-emoji-icon">😢</span>
+              <span class="story-emoji-label">Sad</span>
+            </div>
+            <div class="story-emoji-btn" data-val="2">
+              <span class="story-emoji-icon">😐</span>
+              <span class="story-emoji-label">Okay</span>
+            </div>
+            <div class="story-emoji-btn" data-val="3">
+              <span class="story-emoji-icon">🙂</span>
+              <span class="story-emoji-label">Good</span>
+            </div>
+            <div class="story-emoji-btn" data-val="4">
+              <span class="story-emoji-icon">😍</span>
+              <span class="story-emoji-label">Loved</span>
+            </div>
+            <div class="story-emoji-btn is-active" data-val="5">
+              <span class="story-emoji-icon">🤩</span>
+              <span class="story-emoji-label">Obsessed</span>
+            </div>
+          </div>
+
+          <div class="story-sentiment-banner" id="sentiment-text">
+            🤩 5 Stars — Absolutely obsessed with the gift!
+          </div>
+
+          <label class="story-label">What made you smile the most?</label>
+          <div class="story-pills">
+            <div class="story-pill is-active">✨ Super clear photo</div>
+            <div class="story-pill is-active">🎁 Cute ribbon packing</div>
+            <div class="story-pill">⚡ Delivered on time</div>
+            <div class="story-pill">🥺 Emotional tears moment</div>
+            <div class="story-pill">💡 Wooden LED glow</div>
+          </div>
+
+          <div class="story-btn-row">
+            <button type="button" class="story-next-btn" id="to-step-2">
+              <span>Next: Add Unboxing Photos 📸</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Photos & Story -->
+        <div class="story-step" id="step-2">
+          <h2 class="story-step-heading">Show off your gift! 📸</h2>
+          <p class="story-step-sub">Help other shoppers see the actual unboxing & finishing.</p>
+
+          <div class="story-photo-drop">
+            <input type="file" id="photo-upload" accept="image/*" multiple />
+            <div style="font-size:36px; margin-bottom:4px;">📸</div>
+            <div style="font-weight:700; color:#be185d; font-size:14px;">Tap here to upload from camera/gallery</div>
+            <div style="font-size:12px; color:#9d174d; opacity:0.8;">Unboxing photos get featured on our homepage!</div>
+          </div>
+          <div class="story-thumb-grid" id="preview-grid"></div>
+
+          <div class="story-input-box">
+            <label class="story-label">Tell the story behind this gift 💌</label>
+            <textarea class="story-textarea" id="review-body" rows="3" placeholder="Who was this for? What was their reaction when they saw their photo?"></textarea>
+          </div>
+
+          <div class="story-btn-row">
+            <button type="button" class="story-back-btn" id="back-to-1">←</button>
+            <button type="button" class="story-next-btn" id="to-step-3">
+              <span>Next: Claim ₹150 Voucher 🎁</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Details & Submit -->
+        <div class="story-step" id="step-3">
+          <h2 class="story-step-heading">Almost there! Unlock ₹150 🎉</h2>
+          <p class="story-step-sub">Enter where we should send your verified reward code.</p>
+
+          <div class="story-input-box">
+            <label class="story-label">Your Name</label>
+            <input class="story-input" id="cust-name" type="text" placeholder="e.g. Pooja Mehra" required />
+          </div>
+
+          <div class="story-input-box">
+            <label class="story-label">Email or WhatsApp Number</label>
+            <input class="story-input" id="cust-email" type="text" placeholder="e.g. pooja@gmail.com" required />
+          </div>
+
+          <div class="story-btn-row">
+            <button type="button" class="story-back-btn" id="back-to-2">←</button>
+            <button type="button" class="story-next-btn" id="submit-story">
+              <span>Claim ₹150 Coupon & Submit Review 💌</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SUCCESS VIEW -->
+        <div class="story-step" id="step-success">
+          <div style="text-align:center;">
+            <div style="font-size:54px; margin-bottom:12px;">🎉🥳🎈</div>
+            <h2 class="story-step-heading">You are amazing, thank you!</h2>
+            <p style="font-size:14px; color:#475569; line-height:1.6; margin-bottom:16px;">
+              Your review and unboxing story have been saved! As promised, here is your instant ₹150 discount code:
+            </p>
+
+            <div class="story-reward-box">
+              <div style="font-size:12px; font-weight:700; color:#b45309; text-transform:uppercase;">Flat ₹150 OFF Anything</div>
+              <div class="story-scratch-code" id="coupon-code">GIFTLOVE150</div>
+              <div style="font-size:12px; color:#78350f;">Code copied to clipboard! Valid for 30 days.</div>
+            </div>
+
+            <button onclick="location.reload()" style="background:#0f172a; color:#ffffff; border:none; padding:14px 28px; border-radius:999px; font-weight:700; cursor:pointer;">
+              Review Another Gift
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get("name") || "Pooja";
+      const product = urlParams.get("product") || "Personalized Spotify Acrylic Plaque";
+      const img = urlParams.get("img");
+      const order = urlParams.get("order") || urlParams.get("order_name") || "#1042";
+
+      if (name) {
+        document.getElementById("greeting-title").textContent = `How was the gift, ${name.split(" ")[0]}? 💖`;
+        document.getElementById("cust-name").value = name;
+        document.getElementById("cust-email").value = name.toLowerCase().replace(/[^a-z]/g, "") + "@gmail.com";
+      }
+      if (product) document.getElementById("product-title").textContent = product;
+      if (img) document.getElementById("product-image").src = img;
+      if (order) document.getElementById("order-badge").textContent = `✓ Verified Delivered Order ${order}`;
+
+      // Mood / Star logic
+      let currentVal = 5;
+      const emojiBtns = document.querySelectorAll(".story-emoji-btn");
+      const sentimentText = document.getElementById("sentiment-text");
+
+      const moods = {
+        1: "😢 1 Star — Unhappy with the experience",
+        2: "😐 2 Stars — Could be much better",
+        3: "🙂 3 Stars — Decent gift and satisfied",
+        4: "😍 4 Stars — Loved the final gift and finish!",
+        5: "🤩 5 Stars — Absolutely obsessed with the gift!"
+      };
+
+      emojiBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          emojiBtns.forEach(b => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          currentVal = parseInt(btn.dataset.val);
+          sentimentText.textContent = moods[currentVal];
+        });
+      });
+
+      // Tag pills toggle
+      document.querySelectorAll(".story-pill").forEach(p => {
+        p.addEventListener("click", () => p.classList.toggle("is-active"));
+      });
+
+      // Step navigation
+      const fill = document.getElementById("progress-fill");
+      const step1 = document.getElementById("step-1");
+      const step2 = document.getElementById("step-2");
+      const step3 = document.getElementById("step-3");
+      const stepSuccess = document.getElementById("step-success");
+
+      document.getElementById("to-step-2").onclick = () => {
+        step1.classList.remove("is-active");
+        step2.classList.add("is-active");
+        fill.style.width = "66.66%";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      document.getElementById("back-to-1").onclick = () => {
+        step2.classList.remove("is-active");
+        step1.classList.add("is-active");
+        fill.style.width = "33.33%";
+      };
+
+      document.getElementById("to-step-3").onclick = () => {
+        step2.classList.remove("is-active");
+        step3.classList.add("is-active");
+        fill.style.width = "100%";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      document.getElementById("back-to-2").onclick = () => {
+        step3.classList.remove("is-active");
+        step2.classList.add("is-active");
+        fill.style.width = "66.66%";
+      };
+
+      // Photo upload
+      const upload = document.getElementById("photo-upload");
+      const grid = document.getElementById("preview-grid");
+      upload.addEventListener("change", (e) => {
+        const files = Array.from(e.target.files || []);
+        files.forEach(f => {
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const div = document.createElement("div");
+            div.className = "story-thumb";
+            div.innerHTML = `<img src="${ev.target.result}" />`;
+            grid.appendChild(div);
+          };
+          reader.readAsDataURL(f);
+        });
+      });
+
+      // Submit
+      document.getElementById("submit-story").onclick = () => {
+        const btn = document.getElementById("submit-story");
+        btn.disabled = true;
+        btn.textContent = "Unlocking Reward... ⏳";
+        setTimeout(() => {
+          step3.classList.remove("is-active");
+          stepSuccess.classList.add("is-active");
+          if (typeof confetti === "function") {
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+          }
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 700);
+      };
+    })();
+  </script>
+</body>
+</html>

@@ -210,7 +210,9 @@ export default function OrdersPage() {
     useLoaderData<typeof loader>();
   const submit = useSubmit();
   const navigation = useNavigation();
-  const isSyncing = navigation.state === "submitting";
+  const isSyncing =
+    navigation.state !== "idle" &&
+    navigation.formData?.get("intent") === "sync";
 
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
@@ -220,6 +222,8 @@ export default function OrdersPage() {
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [downloadingZipId, setDownloadingZipId] = useState<string | null>(null);
   const [downloadingUrl, setDownloadingUrl] = useState<string | null>(null);
+  const [openedWaId, setOpenedWaId] = useState<string | null>(null);
+  const [previewingId, setPreviewingId] = useState<string | null>(null);
 
   const handleCopy = useCallback((text: string, id: string) => {
     navigator.clipboard.writeText(text);
@@ -468,8 +472,14 @@ export default function OrdersPage() {
                                   tone="success"
                                   url={revData.whatsappUrl}
                                   target="_blank"
+                                  onClick={() => {
+                                    setOpenedWaId(order.id);
+                                    setTimeout(() => setOpenedWaId(null), 2500);
+                                  }}
                                 >
-                                  📱 Send on WhatsApp
+                                  {openedWaId === order.id
+                                    ? "Opening WhatsApp... 🚀"
+                                    : "📱 Send on WhatsApp"}
                                 </Button>
                                 <Button
                                   onClick={() =>
@@ -500,8 +510,14 @@ export default function OrdersPage() {
                                   variant="plain"
                                   url={revData.reviewLink}
                                   target="_blank"
+                                  onClick={() => {
+                                    setPreviewingId(order.id);
+                                    setTimeout(() => setPreviewingId(null), 2500);
+                                  }}
                                 >
-                                  👁️ Preview Page
+                                  {previewingId === order.id
+                                    ? "Opening Page... 👁️"
+                                    : "👁️ Preview Page"}
                                 </Button>
                               </ButtonGroup>
                             </InlineStack>
@@ -717,11 +733,11 @@ export default function OrdersPage() {
                   <Pagination
                     hasPrevious={page > 1}
                     onPrevious={() => {
-                      window.location.search = `?page=${page - 1}`;
+                      submit({ page: String(page - 1) }, { method: "get" });
                     }}
                     hasNext={page < totalPages}
                     onNext={() => {
-                      window.location.search = `?page=${page + 1}`;
+                      submit({ page: String(page + 1) }, { method: "get" });
                     }}
                   />
                 </div>
