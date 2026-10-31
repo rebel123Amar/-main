@@ -409,6 +409,19 @@
           display: none !important;
         }
 
+        .cart-unlocked-reward.cart-unlocked-reward--neutral {
+          background: #f9fafb !important;
+          border-color: #e5e7eb !important;
+        }
+
+        .cart-unlocked-reward--neutral .cart-unlocked-reward__title {
+          color: #111827 !important;
+        }
+
+        .cart-unlocked-reward--neutral .cart-unlocked-reward__sub {
+          color: #6b7280 !important;
+        }
+
         .cart-unlocked-reward__left {
           display: flex !important;
           align-items: center !important;
@@ -531,7 +544,7 @@
         {%- assign diff = current_total | minus: tier_3_goal -%}
         {%- assign step = diff | times: 250 | divided_by: 900 | divided_by: 10 -%}
         {%- assign initial_progress = 62 | plus: step -%}
-        {%- assign initial_headline = 'Spend <strong>₹' | append: remaining | append: '</strong> to unlock <strong>3 Free Surprise Gifts worth ₹500</strong> 👑' -%}
+        {%- assign initial_headline = 'Spend <strong>₹' | append: remaining | append: '</strong> to unlock <strong>2 Free Surprise Gifts worth ₹500</strong> 👑' -%}
       {%- else -%}
         {%- assign initial_progress = 100 -%}
         {%- assign initial_headline = '🎉 Congratulations! You unlocked <strong>All Surprise Gifts & Offers</strong>! 🥳' -%}
@@ -612,7 +625,7 @@
             <!-- Milestone 4: ₹2499 -->
             <div class="cart-milestone milestone-4{% if current_total >= tier_4_goal %} active{% endif %}" data-tier="4">
               <span class="milestone-amount">₹2499.00</span>
-              <div class="milestone-badge" aria-label="Tier 4: 3 Free Surprise Gifts">
+              <div class="milestone-badge" aria-label="Tier 4: 2 Free Surprise Gifts">
                 <!-- Crown SVG -->
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -620,7 +633,7 @@
               </div>
               <div class="milestone-reward">
                 <span class="reward-icon">👑</span>
-                <span class="reward-title">3 Gifts</span>
+                <span class="reward-title">2 Gifts</span>
                 <span class="reward-sub">(₹500)</span>
               </div>
             </div>
@@ -696,7 +709,7 @@
             text = 'Spend <strong>\u20b9' + Math.ceil(TIER_3 - total) + '</strong> to unlock <strong>10% OFF on your order</strong> \ud83c\udf89';
           } else if (total < TIER_4) {
             progress = P3 + ((total - TIER_3) / (TIER_4 - TIER_3)) * (P4 - P3);
-            text = 'Spend <strong>\u20b9' + Math.ceil(TIER_4 - total) + '</strong> to unlock <strong>3 Free Surprise Gifts worth \u20b9500</strong> \ud83d\udc51';
+            text = 'Spend <strong>\u20b9' + Math.ceil(TIER_4 - total) + '</strong> to unlock <strong>2 Free Surprise Gifts worth \u20b9500</strong> \ud83d\udc51';
           } else {
             progress = 100;
             text = '\ud83c\udf89 Congratulations! You unlocked <strong>All Surprise Gifts &amp; Offers</strong>! \ud83e\udd73';
@@ -743,12 +756,15 @@
               continue;
             }
             box.style.setProperty("display", "flex", "important");
+            box.classList.toggle("cart-unlocked-reward--neutral", total < TIER_1);
+
             if (total >= TIER_4) {
+              // 2499+: 2 gifts worth 500/-
               box.innerHTML =
                 '<div class="cart-unlocked-reward__left">' +
                   '<span class="cart-unlocked-reward__icon">🎁</span>' +
                   '<div class="cart-unlocked-reward__info">' +
-                    '<span class="cart-unlocked-reward__title">3 Free Surprise Gifts (Worth ₹500)</span>' +
+                    '<span class="cart-unlocked-reward__title">2 Free Surprise Gifts (Worth ₹500)</span>' +
                     '<span class="cart-unlocked-reward__sub">Unlocked! Included with your order</span>' +
                   '</div>' +
                 '</div>' +
@@ -756,7 +772,22 @@
                   '<s class="cart-unlocked-reward__old-price">₹500</s>' +
                   '<span class="cart-unlocked-reward__badge">FREE</span>' +
                 '</div>';
+            } else if (total >= TIER_3) {
+              // 1599 to 2499: 10% off (no gift)
+              var gift2Remaining = Math.ceil(TIER_4 - total);
+              box.innerHTML =
+                '<div class="cart-unlocked-reward__left">' +
+                  '<span class="cart-unlocked-reward__icon">🏷️</span>' +
+                  '<div class="cart-unlocked-reward__info">' +
+                    '<span class="cart-unlocked-reward__title">10% OFF Applied</span>' +
+                    '<span class="cart-unlocked-reward__sub">Unlocked! 10% discount applied (Spend ₹' + gift2Remaining + ' more for 2 Free Gifts worth ₹500)</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="cart-unlocked-reward__right">' +
+                  '<span class="cart-unlocked-reward__badge">10% OFF</span>' +
+                '</div>';
             } else if (total >= TIER_2) {
+              // 999 to 1599: 1 gift worth 100
               box.innerHTML =
                 '<div class="cart-unlocked-reward__left">' +
                   '<span class="cart-unlocked-reward__icon">🎁</span>' +
@@ -769,18 +800,33 @@
                   '<s class="cart-unlocked-reward__old-price">₹100</s>' +
                   '<span class="cart-unlocked-reward__badge">FREE</span>' +
                 '</div>';
-            } else {
-              var remaining = Math.ceil(TIER_2 - total);
+            } else if (total >= TIER_1) {
+              // 699 to 999: Free Shipping, next is 1 gift worth 100
+              var giftRemaining = Math.ceil(TIER_2 - total);
               box.innerHTML =
                 '<div class="cart-unlocked-reward__left">' +
-                  '<span class="cart-unlocked-reward__icon">🎁</span>' +
+                  '<span class="cart-unlocked-reward__icon">🚚</span>' +
                   '<div class="cart-unlocked-reward__info">' +
-                    '<span class="cart-unlocked-reward__title">1 Free Gift (Worth ₹100)</span>' +
-                    '<span class="cart-unlocked-reward__sub">Spend ₹' + remaining + ' more to unlock 1 Free Gift!</span>' +
+                    '<span class="cart-unlocked-reward__title">Free Shipping Unlocked!</span>' +
+                    '<span class="cart-unlocked-reward__sub">Spend ₹' + giftRemaining + ' more to unlock 1 Free Gift (Worth ₹100)!</span>' +
                   '</div>' +
                 '</div>' +
                 '<div class="cart-unlocked-reward__right">' +
-                  '<span class="cart-unlocked-reward__locked-badge">₹999 Goal</span>' +
+                  '<span class="cart-unlocked-reward__badge">FREE SHIPPING</span>' +
+                '</div>';
+            } else {
+              // < 699: Shipping applies
+              var shippingRemaining = Math.ceil(TIER_1 - total);
+              box.innerHTML =
+                '<div class="cart-unlocked-reward__left">' +
+                  '<span class="cart-unlocked-reward__icon">🚚</span>' +
+                  '<div class="cart-unlocked-reward__info">' +
+                    '<span class="cart-unlocked-reward__title">Standard Shipping Applies</span>' +
+                    '<span class="cart-unlocked-reward__sub">Spend ₹' + shippingRemaining + ' more to unlock Free Shipping!</span>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="cart-unlocked-reward__right">' +
+                  '<span class="cart-unlocked-reward__locked-badge">₹699 Goal</span>' +
                 '</div>';
             }
           }
@@ -801,10 +847,10 @@
               var svg = el.querySelector('svg');
               var prefix = svg ? svg.outerHTML + ' ' : '';
               el.innerHTML = prefix + '10% OFF';
-            } else if (txtLower.includes('2499') || txtLower.includes('3 gift')) {
+            } else if (txtLower.includes('2499') || txtLower.includes('2 gift') || txtLower.includes('3 gift')) {
               var svg = el.querySelector('svg');
               var prefix = svg ? svg.outerHTML + ' ' : '';
-              el.innerHTML = prefix + '3 Gifts (₹500)';
+              el.innerHTML = prefix + '2 Gifts (₹500)';
             } else if (txtLower.includes('699') || txtLower.includes('shipping')) {
               var svg = el.querySelector('svg');
               var prefix = svg ? svg.outerHTML + ' ' : '';
@@ -1253,8 +1299,8 @@
                                   1 Gift (₹100)
                                 {%- elsif disc_title_down contains '1599' or disc_title_down contains '10%' -%}
                                   10% OFF
-                                {%- elsif disc_title_down contains '2499' or disc_title_down contains '3 gift' -%}
-                                  3 Gifts (₹500)
+                                {%- elsif disc_title_down contains '2499' or disc_title_down contains '2 gift' or disc_title_down contains '3 gift' -%}
+                                  2 Gifts (₹500)
                                 {%- elsif disc_title_down contains '699' or disc_title_down contains 'shipping' -%}
                                   Free Shipping
                                 {%- else -%}
@@ -1675,8 +1721,8 @@
                       1 Gift (₹100)
                     {%- elsif cart_disc_title_down contains '1599' or cart_disc_title_down contains '10%' -%}
                       10% OFF
-                    {%- elsif cart_disc_title_down contains '2499' or cart_disc_title_down contains '3 gift' -%}
-                      3 Gifts (₹500)
+                    {%- elsif cart_disc_title_down contains '2499' or cart_disc_title_down contains '2 gift' or cart_disc_title_down contains '3 gift' -%}
+                      2 Gifts (₹500)
                     {%- elsif cart_disc_title_down contains '699' or cart_disc_title_down contains 'shipping' -%}
                       Free Shipping
                     {%- else -%}
@@ -1692,7 +1738,7 @@
           <!-- UNLOCKED FREE GIFT REWARD NOTIFICATION -->
           {%- assign reward_cart_total = cart.total_price | divided_by: 100 -%}
           <div
-            class="cart-unlocked-reward"
+            class="cart-unlocked-reward{% if reward_cart_total < tier_1_goal %} cart-unlocked-reward--neutral{% endif %}"
             id="cart-drawer-gift-box"
             role="status"
             aria-live="polite"
@@ -1702,13 +1748,25 @@
               <div class="cart-unlocked-reward__left">
                 <span class="cart-unlocked-reward__icon">🎁</span>
                 <div class="cart-unlocked-reward__info">
-                  <span class="cart-unlocked-reward__title">3 Free Surprise Gifts (Worth ₹500)</span>
+                  <span class="cart-unlocked-reward__title">2 Free Surprise Gifts (Worth ₹500)</span>
                   <span class="cart-unlocked-reward__sub">Unlocked! Included with your order</span>
                 </div>
               </div>
               <div class="cart-unlocked-reward__right">
                 <s class="cart-unlocked-reward__old-price">₹500</s>
                 <span class="cart-unlocked-reward__badge">FREE</span>
+              </div>
+            {%- elsif reward_cart_total >= tier_3_goal -%}
+              {%- assign gift2_remaining = tier_4_goal | minus: reward_cart_total -%}
+              <div class="cart-unlocked-reward__left">
+                <span class="cart-unlocked-reward__icon">🏷️</span>
+                <div class="cart-unlocked-reward__info">
+                  <span class="cart-unlocked-reward__title">10% OFF Applied</span>
+                  <span class="cart-unlocked-reward__sub">Unlocked! 10% discount applied (Spend ₹{{ gift2_remaining }} more for 2 Free Gifts worth ₹500)</span>
+                </div>
+              </div>
+              <div class="cart-unlocked-reward__right">
+                <span class="cart-unlocked-reward__badge">10% OFF</span>
               </div>
             {%- elsif reward_cart_total >= tier_2_goal -%}
               <div class="cart-unlocked-reward__left">
@@ -1722,17 +1780,29 @@
                 <s class="cart-unlocked-reward__old-price">₹100</s>
                 <span class="cart-unlocked-reward__badge">FREE</span>
               </div>
-            {%- else -%}
+            {%- elsif reward_cart_total >= tier_1_goal -%}
               {%- assign gift_remaining = tier_2_goal | minus: reward_cart_total -%}
               <div class="cart-unlocked-reward__left">
-                <span class="cart-unlocked-reward__icon">🎁</span>
+                <span class="cart-unlocked-reward__icon">🚚</span>
                 <div class="cart-unlocked-reward__info">
-                  <span class="cart-unlocked-reward__title">1 Free Gift (Worth ₹100)</span>
-                  <span class="cart-unlocked-reward__sub">Spend ₹{{ gift_remaining }} more to unlock 1 Free Gift!</span>
+                  <span class="cart-unlocked-reward__title">Free Shipping Unlocked!</span>
+                  <span class="cart-unlocked-reward__sub">Spend ₹{{ gift_remaining }} more to unlock 1 Free Gift (Worth ₹100)!</span>
                 </div>
               </div>
               <div class="cart-unlocked-reward__right">
-                <span class="cart-unlocked-reward__locked-badge">₹999 Goal</span>
+                <span class="cart-unlocked-reward__badge">FREE SHIPPING</span>
+              </div>
+            {%- else -%}
+              {%- assign shipping_remaining = tier_1_goal | minus: reward_cart_total -%}
+              <div class="cart-unlocked-reward__left">
+                <span class="cart-unlocked-reward__icon">🚚</span>
+                <div class="cart-unlocked-reward__info">
+                  <span class="cart-unlocked-reward__title">Standard Shipping Applies</span>
+                  <span class="cart-unlocked-reward__sub">Spend ₹{{ shipping_remaining }} more to unlock Free Shipping!</span>
+                </div>
+              </div>
+              <div class="cart-unlocked-reward__right">
+                <span class="cart-unlocked-reward__locked-badge">₹699 Goal</span>
               </div>
             {%- endif -%}
           </div>
