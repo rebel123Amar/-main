@@ -185,10 +185,11 @@
   </div>
 
   {%- comment -%} Instagram Link — always shown below reviews {%- endcomment -%}
-  <div class="rebel-reviews__instagram" id="rebel-instagram-link" style="display:none;">
+  {%- comment -%} Instagram Link — always shown below reviews {%- endcomment -%}
+  <div class="rebel-reviews__instagram" id="rebel-instagram-link">
     <span class="rebel-reviews__instagram-icon">📸</span>
-    To check all reviews kindly visit our Instagram highlight
-    <a href="#" id="rebel-ig-url" target="_blank" rel="noopener noreferrer">'Reviews'</a>
+    <span>To check all reviews kindly visit our Instagram highlight</span>
+    <a href="{{ block.settings.instagram_url | default: 'https://www.instagram.com/rebelgifts/' }}" id="rebel-ig-url" target="_blank" rel="noopener noreferrer">'Reviews'</a>
   </div>
 
 </div>
@@ -213,6 +214,13 @@
       "label": "App URL",
       "default": "https://main-pink-phi.vercel.app",
       "info": "Your deployed Rebel app URL (e.g. https://rebel-app.railway.app)"
+    },
+    {
+      "type": "text",
+      "id": "instagram_url",
+      "label": "Instagram Highlight URL",
+      "default": "https://www.instagram.com/rebelgifts/",
+      "info": "Link to your Instagram highlight for customer reviews"
     },
     {
       "type": "range",

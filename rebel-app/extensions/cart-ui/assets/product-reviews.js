@@ -272,10 +272,12 @@
         }
       }
 
-      // Instagram link
-      if (data.instagramUrl && igLink && igUrl) {
-        igUrl.href = data.instagramUrl;
+      // Instagram link — always keep visible as requested
+      if (igLink) {
         igLink.style.display = "flex";
+      }
+      if (data.instagramUrl && igUrl) {
+        igUrl.href = data.instagramUrl;
       }
 
       currentPage = data.page;

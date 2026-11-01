@@ -414,6 +414,81 @@
           border-color: #e5e7eb !important;
         }
 
+        /* ================= ORDER NOTE / REQUEST REGARDING ORDER ================= */
+        .cart-drawer__order-note {
+          margin: 10px 0 14px 0 !important;
+          padding: 12px 14px !important;
+          background: #ffffff !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 8px !important;
+          box-sizing: border-box !important;
+          width: 100% !important;
+          font-family: inherit !important;
+        }
+
+        cart-drawer.is-empty .cart-drawer__order-note,
+        .drawer__inner.is-empty .cart-drawer__order-note {
+          display: none !important;
+        }
+
+        .cart-drawer__order-note-header {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          margin-bottom: 8px !important;
+        }
+
+        .cart-drawer__order-note-icon {
+          font-size: 15px !important;
+          line-height: 1 !important;
+        }
+
+        .cart-drawer__order-note-label {
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          color: #111827 !important;
+          margin: 0 !important;
+          cursor: pointer !important;
+          flex: 1 1 auto !important;
+        }
+
+        .cart-drawer__order-note-badge {
+          font-size: 11px !important;
+          color: #6b7280 !important;
+          font-weight: 500 !important;
+        }
+
+        .cart-drawer__order-note-input {
+          width: 100% !important;
+          box-sizing: border-box !important;
+          border: 1px solid #d1d5db !important;
+          border-radius: 6px !important;
+          padding: 8px 10px !important;
+          font-size: 12.5px !important;
+          font-family: inherit !important;
+          color: #111827 !important;
+          background: #f9fafb !important;
+          resize: vertical !important;
+          min-height: 54px !important;
+          line-height: 1.4 !important;
+          transition: border-color 0.2s, background-color 0.2s !important;
+        }
+
+        .cart-drawer__order-note-input:focus {
+          outline: none !important;
+          border-color: #000000 !important;
+          background: #ffffff !important;
+        }
+
+        .cart-drawer__order-note-status {
+          font-size: 11px !important;
+          color: #16a34a !important;
+          font-weight: 500 !important;
+          margin-top: 4px !important;
+          display: none;
+          text-align: right !important;
+        }
+
         .cart-unlocked-reward--neutral .cart-unlocked-reward__title {
           color: #111827 !important;
         }
@@ -758,6 +833,9 @@
             box.style.setProperty("display", "flex", "important");
             box.classList.toggle("cart-unlocked-reward--neutral", total < TIER_1);
 
+          // Sync gift and reward attributes to Shopify order session
+          syncCartGiftAttributes(total);
+
             if (total >= TIER_4) {
               // 2499+: 2 gifts worth 500/-
               box.innerHTML =
@@ -922,6 +1000,93 @@
           document.addEventListener('DOMContentLoaded', function () { scheduleRender(0); });
         } else {
           scheduleRender(0);
+        }
+
+        // ── Helper: Sync Free Gift and Reward Attributes to Shopify Order ──
+        var _lastSyncedGift = null;
+        function syncCartGiftAttributes(total) {
+          var giftVal = "None";
+          var rewardVal = "None";
+          if (total >= TIER_4) {
+            giftVal = "2 Free Surprise Gifts (Worth ₹500)";
+            rewardVal = "2 Free Surprise Gifts (Worth ₹500)";
+          } else if (total >= TIER_3) {
+            giftVal = "None";
+            rewardVal = "10% OFF";
+          } else if (total >= TIER_2) {
+            giftVal = "1 Free Surprise Gift (Worth ₹100)";
+            rewardVal = "1 Free Surprise Gift (Worth ₹100)";
+          } else if (total >= TIER_1) {
+            giftVal = "None";
+            rewardVal = "Free Shipping";
+          }
+
+          var freeGiftInput = document.getElementById("CartDrawer-Attr-FreeGift");
+          var rewardOfferInput = document.getElementById("CartDrawer-Attr-RewardOffer");
+          if (freeGiftInput) freeGiftInput.value = giftVal;
+          if (rewardOfferInput) rewardOfferInput.value = rewardVal;
+
+          if (_lastSyncedGift === giftVal) return;
+          _lastSyncedGift = giftVal;
+
+          fetch("/cart/update.js", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              attributes: {
+                "Free Gift": giftVal,
+                "Reward Offer": rewardVal
+              }
+            })
+          }).catch(function() {});
+        }
+
+        // ── Auto-save Order Note to Shopify cart session ──
+        function setupOrderNoteAutoSave() {
+          var noteInput = document.getElementById("CartDrawer-OrderNote");
+          var noteStatus = document.getElementById("CartDrawer-OrderNoteStatus");
+          var noteTimer = null;
+          if (noteInput && !noteInput.__hasListener) {
+            noteInput.__hasListener = true;
+            noteInput.addEventListener("input", function() {
+              clearTimeout(noteTimer);
+              noteTimer = setTimeout(function() {
+                fetch("/cart/update.js", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ note: noteInput.value })
+                }).then(function(r) {
+                  if (r.ok && noteStatus) {
+                    noteStatus.style.display = "block";
+                    setTimeout(function() { noteStatus.style.display = "none"; }, 2500);
+                  }
+                }).catch(function() {});
+              }, 600);
+            });
+          }
+
+          var checkoutBtn = document.getElementById("CartDrawer-Checkout");
+          if (checkoutBtn && !checkoutBtn.__hasGiftListener) {
+            checkoutBtn.__hasGiftListener = true;
+            checkoutBtn.addEventListener("click", function() {
+              var curNote = (document.getElementById("CartDrawer-OrderNote") || {}).value;
+              var curGift = (document.getElementById("CartDrawer-Attr-FreeGift") || {}).value || "None";
+              var curReward = (document.getElementById("CartDrawer-Attr-RewardOffer") || {}).value || "None";
+              if (navigator.sendBeacon) {
+                var fd = new FormData();
+                if (typeof curNote === "string") fd.append("note", curNote);
+                fd.append("attributes[Free Gift]", curGift);
+                fd.append("attributes[Reward Offer]", curReward);
+                navigator.sendBeacon("/cart/update", fd);
+              }
+            });
+          }
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", setupOrderNoteAutoSave);
+        } else {
+          setupOrderNoteAutoSave();
         }
 
         // ── Click listeners for cart openers, quantity buttons, etc. ──────────
@@ -1127,6 +1292,9 @@
           class="cart__contents cart-drawer__form"
           method="post"
         >
+          <!-- Synced Cart & Order Attributes for Rewards & Gifts -->
+          <input type="hidden" name="attributes[Free Gift]" id="CartDrawer-Attr-FreeGift" value="{{ cart.attributes['Free Gift'] | escape }}" />
+          <input type="hidden" name="attributes[Reward Offer]" id="CartDrawer-Attr-RewardOffer" value="{{ cart.attributes['Reward Offer'] | escape }}" />
           <div id="CartDrawer-CartItems" class="drawer__contents js-contents">
             {%- if cart != empty -%}
               <div class="drawer__cart-items-wrapper">
@@ -1685,25 +1853,26 @@
         </form>
       </cart-drawer-items>
       <div class="drawer__footer">
-        {%- if settings.show_cart_note -%}
-          <details id="Details-CartDrawer">
-            <summary>
-              <span class="summary__title">
-                {{ 'sections.cart.note' | t }}
-                {{- 'icon-caret.svg' | inline_asset_content -}}
-              </span>
-            </summary>
-            <cart-note class="cart__note field">
-              <label class="visually-hidden" for="CartDrawer-Note">{{ 'sections.cart.note' | t }}</label>
-              <textarea
-                id="CartDrawer-Note"
-                class="text-area text-area--resize-vertical field__input"
-                name="note"
-                placeholder="{{ 'sections.cart.note' | t }}"
-              >{{ cart.note }}</textarea>
-            </cart-note>
-          </details>
-        {%- endif -%}
+        <!-- Note / Request regarding the order -->
+        <div class="cart-drawer__order-note" id="CartDrawer-OrderNote-Container">
+          <div class="cart-drawer__order-note-header">
+            <span class="cart-drawer__order-note-icon" aria-hidden="true">📝</span>
+            <label class="cart-drawer__order-note-label" for="CartDrawer-OrderNote">
+              Note / request regarding the order
+            </label>
+            <span class="cart-drawer__order-note-badge">Optional</span>
+          </div>
+          <textarea
+            id="CartDrawer-OrderNote"
+            class="cart-drawer__order-note-input"
+            name="note"
+            form="CartDrawer-Form"
+            placeholder="Add any special instructions, customization note, or delivery request for your order..."
+            rows="2"
+            maxlength="1000"
+          >{{ cart.note }}</textarea>
+          <div class="cart-drawer__order-note-status" id="CartDrawer-OrderNoteStatus">✓ Saved to order</div>
+        </div>
 
         <!-- Start blocks -->
         <!-- Subtotals -->

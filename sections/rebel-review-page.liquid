@@ -1079,6 +1079,13 @@
       });
     })();
   </script>
+
+  <!-- Instagram Highlights Callout -->
+  <div style="margin-top: 24px; padding: 14px 18px; background: rgba(255, 255, 255, 0.95); border: 1px solid var(--border-pink); border-radius: 12px; font-size: 13.5px; color: var(--text-dark); display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; text-align: center; box-shadow: 0 2px 10px rgba(225, 29, 72, 0.05); margin-left: auto; margin-right: auto; max-width: 540px;">
+    <span style="font-size: 18px;">📸</span>
+    <span>To check all reviews kindly visit our Instagram highlight</span>
+    <a href="{{ section.settings.instagram_url | default: 'https://www.instagram.com/rebelgifts/' }}" target="_blank" rel="noopener noreferrer" style="color: var(--dark-pink); font-weight: 700; text-decoration: none;">'Reviews'</a>
+  </div>
 </div>
 
 {% schema %}
@@ -1090,6 +1097,12 @@
       "id": "heading",
       "label": "Heading",
       "default": "Review Your Order"
+    },
+    {
+      "type": "text",
+      "id": "instagram_url",
+      "label": "Instagram Highlight URL",
+      "default": "https://www.instagram.com/rebelgifts/"
     }
   ],
   "presets": [
