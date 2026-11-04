@@ -416,6 +416,7 @@
 
         /* ================= ORDER NOTE / REQUEST REGARDING ORDER ================= */
         .cart-drawer__order-note {
+          display: none !important;
           margin: 10px 0 14px 0 !important;
           padding: 12px 14px !important;
           background: #ffffff !important;
@@ -1521,17 +1522,15 @@
           var checkoutBtn = document.getElementById("CartDrawer-Checkout");
           if (checkoutBtn && !checkoutBtn.__hasGiftListener) {
             checkoutBtn.__hasGiftListener = true;
-            checkoutBtn.addEventListener("click", function() {
-              var curNote = (document.getElementById("CartDrawer-OrderNote") || {}).value;
-              var curGift = (document.getElementById("CartDrawer-Attr-FreeGift") || {}).value || "None";
-              var curReward = (document.getElementById("CartDrawer-Attr-RewardOffer") || {}).value || "None";
-              if (navigator.sendBeacon) {
-                var fd = new FormData();
-                if (typeof curNote === "string") fd.append("note", curNote);
-                fd.append("attributes[Free Gift]", curGift);
-                fd.append("attributes[Reward Offer]", curReward);
-                navigator.sendBeacon("/cart/update", fd);
+            checkoutBtn.addEventListener("click", function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              if (typeof window.__openRebelPreCheckout === "function") {
+                window.__openRebelPreCheckout();
+              } else {
+                window.location.href = "/checkout";
               }
+              return false;
             });
           }
         }
@@ -2306,26 +2305,14 @@
         </form>
       </cart-drawer-items>
       <div class="drawer__footer">
-        <!-- Note / Request regarding the order -->
-        <div class="cart-drawer__order-note" id="CartDrawer-OrderNote-Container">
-          <div class="cart-drawer__order-note-header">
-            <span class="cart-drawer__order-note-icon" aria-hidden="true">📝</span>
-            <label class="cart-drawer__order-note-label" for="CartDrawer-OrderNote">
-              Note / request regarding the order
-            </label>
-            <span class="cart-drawer__order-note-badge">Optional</span>
-          </div>
-          <textarea
-            id="CartDrawer-OrderNote"
-            class="cart-drawer__order-note-input"
-            name="note"
-            form="CartDrawer-Form"
-            placeholder="Add any special instructions, customization note, or delivery request for your order..."
-            rows="2"
-            maxlength="1000"
-          >{{ cart.note }}</textarea>
-          <div class="cart-drawer__order-note-status" id="CartDrawer-OrderNoteStatus">✓ Saved to order</div>
-        </div>
+        <!-- Order note is requested in Pre-Checkout screen; hidden input maintains form bindings -->
+        <input
+          type="hidden"
+          id="CartDrawer-OrderNote"
+          name="note"
+          form="CartDrawer-Form"
+          value="{{ cart.note }}"
+        >
 
         <!-- Start blocks -->
         <!-- Subtotals -->
@@ -2479,11 +2466,11 @@
 
         <div class="cart__ctas" {{ block.shopify_attributes }}>
           <button
-            type="submit"
+            type="button"
             id="CartDrawer-Checkout"
             class="cart__checkout-button button"
             name="checkout"
-            form="CartDrawer-Form"
+            onclick="event.preventDefault(); event.stopPropagation(); if (typeof window.__openRebelPreCheckout === 'function') { window.__openRebelPreCheckout(); } else { window.location.href='/checkout'; } return false;"
             {% if cart == empty %}
               disabled
             {% endif %}
@@ -2495,10 +2482,10 @@
     </div>
   </div>
   <!-- ================= PRE-CHECKOUT INTERSTITIAL SCREEN ================= -->
-  <div class="rebel-pre-checkout-overlay" id="rebel-pre-checkout-overlay" role="dialog" aria-modal="true" aria-labelledby="rebel-pre-checkout-title">
+  <div class="rebel-pre-checkout-overlay" id="rebel-pre-checkout-overlay" role="dialog" aria-modal="true" aria-labelledby="rebel-pre-checkout-title" style="display: none;">
     <div class="rebel-pre-checkout-modal">
       <!-- Close Button -->
-      <button type="button" class="rebel-pre-checkout__close-btn" id="rebel-pre-checkout-close" aria-label="Close modal">×</button>
+      <button type="button" class="rebel-pre-checkout__close-btn" id="rebel-pre-checkout-close" onclick="window.__closeRebelPreCheckout && window.__closeRebelPreCheckout()" aria-label="Close modal">×</button>
 
       <!-- Header -->
       <div class="rebel-pre-checkout__header">
@@ -2577,7 +2564,7 @@
           <span id="rebel-pre-checkout-submit-text">Proceed to Checkout</span>
           <span class="rebel-arrow" aria-hidden="true">➔</span>
         </button>
-        <button type="button" class="rebel-pre-checkout__back-btn" id="rebel-pre-checkout-back">
+        <button type="button" class="rebel-pre-checkout__back-btn" id="rebel-pre-checkout-back" onclick="window.__closeRebelPreCheckout && window.__closeRebelPreCheckout()">
           ← Back to Cart
         </button>
         <div class="rebel-pre-checkout__security">
@@ -2589,108 +2576,114 @@
 
   <script>
     (function () {
-      function initPreCheckoutModal() {
+      // Global self-healing open function
+      window.__openRebelPreCheckout = function () {
         var overlay = document.getElementById("rebel-pre-checkout-overlay");
         if (!overlay) return;
 
-        // Ensure overlay is at body level so no transform/overflow clips it
+        // Move overlay to document.body so no drawer clip, overflow, or transform hides it
         if (overlay.parentElement !== document.body) {
           document.body.appendChild(overlay);
         }
 
-        var closeBtn = document.getElementById("rebel-pre-checkout-close");
-        var backBtn = document.getElementById("rebel-pre-checkout-back");
-        var submitBtn = document.getElementById("rebel-pre-checkout-submit");
-        var submitText = document.getElementById("rebel-pre-checkout-submit-text");
         var modalNoteInput = document.getElementById("rebel-pre-checkout-note-input");
-
-        function closeModal() {
-          overlay.classList.remove("active");
-          overlay.style.display = "none";
+        var drawerNote = document.getElementById("CartDrawer-OrderNote");
+        if (drawerNote && modalNoteInput && (!modalNoteInput.value || modalNoteInput.value.trim() === "")) {
+          modalNoteInput.value = drawerNote.value || "";
         }
 
-        if (closeBtn) closeBtn.onclick = closeModal;
-        if (backBtn) backBtn.onclick = closeModal;
-        overlay.onclick = function(e) {
-          if (e.target === overlay) closeModal();
+        // Calculate current cart total
+        var wrapper = document.getElementById("cart-reward-wrapper");
+        var currentTotal = wrapper ? parseFloat(wrapper.getAttribute("data-cart-total") || "0") : 0;
+        if (isNaN(currentTotal) || currentTotal <= 0) {
+          var subtotalEl = document.querySelector(".totals__total-value, #CartDrawer-Subtotal, .cart-subtotal, [data-cart-subtotal]");
+          if (subtotalEl) {
+            currentTotal = parseFloat(subtotalEl.textContent.replace(/[^0-9.]/g, "")) || 0;
+          }
+        }
+
+        var giftCard = document.getElementById("rebel-pre-checkout-gift-card");
+        var giftIcon = document.getElementById("rebel-pre-checkout-gift-icon");
+        var giftTitle = document.getElementById("rebel-pre-checkout-gift-title");
+        var giftSub = document.getElementById("rebel-pre-checkout-gift-sub");
+        var giftBadge = document.getElementById("rebel-pre-checkout-gift-badge");
+
+        if (giftCard && giftTitle && giftSub && giftBadge) {
+          if (currentTotal >= 2499) {
+            giftIcon.textContent = "🎁";
+            giftTitle.textContent = "2 Free Surprise Gifts (Worth ₹500)";
+            giftSub.textContent = "Unlocked! Will be packed with your order";
+            giftBadge.textContent = "FREE GIFT";
+            giftBadge.style.background = "#16a34a";
+            giftCard.style.display = "flex";
+          } else if (currentTotal >= 1599) {
+            giftIcon.textContent = "🏷️";
+            giftTitle.textContent = "10% OFF Discount";
+            giftSub.textContent = "Unlocked! Applied at checkout";
+            giftBadge.textContent = "10% OFF";
+            giftBadge.style.background = "#0f172a";
+            giftCard.style.display = "flex";
+          } else if (currentTotal >= 999) {
+            giftIcon.textContent = "🎁";
+            giftTitle.textContent = "1 Free Surprise Gift (Worth ₹100)";
+            giftSub.textContent = "Unlocked! Will be packed with your order";
+            giftBadge.textContent = "FREE GIFT";
+            giftBadge.style.background = "#16a34a";
+            giftCard.style.display = "flex";
+          } else if (currentTotal >= 699) {
+            giftIcon.textContent = "🚚";
+            giftTitle.textContent = "Free Shipping Unlocked";
+            giftSub.textContent = "No shipping charges applied on your order";
+            giftBadge.textContent = "FREE";
+            giftBadge.style.background = "#16a34a";
+            giftCard.style.display = "flex";
+          } else {
+            giftIcon.textContent = "🚚";
+            var rem = Math.ceil(699 - currentTotal);
+            giftTitle.textContent = "Standard Shipping Applies";
+            giftSub.textContent = "Add ₹" + rem + " more to unlock Free Shipping!";
+            giftBadge.textContent = "₹699 GOAL";
+            giftBadge.style.background = "#64748b";
+            giftCard.style.display = "flex";
+          }
+        }
+
+        overlay.style.setProperty("display", "flex", "important");
+        overlay.classList.add("active");
+        document.body.classList.add("rebel-modal-open");
+        if (modalNoteInput) modalNoteInput.focus();
+      };
+
+      window.__closeRebelPreCheckout = function () {
+        var overlay = document.getElementById("rebel-pre-checkout-overlay");
+        if (overlay) {
+          overlay.classList.remove("active");
+          overlay.style.setProperty("display", "none", "important");
+          document.body.classList.remove("rebel-modal-open");
+        }
+      };
+
+      function setupModalEvents() {
+        var overlay = document.getElementById("rebel-pre-checkout-overlay");
+        if (!overlay) return;
+
+        if (overlay.parentElement !== document.body) {
+          document.body.appendChild(overlay);
+        }
+
+        overlay.onclick = function (e) {
+          if (e.target === overlay) window.__closeRebelPreCheckout();
         };
 
-        // Function to open modal
-        window.__openRebelPreCheckout = function() {
-          // Read current note from drawer
-          var drawerNote = document.getElementById("CartDrawer-OrderNote");
-          if (drawerNote && modalNoteInput) {
-            modalNoteInput.value = drawerNote.value || "";
-          }
-
-          // Update gift & reward banner inside modal based on current total
-          var wrapper = document.getElementById("cart-reward-wrapper");
-          var currentTotal = wrapper ? parseFloat(wrapper.getAttribute("data-cart-total") || "0") : 0;
-          if (isNaN(currentTotal) || currentTotal <= 0) {
-            var subtotalEl = document.querySelector(".totals__total-value");
-            if (subtotalEl) {
-              var cleaned = subtotalEl.textContent.replace(/[^0-9.]/g, "");
-              currentTotal = parseFloat(cleaned) || 0;
-            }
-          }
-
-          var giftCard = document.getElementById("rebel-pre-checkout-gift-card");
-          var giftIcon = document.getElementById("rebel-pre-checkout-gift-icon");
-          var giftTitle = document.getElementById("rebel-pre-checkout-gift-title");
-          var giftSub = document.getElementById("rebel-pre-checkout-gift-sub");
-          var giftBadge = document.getElementById("rebel-pre-checkout-gift-badge");
-
-          if (giftCard && giftTitle && giftSub && giftBadge) {
-            if (currentTotal >= 2499) {
-              giftIcon.textContent = "🎁";
-              giftTitle.textContent = "2 Free Surprise Gifts (Worth ₹500)";
-              giftSub.textContent = "Unlocked! Will be packed with your order";
-              giftBadge.textContent = "FREE GIFT";
-              giftBadge.style.background = "#16a34a";
-              giftCard.style.display = "flex";
-            } else if (currentTotal >= 1599) {
-              giftIcon.textContent = "🏷️";
-              giftTitle.textContent = "10% OFF Discount";
-              giftSub.textContent = "Unlocked! Applied at checkout";
-              giftBadge.textContent = "10% OFF";
-              giftBadge.style.background = "#0f172a";
-              giftCard.style.display = "flex";
-            } else if (currentTotal >= 999) {
-              giftIcon.textContent = "🎁";
-              giftTitle.textContent = "1 Free Surprise Gift (Worth ₹100)";
-              giftSub.textContent = "Unlocked! Will be packed with your order";
-              giftBadge.textContent = "FREE GIFT";
-              giftBadge.style.background = "#16a34a";
-              giftCard.style.display = "flex";
-            } else if (currentTotal >= 699) {
-              giftIcon.textContent = "🚚";
-              giftTitle.textContent = "Free Shipping Unlocked";
-              giftSub.textContent = "No shipping charges applied on your order";
-              giftBadge.textContent = "FREE";
-              giftBadge.style.background = "#16a34a";
-              giftCard.style.display = "flex";
-            } else {
-              giftIcon.textContent = "🚚";
-              var rem = Math.ceil(699 - currentTotal);
-              giftTitle.textContent = "Standard Shipping Applies";
-              giftSub.textContent = "Add ₹" + rem + " more to unlock Free Shipping!";
-              giftBadge.textContent = "₹699 GOAL";
-              giftBadge.style.background = "#64748b";
-              giftCard.style.display = "flex";
-            }
-          }
-
-          overlay.style.display = "flex";
-          overlay.classList.add("active");
-          if (modalNoteInput) modalNoteInput.focus();
-        };
-
-        // Handle Final Proceed to Checkout Click
-        if (submitBtn) {
-          submitBtn.onclick = function() {
+        var submitBtn = document.getElementById("rebel-pre-checkout-submit");
+        if (submitBtn && !submitBtn.__hasRebelSubmit) {
+          submitBtn.__hasRebelSubmit = true;
+          submitBtn.onclick = function () {
             submitBtn.disabled = true;
+            var submitText = document.getElementById("rebel-pre-checkout-submit-text");
             if (submitText) submitText.textContent = "Saving & Going to Checkout...";
 
+            var modalNoteInput = document.getElementById("rebel-pre-checkout-note-input");
             var noteVal = modalNoteInput ? modalNoteInput.value.trim() : "";
             var drawerNote = document.getElementById("CartDrawer-OrderNote");
             if (drawerNote) drawerNote.value = noteVal;
@@ -2698,7 +2691,7 @@
             var wrapper = document.getElementById("cart-reward-wrapper");
             var currentTotal = wrapper ? parseFloat(wrapper.getAttribute("data-cart-total") || "0") : 0;
             if (isNaN(currentTotal) || currentTotal <= 0) {
-              var subtotalEl = document.querySelector(".totals__total-value");
+              var subtotalEl = document.querySelector(".totals__total-value, #CartDrawer-Subtotal, .cart-subtotal, [data-cart-subtotal]");
               if (subtotalEl) {
                 currentTotal = parseFloat(subtotalEl.textContent.replace(/[^0-9.]/g, "")) || 0;
               }
@@ -2729,8 +2722,8 @@
             var syncPromise = Promise.resolve();
             if (lineGift) {
               syncPromise = fetch("/cart.js")
-                .then(function(r) { return r.json(); })
-                .then(function(c) {
+                .then(function (r) { return r.json(); })
+                .then(function (c) {
                   if (c && c.items && c.items.length) {
                     var item = c.items[0];
                     var p = item.properties || {};
@@ -2741,10 +2734,10 @@
                       body: JSON.stringify({ id: item.key, quantity: item.quantity, properties: p })
                     });
                   }
-                }).catch(function() {});
+                }).catch(function () {});
             }
 
-            syncPromise.then(function() {
+            syncPromise.then(function () {
               return fetch("/cart/update.js", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -2758,47 +2751,55 @@
                   }
                 })
               });
-            }).then(function() {
-              window.location.href = "/checkout";
-            }).catch(function() {
-              window.location.href = "/checkout";
+            }).then(function () {
+              window.location.href = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root ? window.Shopify.routes.root : "/") + "checkout";
+            }).catch(function () {
+              window.location.href = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root ? window.Shopify.routes.root : "/") + "checkout";
             });
           };
         }
+      }
 
-        // Intercept checkout clicks across the store
-        document.addEventListener("click", function(e) {
-          var target = e.target;
-          if (!target) return;
-          var chkBtn = target.closest('#CartDrawer-Checkout, button[name="checkout"], input[name="checkout"], .cart__checkout-button');
-          if (chkBtn && !chkBtn.closest("#rebel-pre-checkout-overlay")) {
+      // Global Click Interceptor across the document
+      document.addEventListener("click", function (e) {
+        var target = e.target;
+        if (!target) return;
+        var chkBtn = target.closest('#CartDrawer-Checkout, button[name="checkout"], input[name="checkout"], .cart__checkout-button, a[href*="/checkout"], .rebel-drawer-checkout-btn, #checkout');
+        if (chkBtn && !chkBtn.closest("#rebel-pre-checkout-overlay")) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          if (typeof window.__openRebelPreCheckout === "function") {
+            window.__openRebelPreCheckout();
+          } else {
+            window.location.href = "/checkout";
+          }
+          return false;
+        }
+      }, true);
+
+      // Global Submit Interceptor across forms targeting checkout
+      document.addEventListener("submit", function (e) {
+        var form = e.target;
+        if (!form) return;
+        var isCart = form.id === "CartDrawer-Form" || (form.action && form.action.includes("/cart")) || form.getAttribute("action") === "/cart";
+        if (isCart) {
+          if (e.submitter && (e.submitter.name === "checkout" || e.submitter.id === "CartDrawer-Checkout" || (e.submitter.className && e.submitter.className.includes("checkout")))) {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            window.__openRebelPreCheckout();
+            if (typeof window.__openRebelPreCheckout === "function") {
+              window.__openRebelPreCheckout();
+            }
             return false;
           }
-        }, true);
-
-        // Intercept form checkout submit
-        document.addEventListener("submit", function(e) {
-          var form = e.target;
-          if (!form) return;
-          if (form.id === "CartDrawer-Form" || (form.action && form.action.includes("/cart"))) {
-            if (e.submitter && (e.submitter.name === "checkout" || e.submitter.id === "CartDrawer-Checkout")) {
-              e.preventDefault();
-              e.stopPropagation();
-              window.__openRebelPreCheckout();
-              return false;
-            }
-          }
-        }, true);
-      }
+        }
+      }, true);
 
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initPreCheckoutModal);
+        document.addEventListener("DOMContentLoaded", setupModalEvents);
       } else {
-        initPreCheckoutModal();
+        setupModalEvents();
       }
     })();
   </script>
