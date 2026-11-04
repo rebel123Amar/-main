@@ -583,6 +583,408 @@
             font-size: 10.5px !important;
           }
         }
+
+        /* ================= PRE-CHECKOUT INTERSTITIAL SCREEN ================= */
+        .rebel-pre-checkout-overlay {
+          display: none;
+          position: fixed !important;
+          inset: 0 !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          background: rgba(15, 23, 42, 0.72) !important;
+          backdrop-filter: blur(6px) !important;
+          -webkit-backdrop-filter: blur(6px) !important;
+          z-index: 2147483647 !important;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 16px !important;
+          box-sizing: border-box !important;
+          overflow-y: auto !important;
+        }
+
+        .rebel-pre-checkout-overlay.active {
+          display: flex !important;
+          animation: rebelFadeIn 0.25s ease-out forwards;
+        }
+
+        @keyframes rebelFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .rebel-pre-checkout-modal {
+          background: #ffffff !important;
+          border-radius: 18px !important;
+          width: 100% !important;
+          max-width: 480px !important;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+          padding: 24px 22px 20px !important;
+          position: relative !important;
+          box-sizing: border-box !important;
+          font-family: inherit !important;
+          color: #111827 !important;
+          animation: rebelSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          margin: auto !important;
+        }
+
+        @keyframes rebelSlideUp {
+          from { transform: translateY(20px) scale(0.97); opacity: 0; }
+          to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .rebel-pre-checkout__close-btn {
+          position: absolute !important;
+          top: 14px !important;
+          right: 14px !important;
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 50% !important;
+          border: 1px solid #e5e7eb !important;
+          background: #f9fafb !important;
+          color: #4b5563 !important;
+          font-size: 18px !important;
+          line-height: 1 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease !important;
+          padding: 0 !important;
+        }
+
+        .rebel-pre-checkout__close-btn:hover {
+          background: #e5e7eb !important;
+          color: #111827 !important;
+          transform: rotate(90deg) !important;
+        }
+
+        .rebel-pre-checkout__header {
+          text-align: center !important;
+          margin-bottom: 18px !important;
+          padding-right: 20px !important;
+          padding-left: 20px !important;
+        }
+
+        .rebel-pre-checkout__badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          background: #fff1f2 !important;
+          color: #e11d48 !important;
+          border: 1px solid #fecdd3 !important;
+          border-radius: 999px !important;
+          padding: 4px 12px !important;
+          font-size: 11.5px !important;
+          font-weight: 700 !important;
+          letter-spacing: 0.02em !important;
+          text-transform: uppercase !important;
+          margin-bottom: 8px !important;
+        }
+
+        .rebel-pre-checkout__title {
+          font-size: 20px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          line-height: 1.25 !important;
+          margin: 0 0 6px 0 !important;
+          letter-spacing: -0.02em !important;
+        }
+
+        .rebel-pre-checkout__subtitle {
+          font-size: 13px !important;
+          color: #64748b !important;
+          margin: 0 !important;
+          line-height: 1.4 !important;
+        }
+
+        .rebel-pre-checkout__gift-card {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
+          background: #f0fdf4 !important;
+          border: 1.5px solid #86efac !important;
+          border-radius: 12px !important;
+          padding: 12px 14px !important;
+          margin-bottom: 16px !important;
+          box-sizing: border-box !important;
+        }
+
+        .rebel-pre-checkout__gift-left {
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          flex: 1 1 auto !important;
+          min-width: 0 !important;
+        }
+
+        .rebel-pre-checkout__gift-icon {
+          font-size: 24px !important;
+          line-height: 1 !important;
+          flex-shrink: 0 !important;
+        }
+
+        .rebel-pre-checkout__gift-title {
+          font-size: 13.5px !important;
+          font-weight: 700 !important;
+          color: #14532d !important;
+          line-height: 1.3 !important;
+          display: block !important;
+        }
+
+        .rebel-pre-checkout__gift-sub {
+          font-size: 11.5px !important;
+          color: #166534 !important;
+          display: block !important;
+        }
+
+        .rebel-pre-checkout__gift-badge {
+          background: #16a34a !important;
+          color: #ffffff !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          padding: 4px 8px !important;
+          border-radius: 6px !important;
+          letter-spacing: 0.04em !important;
+          text-transform: uppercase !important;
+          white-space: nowrap !important;
+        }
+
+        .rebel-pre-checkout__section {
+          margin-bottom: 16px !important;
+        }
+
+        .rebel-pre-checkout__label {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          font-size: 13px !important;
+          font-weight: 700 !important;
+          color: #1e293b !important;
+          margin-bottom: 6px !important;
+        }
+
+        .rebel-pre-checkout__optional {
+          font-size: 11px !important;
+          font-weight: 500 !important;
+          color: #94a3b8 !important;
+        }
+
+        .rebel-pre-checkout__textarea {
+          width: 100% !important;
+          box-sizing: border-box !important;
+          border: 1.5px solid #cbd5e1 !important;
+          border-radius: 10px !important;
+          padding: 10px 12px !important;
+          font-size: 13px !important;
+          font-family: inherit !important;
+          color: #0f172a !important;
+          background: #ffffff !important;
+          resize: vertical !important;
+          min-height: 64px !important;
+          line-height: 1.45 !important;
+          transition: border-color 0.2s, box-shadow 0.2s !important;
+        }
+
+        .rebel-pre-checkout__textarea:focus {
+          outline: none !important;
+          border-color: #000000 !important;
+          box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06) !important;
+        }
+
+        .rebel-pre-checkout__ig-box {
+          background: linear-gradient(135deg, #fff0f5 0%, #fdf2f8 50%, #fbf5ff 100%) !important;
+          border: 1.5px solid #fbcfe8 !important;
+          border-radius: 14px !important;
+          padding: 14px 16px !important;
+          margin-bottom: 18px !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 10px !important;
+          box-shadow: 0 2px 8px rgba(225, 29, 72, 0.04) !important;
+        }
+
+        .rebel-pre-checkout__ig-top {
+          display: flex !important;
+          align-items: center !important;
+          gap: 12px !important;
+        }
+
+        .rebel-pre-checkout__ig-icon {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 10px !important;
+          background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          color: #ffffff !important;
+          flex-shrink: 0 !important;
+          box-shadow: 0 4px 10px rgba(220, 39, 67, 0.25) !important;
+        }
+
+        .rebel-pre-checkout__ig-info {
+          flex: 1 1 auto !important;
+          min-width: 0 !important;
+        }
+
+        .rebel-pre-checkout__ig-handle {
+          font-size: 14px !important;
+          font-weight: 800 !important;
+          color: #0f172a !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          line-height: 1.2 !important;
+        }
+
+        .rebel-pre-checkout__ig-verified {
+          color: #0ea5e9 !important;
+          font-size: 13px !important;
+        }
+
+        .rebel-pre-checkout__ig-text {
+          font-size: 12px !important;
+          color: #475569 !important;
+          margin-top: 2px !important;
+          line-height: 1.35 !important;
+        }
+
+        .rebel-pre-checkout__ig-action {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 10px !important;
+          padding-top: 8px !important;
+          border-top: 1px dashed #fbcfe8 !important;
+          flex-wrap: wrap !important;
+        }
+
+        .rebel-pre-checkout__ig-follow-link {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+          color: #ffffff !important;
+          font-size: 12.5px !important;
+          font-weight: 700 !important;
+          padding: 8px 14px !important;
+          border-radius: 999px !important;
+          text-decoration: none !important;
+          transition: transform 0.2s, box-shadow 0.2s !important;
+          box-shadow: 0 3px 8px rgba(220, 39, 67, 0.2) !important;
+        }
+
+        .rebel-pre-checkout__ig-follow-link:hover {
+          transform: translateY(-1px) !important;
+          box-shadow: 0 5px 12px rgba(220, 39, 67, 0.3) !important;
+          color: #ffffff !important;
+        }
+
+        .rebel-pre-checkout__ig-checkbox-wrap {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          font-size: 12px !important;
+          color: #334155 !important;
+          cursor: pointer !important;
+          user-select: none !important;
+        }
+
+        .rebel-pre-checkout__ig-checkbox-wrap input {
+          accent-color: #e11d48 !important;
+          cursor: pointer !important;
+        }
+
+        .rebel-pre-checkout__actions {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 10px !important;
+        }
+
+        .rebel-pre-checkout__submit-btn {
+          width: 100% !important;
+          background: #000000 !important;
+          color: #ffffff !important;
+          border: none !important;
+          border-radius: 12px !important;
+          padding: 15px 20px !important;
+          font-size: 15px !important;
+          font-weight: 800 !important;
+          letter-spacing: -0.01em !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 8px !important;
+          cursor: pointer !important;
+          transition: background 0.2s, transform 0.15s !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .rebel-pre-checkout__submit-btn:hover {
+          background: #1e293b !important;
+          transform: translateY(-1px) !important;
+        }
+
+        .rebel-pre-checkout__submit-btn:active {
+          transform: translateY(0) !important;
+        }
+
+        .rebel-pre-checkout__submit-btn:disabled {
+          background: #94a3b8 !important;
+          cursor: not-allowed !important;
+          transform: none !important;
+        }
+
+        .rebel-pre-checkout__back-btn {
+          background: transparent !important;
+          border: none !important;
+          color: #64748b !important;
+          font-size: 13px !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
+          text-align: center !important;
+          padding: 4px !important;
+          transition: color 0.2s !important;
+        }
+
+        .rebel-pre-checkout__back-btn:hover {
+          color: #0f172a !important;
+          text-decoration: underline !important;
+        }
+
+        .rebel-pre-checkout__security {
+          text-align: center !important;
+          font-size: 11px !important;
+          color: #94a3b8 !important;
+          margin-top: 4px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 4px !important;
+        }
+
+        @media screen and (max-width: 480px) {
+          .rebel-pre-checkout-modal {
+            padding: 20px 16px 18px !important;
+            border-radius: 16px !important;
+          }
+          .rebel-pre-checkout__title {
+            font-size: 18px !important;
+          }
+          .rebel-pre-checkout__ig-box {
+            padding: 12px 14px !important;
+          }
+          .rebel-pre-checkout__submit-btn {
+            padding: 13px 18px !important;
+            font-size: 14.5px !important;
+          }
+        }
       </style>
 
       {%- assign tier_1_goal = 699 -%}
@@ -1026,6 +1428,15 @@
           if (freeGiftInput) freeGiftInput.value = giftVal;
           if (rewardOfferInput) rewardOfferInput.value = rewardVal;
 
+          // Sync Free Gift into line item properties so it displays in Checkout list (under product)
+          var targetLineGift = "";
+          if (total >= TIER_4) {
+            targetLineGift = "2 Free Surprise Gifts (Worth ₹500)";
+          } else if (total >= TIER_2 && total < TIER_3) {
+            targetLineGift = "1 Free Surprise Gift (Worth ₹100)";
+          }
+          syncLineItemGiftProperty(targetLineGift);
+
           if (_lastSyncedGift === giftVal) return;
           _lastSyncedGift = giftVal;
 
@@ -1039,6 +1450,48 @@
               }
             })
           }).catch(function() {});
+        }
+
+        // ── Helper: Sync Free Gift into Line Item Properties for Checkout Display ──
+        var _lineItemGiftSyncTimer = null;
+        var _lastTargetGiftProp = null;
+        function syncLineItemGiftProperty(targetGift) {
+          if (_lastTargetGiftProp === targetGift) return;
+          _lastTargetGiftProp = targetGift;
+
+          clearTimeout(_lineItemGiftSyncTimer);
+          _lineItemGiftSyncTimer = setTimeout(function() {
+            fetch("/cart.js")
+              .then(function(res) { return res.json(); })
+              .then(function(cart) {
+                if (!cart || !cart.items || !cart.items.length) return;
+                var firstItem = cart.items[0];
+                var props = firstItem.properties || {};
+                var currentProp = props["Free Gift"] || props["🎁 Free Gift"] || "";
+
+                if (currentProp === (targetGift || "")) return;
+
+                var newProps = {};
+                for (var key in props) {
+                  if (props.hasOwnProperty(key) && key !== "Free Gift" && key !== "🎁 Free Gift") {
+                    newProps[key] = props[key];
+                  }
+                }
+                if (targetGift) {
+                  newProps["Free Gift"] = targetGift;
+                }
+
+                fetch("/cart/change.js", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    id: firstItem.key,
+                    quantity: firstItem.quantity,
+                    properties: newProps
+                  })
+                }).catch(function() {});
+              }).catch(function() {});
+          }, 350);
         }
 
         // ── Auto-save Order Note to Shopify cart session ──
@@ -2041,4 +2494,312 @@
       </div>
     </div>
   </div>
+  <!-- ================= PRE-CHECKOUT INTERSTITIAL SCREEN ================= -->
+  <div class="rebel-pre-checkout-overlay" id="rebel-pre-checkout-overlay" role="dialog" aria-modal="true" aria-labelledby="rebel-pre-checkout-title">
+    <div class="rebel-pre-checkout-modal">
+      <!-- Close Button -->
+      <button type="button" class="rebel-pre-checkout__close-btn" id="rebel-pre-checkout-close" aria-label="Close modal">×</button>
+
+      <!-- Header -->
+      <div class="rebel-pre-checkout__header">
+        <div class="rebel-pre-checkout__badge">✨ Final Step Before Checkout</div>
+        <h2 class="rebel-pre-checkout__title" id="rebel-pre-checkout-title">Order Instructions & Follow</h2>
+        <p class="rebel-pre-checkout__subtitle">Add any special request and connect with Rebel Gifts</p>
+      </div>
+
+      <!-- Eligible Free Gift / Reward Banner -->
+      <div class="rebel-pre-checkout__gift-card" id="rebel-pre-checkout-gift-card">
+        <div class="rebel-pre-checkout__gift-left">
+          <span class="rebel-pre-checkout__gift-icon" id="rebel-pre-checkout-gift-icon">🎁</span>
+          <div>
+            <span class="rebel-pre-checkout__gift-title" id="rebel-pre-checkout-gift-title">1 Free Surprise Gift (Worth ₹100)</span>
+            <span class="rebel-pre-checkout__gift-sub" id="rebel-pre-checkout-gift-sub">Unlocked! Will be packed with your order</span>
+          </div>
+        </div>
+        <span class="rebel-pre-checkout__gift-badge" id="rebel-pre-checkout-gift-badge">FREE</span>
+      </div>
+
+      <!-- Special Instructions Section -->
+      <div class="rebel-pre-checkout__section">
+        <label class="rebel-pre-checkout__label" for="rebel-pre-checkout-note-input">
+          <span>📝 Special Instructions / Order Request</span>
+          <span class="rebel-pre-checkout__optional">(Optional)</span>
+        </label>
+        <textarea
+          id="rebel-pre-checkout-note-input"
+          class="rebel-pre-checkout__textarea"
+          rows="2"
+          placeholder="Add customization details, gift notes, delivery timing, or packaging instructions..."
+        >{{ cart.note }}</textarea>
+      </div>
+
+      <!-- Rebel Instagram Profile Request Box -->
+      <div class="rebel-pre-checkout__ig-box">
+        <div class="rebel-pre-checkout__ig-top">
+          <div class="rebel-pre-checkout__ig-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </div>
+          <div class="rebel-pre-checkout__ig-info">
+            <div class="rebel-pre-checkout__ig-handle">
+              <span>@rebelgifts</span>
+              <span class="rebel-pre-checkout__ig-verified" title="Verified">✓</span>
+            </div>
+            <p class="rebel-pre-checkout__ig-text">
+              Follow us on Instagram for order updates, sneak peeks & unboxing giveaway hampers!
+            </p>
+          </div>
+        </div>
+
+        <div class="rebel-pre-checkout__ig-action">
+          <a
+            href="https://www.instagram.com/rebelgifts/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="rebel-pre-checkout__ig-follow-link"
+            id="rebel-pre-checkout-ig-btn"
+          >
+            <span>Follow @rebelgifts ↗</span>
+          </a>
+          <label class="rebel-pre-checkout__ig-checkbox-wrap">
+            <input type="checkbox" id="rebel-pre-checkout-ig-checked" checked />
+            <span>I'm following Rebel</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="rebel-pre-checkout__actions">
+        <button type="button" class="rebel-pre-checkout__submit-btn" id="rebel-pre-checkout-submit">
+          <span id="rebel-pre-checkout-submit-text">Proceed to Checkout</span>
+          <span class="rebel-arrow" aria-hidden="true">➔</span>
+        </button>
+        <button type="button" class="rebel-pre-checkout__back-btn" id="rebel-pre-checkout-back">
+          ← Back to Cart
+        </button>
+        <div class="rebel-pre-checkout__security">
+          <span>🔒 100% Safe & Secure Checkout • UPI, Cards, NetBanking</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      function initPreCheckoutModal() {
+        var overlay = document.getElementById("rebel-pre-checkout-overlay");
+        if (!overlay) return;
+
+        // Ensure overlay is at body level so no transform/overflow clips it
+        if (overlay.parentElement !== document.body) {
+          document.body.appendChild(overlay);
+        }
+
+        var closeBtn = document.getElementById("rebel-pre-checkout-close");
+        var backBtn = document.getElementById("rebel-pre-checkout-back");
+        var submitBtn = document.getElementById("rebel-pre-checkout-submit");
+        var submitText = document.getElementById("rebel-pre-checkout-submit-text");
+        var modalNoteInput = document.getElementById("rebel-pre-checkout-note-input");
+
+        function closeModal() {
+          overlay.classList.remove("active");
+          overlay.style.display = "none";
+        }
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (backBtn) backBtn.onclick = closeModal;
+        overlay.onclick = function(e) {
+          if (e.target === overlay) closeModal();
+        };
+
+        // Function to open modal
+        window.__openRebelPreCheckout = function() {
+          // Read current note from drawer
+          var drawerNote = document.getElementById("CartDrawer-OrderNote");
+          if (drawerNote && modalNoteInput) {
+            modalNoteInput.value = drawerNote.value || "";
+          }
+
+          // Update gift & reward banner inside modal based on current total
+          var wrapper = document.getElementById("cart-reward-wrapper");
+          var currentTotal = wrapper ? parseFloat(wrapper.getAttribute("data-cart-total") || "0") : 0;
+          if (isNaN(currentTotal) || currentTotal <= 0) {
+            var subtotalEl = document.querySelector(".totals__total-value");
+            if (subtotalEl) {
+              var cleaned = subtotalEl.textContent.replace(/[^0-9.]/g, "");
+              currentTotal = parseFloat(cleaned) || 0;
+            }
+          }
+
+          var giftCard = document.getElementById("rebel-pre-checkout-gift-card");
+          var giftIcon = document.getElementById("rebel-pre-checkout-gift-icon");
+          var giftTitle = document.getElementById("rebel-pre-checkout-gift-title");
+          var giftSub = document.getElementById("rebel-pre-checkout-gift-sub");
+          var giftBadge = document.getElementById("rebel-pre-checkout-gift-badge");
+
+          if (giftCard && giftTitle && giftSub && giftBadge) {
+            if (currentTotal >= 2499) {
+              giftIcon.textContent = "🎁";
+              giftTitle.textContent = "2 Free Surprise Gifts (Worth ₹500)";
+              giftSub.textContent = "Unlocked! Will be packed with your order";
+              giftBadge.textContent = "FREE GIFT";
+              giftBadge.style.background = "#16a34a";
+              giftCard.style.display = "flex";
+            } else if (currentTotal >= 1599) {
+              giftIcon.textContent = "🏷️";
+              giftTitle.textContent = "10% OFF Discount";
+              giftSub.textContent = "Unlocked! Applied at checkout";
+              giftBadge.textContent = "10% OFF";
+              giftBadge.style.background = "#0f172a";
+              giftCard.style.display = "flex";
+            } else if (currentTotal >= 999) {
+              giftIcon.textContent = "🎁";
+              giftTitle.textContent = "1 Free Surprise Gift (Worth ₹100)";
+              giftSub.textContent = "Unlocked! Will be packed with your order";
+              giftBadge.textContent = "FREE GIFT";
+              giftBadge.style.background = "#16a34a";
+              giftCard.style.display = "flex";
+            } else if (currentTotal >= 699) {
+              giftIcon.textContent = "🚚";
+              giftTitle.textContent = "Free Shipping Unlocked";
+              giftSub.textContent = "No shipping charges applied on your order";
+              giftBadge.textContent = "FREE";
+              giftBadge.style.background = "#16a34a";
+              giftCard.style.display = "flex";
+            } else {
+              giftIcon.textContent = "🚚";
+              var rem = Math.ceil(699 - currentTotal);
+              giftTitle.textContent = "Standard Shipping Applies";
+              giftSub.textContent = "Add ₹" + rem + " more to unlock Free Shipping!";
+              giftBadge.textContent = "₹699 GOAL";
+              giftBadge.style.background = "#64748b";
+              giftCard.style.display = "flex";
+            }
+          }
+
+          overlay.style.display = "flex";
+          overlay.classList.add("active");
+          if (modalNoteInput) modalNoteInput.focus();
+        };
+
+        // Handle Final Proceed to Checkout Click
+        if (submitBtn) {
+          submitBtn.onclick = function() {
+            submitBtn.disabled = true;
+            if (submitText) submitText.textContent = "Saving & Going to Checkout...";
+
+            var noteVal = modalNoteInput ? modalNoteInput.value.trim() : "";
+            var drawerNote = document.getElementById("CartDrawer-OrderNote");
+            if (drawerNote) drawerNote.value = noteVal;
+
+            var wrapper = document.getElementById("cart-reward-wrapper");
+            var currentTotal = wrapper ? parseFloat(wrapper.getAttribute("data-cart-total") || "0") : 0;
+            if (isNaN(currentTotal) || currentTotal <= 0) {
+              var subtotalEl = document.querySelector(".totals__total-value");
+              if (subtotalEl) {
+                currentTotal = parseFloat(subtotalEl.textContent.replace(/[^0-9.]/g, "")) || 0;
+              }
+            }
+
+            var giftVal = "None";
+            var rewardVal = "None";
+            var lineGift = "";
+            if (currentTotal >= 2499) {
+              giftVal = "2 Free Surprise Gifts (Worth ₹500)";
+              rewardVal = "2 Free Surprise Gifts (Worth ₹500)";
+              lineGift = "2 Free Surprise Gifts (Worth ₹500)";
+            } else if (currentTotal >= 1599) {
+              giftVal = "None";
+              rewardVal = "10% OFF";
+            } else if (currentTotal >= 999) {
+              giftVal = "1 Free Surprise Gift (Worth ₹100)";
+              rewardVal = "1 Free Surprise Gift (Worth ₹100)";
+              lineGift = "1 Free Surprise Gift (Worth ₹100)";
+            } else if (currentTotal >= 699) {
+              giftVal = "None";
+              rewardVal = "Free Shipping";
+            }
+
+            var igCheck = document.getElementById("rebel-pre-checkout-ig-checked");
+            var igFollowed = igCheck && igCheck.checked ? "Yes (@rebelgifts)" : "Not Checked";
+
+            var syncPromise = Promise.resolve();
+            if (lineGift) {
+              syncPromise = fetch("/cart.js")
+                .then(function(r) { return r.json(); })
+                .then(function(c) {
+                  if (c && c.items && c.items.length) {
+                    var item = c.items[0];
+                    var p = item.properties || {};
+                    p["Free Gift"] = lineGift;
+                    return fetch("/cart/change.js", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ id: item.key, quantity: item.quantity, properties: p })
+                    });
+                  }
+                }).catch(function() {});
+            }
+
+            syncPromise.then(function() {
+              return fetch("/cart/update.js", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  note: noteVal,
+                  attributes: {
+                    "Free Gift": giftVal,
+                    "Reward Offer": rewardVal,
+                    "Instagram Follow": igFollowed,
+                    "Special Instructions": noteVal
+                  }
+                })
+              });
+            }).then(function() {
+              window.location.href = "/checkout";
+            }).catch(function() {
+              window.location.href = "/checkout";
+            });
+          };
+        }
+
+        // Intercept checkout clicks across the store
+        document.addEventListener("click", function(e) {
+          var target = e.target;
+          if (!target) return;
+          var chkBtn = target.closest('#CartDrawer-Checkout, button[name="checkout"], input[name="checkout"], .cart__checkout-button');
+          if (chkBtn && !chkBtn.closest("#rebel-pre-checkout-overlay")) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            window.__openRebelPreCheckout();
+            return false;
+          }
+        }, true);
+
+        // Intercept form checkout submit
+        document.addEventListener("submit", function(e) {
+          var form = e.target;
+          if (!form) return;
+          if (form.id === "CartDrawer-Form" || (form.action && form.action.includes("/cart"))) {
+            if (e.submitter && (e.submitter.name === "checkout" || e.submitter.id === "CartDrawer-Checkout")) {
+              e.preventDefault();
+              e.stopPropagation();
+              window.__openRebelPreCheckout();
+              return false;
+            }
+          }
+        }, true);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPreCheckoutModal);
+      } else {
+        initPreCheckoutModal();
+      }
+    })();
+  </script>
 </cart-drawer>

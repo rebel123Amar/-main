@@ -36,18 +36,29 @@ export async function handleOrderCreate(shop: string, order: any) {
       }
     }
 
-    // Find special instructions
+    // Find customer order note / special instructions
     const specialRequestAttr = attributes.find(
       (a) =>
         a.name === "_rebel_special_request" ||
         a.name === "rebel_special_request" ||
         a.name === "Special Instructions" ||
-        a.name === "special_instructions"
+        a.name === "special_instructions" ||
+        a.name === "Order Note" ||
+        a.name === "note"
     );
 
-    let specialRequest = (specialRequestAttr?.value || note || "").trim();
+    let customerNote = (specialRequestAttr?.value || note || "").trim();
 
-    // ALSO: Extract images & text from line item properties (Product Page Customizer)
+    // Find Free Gift attribute
+    const freeGiftAttr = attributes.find(
+      (a) => a.name === "Free Gift" || a.name === "Reward Offer" || a.name === "Gift"
+    );
+    let freeGift = (freeGiftAttr?.value || "").trim();
+    if (freeGift.toLowerCase() === "none") freeGift = "";
+
+    const customTextParts: string[] = [];
+
+    // ALSO: Extract images, text, and free gift from line item properties
     const lineItems = order.line_items || order.lineItems || [];
     for (const item of lineItems) {
       const props = item.properties || item.customAttributes || [];
@@ -60,15 +71,37 @@ export async function handleOrderCreate(shop: string, order: any) {
           if (!imageUrls.includes(val)) {
             imageUrls.push(val);
           }
+        } else if (/free gift|gift/i.test(key)) {
+          if (!freeGift && val.toLowerCase() !== "none") {
+            freeGift = val;
+          }
+        } else if (/order note|special instructions|special request/i.test(key)) {
+          if (!customerNote) {
+            customerNote = val;
+          } else if (!customerNote.includes(val)) {
+            customerNote += ` | ${val}`;
+          }
         } else if (/enter text|custom text|customization/i.test(key)) {
-          if (!specialRequest) {
-            specialRequest = val;
-          } else if (!specialRequest.includes(val)) {
-            specialRequest += ` | ${val}`;
+          if (!customTextParts.includes(val)) {
+            customTextParts.push(val);
           }
         }
       }
     }
+
+    // Build structured specialRequest display
+    const parts: string[] = [];
+    if (freeGift) {
+      parts.push(`🎁 Free Gift: ${freeGift}`);
+    }
+    if (customerNote) {
+      parts.push(`📝 Order Note: ${customerNote}`);
+    }
+    if (customTextParts.length > 0) {
+      parts.push(`✍️ Custom Text: ${customTextParts.join(" | ")}`);
+    }
+
+    const specialRequest = parts.join("\n\n");
 
     // Only save if there's actual custom data
     if (!specialRequest && imageUrls.length === 0) {

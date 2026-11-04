@@ -373,6 +373,14 @@ export default function OrdersPage() {
                       order.specialRequest && order.specialRequest.trim()
                     );
                     const hasImages = images.length > 0;
+                    const hasFreeGift = Boolean(order.specialRequest && order.specialRequest.includes("🎁 Free Gift"));
+                    let freeGiftLabel = "🎁 Free Gift Included";
+                    if (hasFreeGift) {
+                      const match = order.specialRequest.match(/🎁 Free Gift:\s*([^\n\r]+)/);
+                      if (match && match[1]) {
+                        freeGiftLabel = `🎁 ${match[1].trim()}`;
+                      }
+                    }
                     const cleanShopDomain = shop.replace(".myshopify.com", "");
                     const shopifyAdminOrderUrl = `https://admin.shopify.com/store/${cleanShopDomain}/orders/${order.orderId}`;
 
@@ -427,6 +435,9 @@ export default function OrdersPage() {
                           </BlockStack>
 
                           <InlineStack gap="200">
+                            {hasFreeGift && (
+                              <Badge tone="success">{freeGiftLabel}</Badge>
+                            )}
                             {hasRequest && <Badge tone="info">Special Instructions</Badge>}
                             {hasImages && (
                               <Badge tone="success">
@@ -547,7 +558,7 @@ export default function OrdersPage() {
                             <BlockStack gap="200">
                               <InlineStack align="space-between" blockAlign="center">
                                 <Text as="p" variant="bodySm" fontWeight="semibold">
-                                  ✏️ Customer Special Instructions:
+                                  ✏️ Customer Instructions & Gift Offer:
                                 </Text>
                                 <Button
                                   size="micro"
