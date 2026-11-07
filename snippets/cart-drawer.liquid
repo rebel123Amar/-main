@@ -113,8 +113,8 @@
 
         .cart-reward-wrapper {
           background: #ffffff !important;
-          padding: 16px 12px 14px !important;
-          margin: 0 0 14px !important;
+          padding: 8px 10px 6px !important;
+          margin: 0 0 6px !important;
           border-bottom: 1px solid #ededed !important;
           position: relative !important;
           color: #111111 !important;
@@ -138,11 +138,11 @@
         /* Top Headline Message */
         .cart-reward-headline {
           text-align: center !important;
-          font-size: 14.5px !important;
+          font-size: 13px !important;
           font-weight: 600 !important;
           color: #111111 !important;
-          line-height: 1.35 !important;
-          margin: 0 0 18px 0 !important;
+          line-height: 1.25 !important;
+          margin: 0 0 12px 0 !important;
           letter-spacing: -0.01em !important;
           transition: all 0.3s ease !important;
         }
@@ -388,17 +388,17 @@
           }
         }
 
-        /* ================= UNLOCKED FREE GIFT REWARD NOTIFICATION ================= */
+        /* ================= UNLOCKED FREE GIFT REWARD NOTIFICATION (COMPACT) ================= */
         .cart-unlocked-reward {
           display: flex !important;
           align-items: center !important;
           justify-content: space-between !important;
-          gap: 10px !important;
+          gap: 6px !important;
           background: #f0fdf4 !important;
           border: 1px solid #bbf7d0 !important;
-          border-radius: 8px !important;
-          padding: 10px 14px !important;
-          margin: 12px 0 14px 0 !important;
+          border-radius: 6px !important;
+          padding: 5px 8px !important;
+          margin: 4px 0 4px 0 !important;
           box-sizing: border-box !important;
           width: 100% !important;
           font-family: inherit !important;
@@ -501,13 +501,13 @@
         .cart-unlocked-reward__left {
           display: flex !important;
           align-items: center !important;
-          gap: 10px !important;
+          gap: 6px !important;
           min-width: 0 !important;
           flex: 1 1 auto !important;
         }
 
         .cart-unlocked-reward__icon {
-          font-size: 22px !important;
+          font-size: 16px !important;
           line-height: 1 !important;
           flex-shrink: 0 !important;
         }
@@ -515,34 +515,34 @@
         .cart-unlocked-reward__info {
           display: flex !important;
           flex-direction: column !important;
-          gap: 2px !important;
+          gap: 0 !important;
           min-width: 0 !important;
         }
 
         .cart-unlocked-reward__title {
-          font-size: 13.5px !important;
+          font-size: 12px !important;
           font-weight: 700 !important;
           color: #14532d !important;
-          line-height: 1.25 !important;
+          line-height: 1.2 !important;
           letter-spacing: -0.01em !important;
         }
 
         .cart-unlocked-reward__sub {
-          font-size: 11.5px !important;
+          font-size: 10.5px !important;
           font-weight: 500 !important;
           color: #166534 !important;
-          line-height: 1.2 !important;
+          line-height: 1.15 !important;
         }
 
         .cart-unlocked-reward__right {
           display: flex !important;
           align-items: center !important;
-          gap: 6px !important;
+          gap: 4px !important;
           flex-shrink: 0 !important;
         }
 
         .cart-unlocked-reward__old-price {
-          font-size: 12px !important;
+          font-size: 11px !important;
           color: #6b7280 !important;
           text-decoration: line-through !important;
         }
@@ -550,23 +550,62 @@
         .cart-unlocked-reward__badge {
           background: #16a34a !important;
           color: #ffffff !important;
-          font-size: 11px !important;
+          font-size: 9.5px !important;
           font-weight: 700 !important;
-          padding: 3px 8px !important;
+          padding: 2px 5px !important;
           border-radius: 4px !important;
-          letter-spacing: 0.04em !important;
+          letter-spacing: 0.02em !important;
           text-transform: uppercase !important;
-          line-height: 1.2 !important;
+          line-height: 1.1 !important;
+          white-space: nowrap !important;
         }
 
         .cart-unlocked-reward__locked-badge {
           background: #f3f4f6 !important;
           color: #4b5563 !important;
-          font-size: 10.5px !important;
+          font-size: 9.5px !important;
           font-weight: 600 !important;
-          padding: 3px 7px !important;
+          padding: 2px 5px !important;
           border-radius: 4px !important;
+          line-height: 1.1 !important;
+          white-space: nowrap !important;
+        }
+
+        /* Maximize product visibility inside cart drawer footer */
+        cart-drawer:not(.is-empty) .drawer__footer {
+          padding-top: 4px !important;
+          padding-bottom: 8px !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .totals {
+          margin: 4px 0 2px 0 !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .totals__total {
+          font-size: 14px !important;
+          margin: 0 !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .totals__total-value {
+          font-size: 14px !important;
+          margin: 0 !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .tax-note {
+          margin: 2px 0 4px 0 !important;
+          font-size: 10.5px !important;
           line-height: 1.2 !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .cart__ctas {
+          margin-top: 4px !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__footer .cart__checkout-button {
+          min-height: 42px !important;
+          padding-top: 8px !important;
+          padding-bottom: 8px !important;
+          font-size: 14px !important;
         }
 
         @media screen and (max-width: 749px) {
@@ -1257,13 +1296,12 @@
               // 1599 to 2499: 10% off (no gift)
               var gift2Remaining = Math.ceil(TIER_4 - total);
               var discount10Amount = (total * 0.10);
-              var final10Total = (total - discount10Amount);
               box.innerHTML =
                 '<div class="cart-unlocked-reward__left">' +
                   '<span class="cart-unlocked-reward__icon">🏷️</span>' +
                   '<div class="cart-unlocked-reward__info">' +
                     '<span class="cart-unlocked-reward__title">10% OFF Applied (-₹' + discount10Amount.toFixed(2) + ')</span>' +
-                    '<span class="cart-unlocked-reward__sub">Unlocked! Pay ₹' + final10Total.toFixed(2) + ' instead of ₹' + total.toFixed(2) + ' (Spend ₹' + gift2Remaining + ' more for 2 Free Gifts worth ₹500)</span>' +
+                    '<span class="cart-unlocked-reward__sub">Spend ₹' + gift2Remaining + ' more for 2 Free Gifts (₹500)</span>' +
                   '</div>' +
                 '</div>' +
                 '<div class="cart-unlocked-reward__right">' +
@@ -1318,28 +1356,17 @@
 
         // ── Helper: Update Cart Drawer Estimated Total & Discount Row ──────
         function updateDrawerPriceSummaryWithDiscount(total) {
-          var discountRow = document.getElementById("cart-drawer-10off-row");
-          var discountVal = document.getElementById("cart-drawer-10off-val");
           var totalValEl = document.querySelector(".totals__total-value, #cart-drawer-subtotal-val");
 
           if (total >= TIER_3 && total < TIER_4) {
             var disc = total * 0.10;
             var finalPrice = total - disc;
-            if (discountRow) {
-              discountRow.style.setProperty("display", "flex", "important");
-            }
-            if (discountVal) {
-              discountVal.textContent = "-Rs. " + disc.toFixed(2);
-            }
             if (totalValEl) {
               totalValEl.innerHTML =
-                '<s class="cart-drawer__orig-subtotal" style="opacity: 0.6; text-decoration: line-through; margin-right: 8px; font-weight: 500; font-size: 0.88em; color: #64748b;">Rs. ' + total.toFixed(2) + '</s>' +
-                '<strong class="cart-drawer__discounted-subtotal" style="color: #16a34a; font-weight: 800;">Rs. ' + finalPrice.toFixed(2) + ' INR</strong>';
+                '<s class="cart-drawer__orig-subtotal" style="opacity: 0.55; text-decoration: line-through; margin-right: 6px; font-weight: 500; font-size: 13px; color: #64748b;">Rs. ' + total.toFixed(2) + '</s>' +
+                '<strong class="cart-drawer__discounted-subtotal" style="color: #16a34a; font-weight: 800; font-size: 15px;">Rs. ' + finalPrice.toFixed(2) + ' INR</strong>';
             }
           } else {
-            if (discountRow) {
-              discountRow.style.setProperty("display", "none", "important");
-            }
             if (totalValEl && (totalValEl.querySelector("s") || totalValEl.querySelector("strong"))) {
               totalValEl.textContent = "Rs. " + total.toFixed(2) + " INR";
             }
@@ -2420,12 +2447,11 @@
             {%- elsif reward_cart_total >= tier_3_goal -%}
               {%- assign gift2_remaining = tier_4_goal | minus: reward_cart_total -%}
               {%- assign tier3_disc = cart.total_price | times: 10 | divided_by: 100 -%}
-              {%- assign tier3_final = cart.total_price | minus: tier3_disc -%}
               <div class="cart-unlocked-reward__left">
                 <span class="cart-unlocked-reward__icon">🏷️</span>
                 <div class="cart-unlocked-reward__info">
                   <span class="cart-unlocked-reward__title">10% OFF Applied (-{{ tier3_disc | money }})</span>
-                  <span class="cart-unlocked-reward__sub">Unlocked! Pay {{ tier3_final | money }} instead of {{ cart.total_price | money }} (Spend ₹{{ gift2_remaining }} more for 2 Free Gifts worth ₹500)</span>
+                  <span class="cart-unlocked-reward__sub">Spend ₹{{ gift2_remaining }} more for 2 Free Gifts (₹500)</span>
                 </div>
               </div>
               <div class="cart-unlocked-reward__right">
@@ -2470,7 +2496,7 @@
             {%- endif -%}
           </div>
 
-          <!-- 10% OFF Discount Line Item -->
+          <!-- 10% OFF Discount Calculation -->
           {%- assign is_ten_percent_tier = false -%}
           {%- if reward_cart_total >= tier_3_goal and reward_cart_total < tier_4_goal -%}
             {%- assign is_ten_percent_tier = true -%}
@@ -2478,26 +2504,14 @@
             {%- assign discounted_cart_total = cart.total_price | minus: ten_percent_discount_amount -%}
           {%- endif -%}
 
-          <div
-            class="cart-drawer__10off-row"
-            id="cart-drawer-10off-row"
-            style="{% unless is_ten_percent_tier %}display: none !important;{% else %}display: flex !important;{% endunless %} justify-content: space-between; align-items: center; margin: 8px 0 4px; padding: 7px 10px; background: #f0fdf4; border: 1px dashed #86efac; border-radius: 8px; font-size: 13px; color: #15803d; font-weight: 700;"
-          >
-            <span style="display: inline-flex; align-items: center; gap: 5px;">
-              <span>🏷️</span>
-              <span>10% OFF Tier Discount</span>
-            </span>
-            <span id="cart-drawer-10off-val">-{{ ten_percent_discount_amount | money_with_currency }}</span>
-          </div>
-
           <div class="totals" role="status">
             <h2 class="totals__total">{{ 'sections.cart.estimated_total' | t }}</h2>
             <p class="totals__total-value" id="cart-drawer-subtotal-val">
               {%- if is_ten_percent_tier -%}
-                <s class="cart-drawer__orig-subtotal" style="opacity: 0.6; text-decoration: line-through; margin-right: 8px; font-weight: 500; font-size: 0.88em; color: #64748b;">
+                <s class="cart-drawer__orig-subtotal" style="opacity: 0.55; text-decoration: line-through; margin-right: 6px; font-weight: 500; font-size: 13px; color: #64748b;">
                   {{ cart.total_price | money_with_currency }}
                 </s>
-                <strong class="cart-drawer__discounted-subtotal" style="color: #16a34a; font-weight: 800;">
+                <strong class="cart-drawer__discounted-subtotal" style="color: #16a34a; font-weight: 800; font-size: 15px;">
                   {{ discounted_cart_total | money_with_currency }}
                 </strong>
               {%- else -%}
