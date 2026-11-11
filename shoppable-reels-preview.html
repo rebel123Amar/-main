@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shoppable Video Reels - Rebel Gifts Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f7f7f8;
+      color: #111111;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top banner */
+    .preview-bar {
+      background: #111827;
+      color: #ffffff;
+      padding: 10px 20px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .preview-bar a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* SECTION STYLES */
+    .rebel-reels-section {
+      background: #ffffff;
+      padding: 48px 0 60px 0;
+      position: relative;
+    }
+
+    .rebel-reels__container {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .rebel-reels__header {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .rebel-reels__kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0, 0, 0, 0.05);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 50px;
+      margin-bottom: 12px;
+    }
+
+    .rebel-reels__pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #e11d48;
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+    }
+
+    .rebel-reels__title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .rebel-reels__subtitle {
+      font-size: 15px;
+      color: #666666;
+    }
+
+    /* Track & Carousel */
+    .rebel-reels__carousel-wrapper {
+      position: relative;
+    }
+
+    .rebel-reels__track {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 6px 2px 18px 2px;
+    }
+    .rebel-reels__track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .rebel-reels__card {
+      flex: 0 0 calc((100% - (4 * 18px)) / 5);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000000;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+      position: relative;
+    }
+
+    .rebel-reels__card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Media Box */
+    .rebel-reels__media-box {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #111111;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .rebel-reels__video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .rebel-reels__badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 3;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    .rebel-reels__audio-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 4;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+      padding: 0;
+    }
+    .rebel-reels__audio-btn:hover {
+      background: rgba(0, 0, 0, 0.85);
+      transform: scale(1.08);
+    }
+    .rebel-reels__audio-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .rebel-reels__gradient {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Docked Bottom Bar */
+    .rebel-reels__bottom-bar {
+      position: relative;
+      z-index: 5;
+      background: #000000;
+      color: #ffffff;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      height: 48px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .rebel-reels__shop-link {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      text-decoration: none;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      transition: background 0.2s ease;
+      min-width: 0;
+    }
+    .rebel-reels__shop-link:hover {
+      background: #1f1f1f;
+    }
+
+    .rebel-reels__shop-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rebel-reels__expand-btn {
+      width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      padding: 0;
+    }
+    .rebel-reels__expand-btn:hover {
+      background: #1f1f1f;
+    }
+    .rebel-reels__expand-btn svg {
+      width: 13px;
+      height: 13px;
+      fill: currentColor;
+      transition: transform 0.2s ease;
+    }
+    .rebel-reels__card:hover .rebel-reels__expand-btn svg {
+      transform: translateY(2px);
+    }
+
+    /* Modal */
+    .rebel-reels-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(16px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .rebel-reels-modal.is-active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .rebel-reels-modal__dialog {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 90vh;
+      max-height: 820px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #000000;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .rebel-reels-modal__video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .rebel-reels-modal__close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .rebel-reels-modal__product-card {
+      position: absolute;
+      bottom: 16px;
+      left: 14px;
+      right: 14px;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .rebel-reels-modal__product-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .rebel-reels-modal__product-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .rebel-reels-modal__product-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111111;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .rebel-reels-modal__price-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .rebel-reels-modal__price {
+      font-weight: 800;
+      color: #111111;
+    }
+
+    .rebel-reels-modal__compare-price {
+      text-decoration: line-through;
+      color: #888888;
+      font-size: 12px;
+    }
+
+    .rebel-reels-modal__discount-tag {
+      background: #e6f9ed;
+      color: #059669;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .rebel-reels-modal__cta-btn {
+      background: #000000;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 1024px) {
+      .rebel-reels__card {
+        flex: 0 0 calc((100% - (2 * 14px)) / 3);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rebel-reels__title {
+        font-size: 24px;
+      }
+      .rebel-reels__card {
+        flex: 0 0 72vw;
+        max-width: 280px;
+      }
+      .rebel-reels-modal__dialog {
+        height: 98vh;
+        max-width: 96vw;
+        border-radius: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-bar">
+    <span>✨ <strong>Rebel Gifts</strong> - Shoppable Video Reels Custom Section</span>
+    <span>Ready to deploy on Shopify Theme</span>
+  </div>
+
+  <section class="rebel-reels-section">
+    <div class="rebel-reels__container">
+      
+      <div class="rebel-reels__header">
+        <div class="rebel-reels__kicker">
+          <span class="rebel-reels__pulse-dot"></span>
+          <span>Trending Reels ✨</span>
+        </div>
+        <h2 class="rebel-reels__title">Show Your Hottest Products Here</h2>
+        <p class="rebel-reels__subtitle">Watch customer unboxings & click Shop Now to get yours</p>
+      </div>
+
+      <div class="rebel-reels__carousel-wrapper">
+        <div class="rebel-reels__track" id="preview-track">
+          
+          <!-- Card 1 -->
+          <div class="rebel-reels__card" data-video="https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4" data-title="Fairy Light Polaroid Hamper" data-price="Rs. 379.00" data-compare="Rs. 550.00" data-discount="31% OFF" data-thumb="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png">
+            <div class="rebel-reels__media-box">
+              <video class="rebel-reels__video" src="https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4" playsinline muted loop autoplay></video>
+              <div class="rebel-reels__badge">🔥 Best Seller</div>
+              <button type="button" class="rebel-reels__audio-btn">
+                <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div class="rebel-reels__gradient"></div>
+            </div>
+            <div class="rebel-reels__bottom-bar">
+              <a href="#" class="rebel-reels__shop-link"><span class="rebel-reels__shop-text">Shop Now</span></a>
+              <button type="button" class="rebel-reels__expand-btn"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="rebel-reels__card" data-video="https://cdn.shopify.com/videos/c/o/v/18eed137211e43169fc77470c1117cdb.mp4" data-title="Mini Memoroids (Set of 10)" data-price="Rs. 219.00" data-compare="Rs. 300.00" data-discount="27% OFF" data-thumb="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png">
+            <div class="rebel-reels__media-box">
+              <video class="rebel-reels__video" src="https://cdn.shopify.com/videos/c/o/v/18eed137211e43169fc77470c1117cdb.mp4" playsinline muted loop autoplay></video>
+              <div class="rebel-reels__badge">⭐ Customer Fav</div>
+              <button type="button" class="rebel-reels__audio-btn">
+                <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div class="rebel-reels__gradient"></div>
+            </div>
+            <div class="rebel-reels__bottom-bar">
+              <a href="#" class="rebel-reels__shop-link"><span class="rebel-reels__shop-text">Shop Now</span></a>
+              <button type="button" class="rebel-reels__expand-btn"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="rebel-reels__card" data-video="https://cdn.shopify.com/videos/c/o/v/036674109ebe45b8bb82a610718030c8.mp4" data-title="Cute Memory Box Hamper" data-price="Rs. 299.00" data-compare="Rs. 369.00" data-discount="18% OFF" data-thumb="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png">
+            <div class="rebel-reels__media-box">
+              <video class="rebel-reels__video" src="https://cdn.shopify.com/videos/c/o/v/036674109ebe45b8bb82a610718030c8.mp4" playsinline muted loop autoplay></video>
+              <div class="rebel-reels__badge">🎁 Freebie</div>
+              <button type="button" class="rebel-reels__audio-btn">
+                <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div class="rebel-reels__gradient"></div>
+            </div>
+            <div class="rebel-reels__bottom-bar">
+              <a href="#" class="rebel-reels__shop-link"><span class="rebel-reels__shop-text">Shop Now</span></a>
+              <button type="button" class="rebel-reels__expand-btn"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="rebel-reels__card" data-video="https://cdn.shopify.com/videos/c/o/v/af80f40495c748a0a18f76e3b9a37c10.mp4" data-title="POP UP Birthday Frame" data-price="Rs. 389.00" data-compare="Rs. 599.00" data-discount="35% OFF" data-thumb="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png">
+            <div class="rebel-reels__media-box">
+              <video class="rebel-reels__video" src="https://cdn.shopify.com/videos/c/o/v/af80f40495c748a0a18f76e3b9a37c10.mp4" playsinline muted loop autoplay></video>
+              <div class="rebel-reels__badge">⚡ Trending</div>
+              <button type="button" class="rebel-reels__audio-btn">
+                <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div class="rebel-reels__gradient"></div>
+            </div>
+            <div class="rebel-reels__bottom-bar">
+              <a href="#" class="rebel-reels__shop-link"><span class="rebel-reels__shop-text">Shop Now</span></a>
+              <button type="button" class="rebel-reels__expand-btn"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="rebel-reels__card" data-video="https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4" data-title="Personalized Birthday Newspaper" data-price="Rs. 399.00" data-compare="Rs. 699.00" data-discount="42% OFF" data-thumb="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png">
+            <div class="rebel-reels__media-box">
+              <video class="rebel-reels__video" src="https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4" playsinline muted loop autoplay></video>
+              <div class="rebel-reels__badge">❤️ Most Loved</div>
+              <button type="button" class="rebel-reels__audio-btn">
+                <svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+              </button>
+              <div class="rebel-reels__gradient"></div>
+            </div>
+            <div class="rebel-reels__bottom-bar">
+              <a href="#" class="rebel-reels__shop-link"><span class="rebel-reels__shop-text">Shop Now</span></a>
+              <button type="button" class="rebel-reels__expand-btn"><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg></button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <div class="rebel-reels-modal" id="modal">
+    <div class="rebel-reels-modal__dialog">
+      <video class="rebel-reels-modal__video" id="modal-video" playsinline loop></video>
+      <button class="rebel-reels-modal__close-btn" id="modal-close">&times;</button>
+      <div class="rebel-reels-modal__product-card">
+        <img class="rebel-reels-modal__product-thumb" id="modal-thumb" src="" alt="">
+        <div class="rebel-reels-modal__product-info">
+          <div class="rebel-reels-modal__product-title" id="modal-title"></div>
+          <div class="rebel-reels-modal__price-row">
+            <span class="rebel-reels-modal__price" id="modal-price"></span>
+            <span class="rebel-reels-modal__compare-price" id="modal-compare"></span>
+            <span class="rebel-reels-modal__discount-tag" id="modal-discount"></span>
+          </div>
+        </div>
+        <a href="#" class="rebel-reels-modal__cta-btn">SHOP NOW</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const modalVideo = document.getElementById('modal-video');
+    const modalClose = document.getElementById('modal-close');
+    const modalThumb = document.getElementById('modal-thumb');
+    const modalTitle = document.getElementById('modal-title');
+    const modalPrice = document.getElementById('modal-price');
+    const modalCompare = document.getElementById('modal-compare');
+    const modalDiscount = document.getElementById('modal-discount');
+
+    document.querySelectorAll('.rebel-reels__card').forEach(card => {
+      const mediaBox = card.querySelector('.rebel-reels__media-box');
+      const expandBtn = card.querySelector('.rebel-reels__expand-btn');
+      const open = () => {
+        modalVideo.src = card.dataset.video;
+        modalTitle.textContent = card.dataset.title;
+        modalPrice.textContent = card.dataset.price;
+        modalCompare.textContent = card.dataset.compare;
+        modalDiscount.textContent = card.dataset.discount;
+        modalThumb.src = card.dataset.thumb;
+        modal.classList.add('is-active');
+        modalVideo.play();
+      };
+      mediaBox.addEventListener('click', open);
+      expandBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        open();
+      });
+    });
+
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('is-active');
+      modalVideo.pause();
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('is-active');
+        modalVideo.pause();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,666 +1,1224 @@
 {% doc %}
   @prompt
-    Create Mosambi Media's signature "Watch & Buy" Video Testimonials / Reels section for Shopify:
-    - Vertical video reels slider (9:16 aspect ratio).
-    - Lightweight IntersectionObserver for auto-playing muted videos when visible in viewport.
-    - Product card docked beneath each video:
-      - Product thumbnail
-      - Product title
-      - Price & compare-at price
-      - Green discount badge (e.g., "31% OFF")
-      - Full-width "SHOP NOW" CTA button.
-    - Touch swipe for mobile and next/previous arrows for desktop.
-    - Fully editable via Shopify Theme Customizer with block presets.
+    Custom Shoppable Video Reels Section (Watch & Buy) for Rebel Gifts:
+    - 9:16 vertical reels layout with rounded corners matching reference screenshot.
+    - Docked black 'Shop Now' action bar with direct product link and expand icon.
+    - Autoplay muted on scroll via IntersectionObserver.
+    - In-card audio unmute toggle.
+    - Fullscreen interactive TikTok/Instagram-style Reels modal with docked product card.
+    - Responsive: 5-column desktop layout, touch-swipe carousel on mobile.
+    - Shopify 2.0 Schema with product picker and 5 default preset blocks.
 {% enddoc %}
 
 {%- assign sec_id = section.id | replace: '_', '' | downcase -%}
 
 {% style %}
-  #rebel-watch-buy-{{ sec_id }} {
-    --sec-bg: {{ section.settings.bg_color }};
-    --card-bg: {{ section.settings.card_bg }};
-    --title-color: {{ section.settings.title_color }};
-    --btn-bg: {{ section.settings.button_bg }};
-    --btn-text: {{ section.settings.button_text_color }};
-    --discount-color: #057805;
-    --padding-top: {{ section.settings.padding_top }}px;
-    --padding-bottom: {{ section.settings.padding_bottom }}px;
+  #rebel-reels-{{ sec_id }} {
+    --sec-bg: {{ section.settings.bg_color | default: '#ffffff' }};
+    --text-color: {{ section.settings.text_color | default: '#111111' }};
+    --subtext-color: {{ section.settings.subtext_color | default: '#666666' }};
+    --bar-bg: {{ section.settings.bar_bg | default: '#000000' }};
+    --bar-text: {{ section.settings.bar_text_color | default: '#ffffff' }};
+    --bar-hover-bg: {{ section.settings.bar_hover_bg | default: '#1f1f1f' }};
+    --accent-color: {{ section.settings.accent_color | default: '#10b981' }};
+    --card-radius: {{ section.settings.card_border_radius | default: 14 }}px;
+    --padding-top: {{ section.settings.padding_top | default: 40 }}px;
+    --padding-bottom: {{ section.settings.padding_bottom | default: 50 }}px;
 
     background-color: var(--sec-bg);
     padding: var(--padding-top) 0 var(--padding-bottom) 0;
     position: relative;
     overflow: hidden;
     font-family: inherit;
+    color: var(--text-color);
   }
 
-  .rebel-wb__container {
-    max-width: {{ section.settings.max_width }}px;
+  .rebel-reels__container {
+    max-width: {{ section.settings.max_width | default: 1420 }}px;
     margin: 0 auto;
     padding: 0 20px;
     box-sizing: border-box;
   }
 
-  .rebel-wb__header {
-    text-align: center;
+  /* Header */
+  .rebel-reels__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
     margin-bottom: 28px;
+    gap: 20px;
+    flex-wrap: wrap;
+    {% if section.settings.header_alignment == 'center' %}
+      text-align: center;
+      justify-content: center;
+    {% endif %}
   }
 
-  .rebel-wb__badge {
+  .rebel-reels__header-content {
+    flex: 1;
+    min-width: 260px;
+    {% if section.settings.header_alignment == 'center' %}
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    {% endif %}
+  }
+
+  .rebel-reels__kicker {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     background: rgba(0, 0, 0, 0.05);
-    color: var(--title-color);
+    color: var(--text-color);
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     padding: 5px 14px;
     border-radius: 50px;
     margin-bottom: 10px;
   }
 
-  .rebel-wb__title {
-    font-size: {{ section.settings.title_size_desktop }}px;
-    font-weight: 700;
-    line-height: 1.25;
+  .rebel-reels__pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e11d48;
+    box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+    animation: rebel-reels-pulse 1.8s infinite;
+  }
+
+  @keyframes rebel-reels-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 7px rgba(225, 29, 72, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(225, 29, 72, 0);
+    }
+  }
+
+  .rebel-reels__title {
+    font-size: {{ section.settings.title_size_desktop | default: 28 }}px;
+    font-weight: 800;
+    line-height: 1.22;
     margin: 0 0 8px 0;
-    color: var(--title-color);
+    color: var(--text-color);
+    letter-spacing: -0.3px;
   }
 
-  .rebel-wb__subtitle {
+  .rebel-reels__subtitle {
     font-size: 15px;
-    color: #666666;
+    color: var(--subtext-color);
     margin: 0;
+    line-height: 1.45;
   }
 
-  /* Carousel */
-  .rebel-wb__slider-wrapper {
-    position: relative;
-    padding: 10px 0 20px 0;
-  }
-
-  .rebel-wb__track-wrap {
-    overflow: hidden;
-    padding: 4px;
-  }
-
-  .rebel-wb__track {
+  /* Desktop Slider Nav Arrows */
+  .rebel-reels__nav-btns {
     display: flex;
-    gap: 20px;
-    transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
-    will-change: transform;
-    cursor: grab;
-    user-select: none;
+    align-items: center;
+    gap: 10px;
   }
 
-  .rebel-wb__track:active {
-    cursor: grabbing;
-  }
-
-  /* Reel Card */
-  .rebel-wb__slide {
-    flex: 0 0 calc((100% - (({{ section.settings.columns_desktop }} - 1) * 20px)) / {{ section.settings.columns_desktop }});
-    box-sizing: border-box;
-    background: var(--card-bg);
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  .rebel-reels__nav-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, 0.12);
+    background: #ffffff;
+    color: #111111;
     display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
 
-  .rebel-wb__slide:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.12);
+  .rebel-reels__nav-btn:hover {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  /* Video wrapper */
-  .rebel-wb__video-wrap {
+  .rebel-reels__nav-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+  }
+
+  /* Slider / Track */
+  .rebel-reels__carousel-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 9 / 14;
-    background: #000000;
-    overflow: hidden;
   }
 
-  .rebel-wb__video {
+  .rebel-reels__track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 6px 2px 14px 2px;
+  }
+
+  .rebel-reels__track::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Card */
+  .rebel-reels__card {
+    flex: 0 0 calc((100% - (({{ section.settings.columns_desktop | default: 5 }} - 1) * 16px)) / {{ section.settings.columns_desktop | default: 5 }});
+    min-width: 0;
+    box-sizing: border-box;
+    scroll-snap-align: start;
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    background: #000000;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rebel-reels__card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+  }
+
+  /* Card Media Wrapper (9:16 Aspect Ratio) */
+  .rebel-reels__media-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    background: #111111;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .rebel-reels__video,
+  .rebel-reels__poster {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
-  .rebel-wb__play-badge {
+  /* Card Badges and Overlays */
+  .rebel-reels__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 3;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+
+  .rebel-reels__audio-btn {
     position: absolute;
     top: 12px;
     right: 12px;
+    z-index: 4;
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(4px);
-    pointer-events: none;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    padding: 0;
   }
 
-  .rebel-wb__play-badge svg {
-    width: 14px;
-    height: 14px;
+  .rebel-reels__audio-btn:hover {
+    background: rgba(0, 0, 0, 0.85);
+    transform: scale(1.08);
+  }
+
+  .rebel-reels__audio-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+  }
+
+  .rebel-reels__play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .rebel-reels__card:hover .rebel-reels__play-overlay {
+    opacity: 1;
+  }
+
+  .rebel-reels__play-icon-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .rebel-reels__play-icon-circle svg {
+    width: 20px;
+    height: 20px;
     fill: currentColor;
     margin-left: 2px;
   }
 
-  /* Product details docked underneath */
-  .rebel-wb__product-info {
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    background: var(--card-bg);
-    flex-grow: 1;
-    justify-content: space-between;
+  /* Subtle bottom gradient on video */
+  .rebel-reels__gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
   }
 
-  .rebel-wb__product-top {
+  /* Docked Bottom Bar (Matching User Screenshot) */
+  .rebel-reels__bottom-bar {
+    position: relative;
+    z-index: 5;
+    background: var(--bar-bg);
+    color: var(--bar-text);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    height: 46px;
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .rebel-reels__shop-link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    text-decoration: none;
+    color: var(--bar-text);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: background 0.2s ease;
+    min-width: 0;
+  }
+
+  .rebel-reels__shop-link:hover {
+    background: var(--bar-hover-bg);
+  }
+
+  .rebel-reels__shop-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rebel-reels__shop-price-pill {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.85;
+    margin-left: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .rebel-reels__expand-btn {
+    width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--bar-text);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    padding: 0;
+  }
+
+  .rebel-reels__expand-btn:hover {
+    background: var(--bar-hover-bg);
+  }
+
+  .rebel-reels__expand-btn svg {
+    width: 13px;
+    height: 13px;
+    fill: currentColor;
+    transition: transform 0.2s ease;
+  }
+
+  .rebel-reels__card:hover .rebel-reels__expand-btn svg {
+    transform: translateY(1px);
+  }
+
+  /* Fullscreen Modal */
+  .rebel-reels-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .rebel-reels-modal.is-active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .rebel-reels-modal__dialog {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    height: 92vh;
+    max-height: 840px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #000000;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rebel-reels-modal__video-wrap {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    overflow: hidden;
+  }
+
+  .rebel-reels-modal__video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .rebel-reels-modal__close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+
+  .rebel-reels-modal__close-btn:hover {
+    background: rgba(0, 0, 0, 0.95);
+    transform: scale(1.08);
+  }
+
+  .rebel-reels-modal__sound-btn {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 10;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .rebel-reels-modal__product-card {
+    position: absolute;
+    bottom: 16px;
+    left: 14px;
+    right: 14px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 12px;
     display: flex;
     align-items: center;
     gap: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   }
 
-  .rebel-wb__product-thumb {
-    width: 58px;
-    height: 58px;
-    border-radius: 6px;
+  .rebel-reels-modal__product-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
     object-fit: cover;
     flex-shrink: 0;
+    background: #f1f1f1;
     border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
-  .rebel-wb__product-meta {
+  .rebel-reels-modal__product-info {
     flex: 1;
     min-width: 0;
   }
 
-  .rebel-wb__product-title {
+  .rebel-reels-modal__product-title {
     font-size: 14px;
     font-weight: 700;
     color: #111111;
-    margin: 0 0 4px 0;
-    line-height: 1.3;
+    margin: 0 0 3px 0;
+    line-height: 1.25;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-decoration: none;
-    display: block;
   }
 
-  .rebel-wb__product-title:hover {
-    color: #000000;
-    text-decoration: underline;
-  }
-
-  .rebel-wb__price-wrap {
+  .rebel-reels-modal__price-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
     font-size: 13px;
+    margin-bottom: 2px;
   }
 
-  .rebel-wb__price {
-    font-weight: 700;
+  .rebel-reels-modal__price {
+    font-weight: 800;
     color: #111111;
   }
 
-  .rebel-wb__compare-price {
+  .rebel-reels-modal__compare-price {
     text-decoration: line-through;
     color: #888888;
     font-size: 12px;
   }
 
-  .rebel-wb__discount-badge {
-    background: transparent;
-    border: 1.5px solid var(--discount-color);
-    border-radius: 4px;
-    font-weight: 700;
-    padding: 2px 6px;
+  .rebel-reels-modal__discount-tag {
+    background: #e6f9ed;
+    color: #059669;
     font-size: 11px;
-    color: var(--discount-color);
-    letter-spacing: 0.2px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 
-  .rebel-wb__shop-btn {
-    display: block;
-    width: 100%;
-    text-align: center;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    padding: 10px 14px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 700;
+  .rebel-reels-modal__cta-btn {
+    background: #000000;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
     letter-spacing: 0.5px;
-    text-decoration: none;
     text-transform: uppercase;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    box-sizing: border-box;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.18s ease, background 0.18s ease;
   }
 
-  .rebel-wb__shop-btn:hover {
-    opacity: 0.9;
+  .rebel-reels-modal__cta-btn:hover {
+    background: #222222;
     transform: translateY(-1px);
   }
 
-  /* Arrows */
-  .rebel-wb__nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 18px;
-  }
-
-  .rebel-wb__arrow {
-    width: 42px;
-    height: 42px;
+  /* Modal Next / Prev Nav */
+  .rebel-reels-modal__arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
-    background: var(--card-bg);
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    color: #111111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
-  }
-
-  .rebel-wb__arrow:hover {
-    background: #000000;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     color: #ffffff;
-    border-color: #000000;
-  }
-
-  .rebel-wb__arrow:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  .rebel-wb__dots {
     display: flex;
     align-items: center;
-    gap: 8px;
-  }
-
-  .rebel-wb__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.15);
-    border: none;
+    justify-content: center;
     cursor: pointer;
-    padding: 0;
-    transition: all 0.25s ease;
+    transition: background 0.2s ease, transform 0.2s ease;
+    z-index: 100;
   }
 
-  .rebel-wb__dot.active {
-    width: 24px;
-    border-radius: 10px;
-    background: #000000;
+  .rebel-reels-modal__arrow:hover {
+    background: rgba(255, 255, 255, 0.4);
   }
 
-  /* Responsive */
-  @media (max-width: 1024px) {
-    .rebel-wb__slide {
-      flex: 0 0 calc((100% - (({{ section.settings.columns_tablet }} - 1) * 16px)) / {{ section.settings.columns_tablet }});
+  .rebel-reels-modal__arrow--prev {
+    left: -65px;
+  }
+
+  .rebel-reels-modal__arrow--next {
+    right: -65px;
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 1200px) {
+    .rebel-reels__card {
+      flex: 0 0 calc((100% - (({{ section.settings.columns_tablet | default: 3 }} - 1) * 14px)) / {{ section.settings.columns_tablet | default: 3 }});
     }
   }
 
   @media (max-width: 768px) {
-    .rebel-wb__title {
-      font-size: {{ section.settings.title_size_mobile }}px;
+    #rebel-reels-{{ sec_id }} {
+      padding: 30px 0 35px 0;
     }
 
-    .rebel-wb__slide {
-      flex: 0 0 82%;
+    .rebel-reels__header {
+      margin-bottom: 18px;
+    }
+
+    .rebel-reels__title {
+      font-size: {{ section.settings.title_size_mobile | default: 22 }}px;
+    }
+
+    .rebel-reels__nav-btns {
+      display: none;
+    }
+
+    .rebel-reels__track {
+      gap: 12px;
+      padding-bottom: 10px;
+    }
+
+    .rebel-reels__card {
+      /* Show cards with peek for intuitive horizontal swipe */
+      flex: 0 0 72vw;
+      max-width: 280px;
+    }
+
+    .rebel-reels-modal__arrow {
+      display: none;
+    }
+
+    .rebel-reels-modal__dialog {
+      height: 98vh;
+      max-width: 96vw;
+      border-radius: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .rebel-reels__card {
+      flex: 0 0 68vw;
+      max-width: 250px;
+    }
+    .rebel-reels__shop-link {
+      padding: 0 12px;
+      font-size: 13px;
     }
   }
 {% endstyle %}
 
 <section
-  id="rebel-watch-buy-{{ sec_id }}"
-  class="rebel-wb"
-  aria-label="Watch & Buy Customer Videos"
+  id="rebel-reels-{{ sec_id }}"
+  class="rebel-reels"
+  aria-label="Shoppable Video Reels"
 >
-  <div class="rebel-wb__container">
+  <div class="rebel-reels__container">
     
-    <div class="rebel-wb__header">
-      {%- if section.settings.kicker_text != blank -%}
-        <div class="rebel-wb__badge">
-          <span>{{ section.settings.kicker_text | escape }}</span>
+    {%- comment -%} Section Header {%- endcomment -%}
+    <div class="rebel-reels__header">
+      <div class="rebel-reels__header-content">
+        {%- if section.settings.kicker_text != blank -%}
+          <div class="rebel-reels__kicker">
+            <span class="rebel-reels__pulse-dot"></span>
+            <span>{{ section.settings.kicker_text | escape }}</span>
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.title != blank -%}
+          <h2 class="rebel-reels__title">{{ section.settings.title | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.subtitle != blank -%}
+          <p class="rebel-reels__subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.blocks.size > 2 -%}
+        <div class="rebel-reels__nav-btns">
+          <button
+            type="button"
+            class="rebel-reels__nav-btn"
+            id="rebel-prev-{{ sec_id }}"
+            aria-label="Previous Reels"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="rebel-reels__nav-btn"
+            id="rebel-next-{{ sec_id }}"
+            aria-label="Next Reels"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
         </div>
-      {%- endif -%}
-
-      {%- if section.settings.title != blank -%}
-        <h2 class="rebel-wb__title">{{ section.settings.title | escape }}</h2>
-      {%- endif -%}
-
-      {%- if section.settings.subtitle != blank -%}
-        <p class="rebel-wb__subtitle">{{ section.settings.subtitle | escape }}</p>
       {%- endif -%}
     </div>
 
-    <div class="rebel-wb__slider-wrapper">
-      <div class="rebel-wb__track-wrap" id="rebel-wb-wrap-{{ sec_id }}">
-        <div class="rebel-wb__track" id="rebel-wb-track-{{ sec_id }}">
+    {%- comment -%} Reel Carousel / Track {%- endcomment -%}
+    <div class="rebel-reels__carousel-wrapper">
+      <div class="rebel-reels__track" id="rebel-track-{{ sec_id }}">
+        
+        {%- for block in section.blocks -%}
+          {%- assign prd = block.settings.product -%}
           
-          {%- for block in section.blocks -%}
-            <div class="rebel-wb__slide" {{ block.shopify_attributes }}>
-              
-              {%- comment -%} Video player {%- endcomment -%}
-              <div class="rebel-wb__video-wrap">
-                {%- if block.settings.video_url != blank -%}
-                  <video
-                    class="rebel-wb__video"
-                    src="{{ block.settings.video_url }}"
-                    poster="{{ block.settings.video_poster | image_url: width: 600 }}"
-                    playsinline
-                    muted
-                    loop
-                    preload="metadata"
-                  ></video>
-                {%- elsif block.settings.shopify_video != blank -%}
-                  {{ block.settings.shopify_video | video_tag: class: 'rebel-wb__video', playsinline: true, muted: true, loop: true, controls: false }}
-                {%- else -%}
-                  <video
-                    class="rebel-wb__video"
-                    src="https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4"
-                    playsinline
-                    muted
-                    loop
-                  ></video>
-                {%- endif -%}
+          {%- comment -%} Product title resolution {%- endcomment -%}
+          {%- assign reel_title = block.settings.custom_product_title -%}
+          {%- if reel_title == blank and prd != blank -%}
+            {%- assign reel_title = prd.title -%}
+          {%- elsif reel_title == blank -%}
+            {%- assign reel_title = "Featured Product" -%}
+          {%- endif -%}
 
-                <div class="rebel-wb__play-badge">
+          {%- comment -%} Product URL resolution {%- endcomment -%}
+          {%- assign reel_url = block.settings.custom_product_url -%}
+          {%- if reel_url == blank and prd != blank -%}
+            {%- assign reel_url = prd.url -%}
+          {%- elsif reel_url == blank -%}
+            {%- assign reel_url = "#" -%}
+          {%- endif -%}
+
+          {%- comment -%} Product Image {%- endcomment -%}
+          {%- assign reel_thumb = "" -%}
+          {%- if block.settings.product_image != blank -%}
+            {%- assign reel_thumb = block.settings.product_image | image_url: width: 240 -%}
+          {%- elsif prd != blank and prd.featured_image != blank -%}
+            {%- assign reel_thumb = prd.featured_image | image_url: width: 240 -%}
+          {%- else -%}
+            {%- assign reel_thumb = "https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png" -%}
+          {%- endif -%}
+
+          {%- comment -%} Price & Compare Price {%- endcomment -%}
+          {%- assign reel_price = block.settings.custom_price -%}
+          {%- if reel_price == blank and prd != blank -%}
+            {%- assign reel_price = prd.price | money -%}
+          {%- elsif reel_price == blank -%}
+            {%- assign reel_price = "Rs. 399.00" -%}
+          {%- endif -%}
+
+          {%- assign reel_compare = block.settings.custom_compare_price -%}
+          {%- if reel_compare == blank and prd != blank and prd.compare_at_price > prd.price -%}
+            {%- assign reel_compare = prd.compare_at_price | money -%}
+          {%- endif -%}
+
+          {%- comment -%} Discount Badge {%- endcomment -%}
+          {%- assign reel_discount = block.settings.badge_text -%}
+          {%- if reel_discount == blank and prd != blank and prd.compare_at_price > prd.price -%}
+            {%- assign diff = prd.compare_at_price | minus: prd.price | times: 100 -%}
+            {%- assign pct = diff | divided_by: prd.compare_at_price -%}
+            {%- assign reel_discount = pct | append: "% OFF" -%}
+          {%- endif -%}
+
+          {%- comment -%} Video Source {%- endcomment -%}
+          {%- assign video_src = block.settings.video_url -%}
+          {%- if video_src == blank and block.settings.shopify_video != blank -%}
+            {%- assign video_src = block.settings.shopify_video.sources[0].url -%}
+          {%- endif -%}
+          {%- if video_src == blank -%}
+            {%- assign video_src = "https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4" -%}
+          {%- endif -%}
+
+          <div
+            class="rebel-reels__card"
+            data-index="{{ forloop.index0 }}"
+            data-video-src="{{ video_src }}"
+            data-title="{{ reel_title | escape }}"
+            data-url="{{ reel_url }}"
+            data-thumb="{{ reel_thumb }}"
+            data-price="{{ reel_price }}"
+            data-compare="{{ reel_compare }}"
+            data-discount="{{ reel_discount }}"
+            {{ block.shopify_attributes }}
+          >
+            {%- comment -%} Video media area {%- endcomment -%}
+            <div class="rebel-reels__media-box" role="button" aria-label="Play Reel {{ reel_title | escape }}">
+              
+              <video
+                class="rebel-reels__video"
+                src="{{ video_src }}"
+                {% if block.settings.video_poster != blank %}
+                  poster="{{ block.settings.video_poster | image_url: width: 600 }}"
+                {% endif %}
+                playsinline
+                muted
+                loop
+                preload="metadata"
+              ></video>
+
+              {%- if block.settings.badge_text != blank -%}
+                <div class="rebel-reels__badge">{{ block.settings.badge_text | escape }}</div>
+              {%- endif -%}
+
+              <button type="button" class="rebel-reels__audio-btn" aria-label="Toggle Sound">
+                <svg class="rebel-reels__icon-mute" viewBox="0 0 24 24">
+                  <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                </svg>
+                <svg class="rebel-reels__icon-unmute" style="display:none;" viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              </button>
+
+              <div class="rebel-reels__play-overlay">
+                <div class="rebel-reels__play-icon-circle">
                   <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </div>
               </div>
 
-              {%- comment -%} Product info & Shop button {%- endcomment -%}
-              <div class="rebel-wb__product-info">
-                <div class="rebel-wb__product-top">
-                  {%- if block.settings.product_image != blank -%}
-                    <img
-                      class="rebel-wb__product-thumb"
-                      src="{{ block.settings.product_image | image_url: width: 120 }}"
-                      alt="{{ block.settings.product_title | escape }}"
-                      loading="lazy"
-                      width="58"
-                      height="58"
-                    />
-                  {%- endif -%}
-
-                  <div class="rebel-wb__product-meta">
-                    <a
-                      href="{{ block.settings.product_url | default: '#' }}"
-                      class="rebel-wb__product-title"
-                      title="{{ block.settings.product_title | escape }}"
-                    >
-                      {{ block.settings.product_title | default: "Customized Gift Item" }}
-                    </a>
-
-                    <div class="rebel-wb__price-wrap">
-                      {%- if block.settings.compare_price != blank -%}
-                        <span class="rebel-wb__compare-price">{{ block.settings.compare_price }}</span>
-                      {%- endif -%}
-                      <span class="rebel-wb__price">{{ block.settings.price | default: "Rs. 389.00" }}</span>
-                      {%- if block.settings.discount_text != blank -%}
-                        <span class="rebel-wb__discount-badge">{{ block.settings.discount_text }}</span>
-                      {%- endif -%}
-                    </div>
-                  </div>
-                </div>
-
-                <a
-                  href="{{ block.settings.product_url | default: '#' }}"
-                  class="rebel-wb__shop-btn"
-                >
-                  {{ block.settings.button_text | default: "SHOP NOW" }}
-                </a>
-              </div>
-
+              <div class="rebel-reels__gradient"></div>
             </div>
-          {%- endfor -%}
 
+            {%- comment -%} Docked Black 'Shop Now' Bar {%- endcomment -%}
+            <div class="rebel-reels__bottom-bar">
+              <a
+                href="{{ reel_url }}"
+                class="rebel-reels__shop-link"
+                title="Shop {{ reel_title | escape }}"
+              >
+                <span class="rebel-reels__shop-text">{{ block.settings.button_text | default: "Shop Now" }}</span>
+                {%- if section.settings.show_price_in_bar and reel_price != blank -%}
+                  <span class="rebel-reels__shop-price-pill">{{ reel_price }}</span>
+                {%- endif -%}
+              </a>
+
+              <button
+                type="button"
+                class="rebel-reels__expand-btn"
+                aria-label="Watch full reel and view product"
+                title="Watch full reel"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M7 10l5 5 5-5z"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+        {%- endfor -%}
+
+      </div>
+    </div>
+
+  </div>
+
+  {%- comment -%} Fullscreen Reels Modal {%- endcomment -%}
+  <div class="rebel-reels-modal" id="rebel-modal-{{ sec_id }}" aria-hidden="true" role="dialog">
+    <div class="rebel-reels-modal__dialog">
+      
+      <div class="rebel-reels-modal__video-wrap">
+        <video
+          class="rebel-reels-modal__video"
+          id="rebel-modal-video-{{ sec_id }}"
+          playsinline
+          loop
+          preload="auto"
+        ></video>
+
+        <button type="button" class="rebel-reels-modal__sound-btn" id="rebel-modal-sound-{{ sec_id }}" aria-label="Toggle Sound">
+          <svg class="rebel-modal-mute-icon" style="display:none;" width="20" height="20" fill="#fff" viewBox="0 0 24 24">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+          </svg>
+          <svg class="rebel-modal-unmute-icon" width="20" height="20" fill="#fff" viewBox="0 0 24 24">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        </button>
+
+        <button type="button" class="rebel-reels-modal__close-btn" id="rebel-modal-close-{{ sec_id }}" aria-label="Close Modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        {%- comment -%} Floating Product Card inside Modal {%- endcomment -%}
+        <div class="rebel-reels-modal__product-card">
+          <img
+            class="rebel-reels-modal__product-thumb"
+            id="rebel-modal-thumb-{{ sec_id }}"
+            src=""
+            alt=""
+            width="60"
+            height="60"
+          />
+
+          <div class="rebel-reels-modal__product-info">
+            <h4 class="rebel-reels-modal__product-title" id="rebel-modal-title-{{ sec_id }}"></h4>
+            <div class="rebel-reels-modal__price-row">
+              <span class="rebel-reels-modal__price" id="rebel-modal-price-{{ sec_id }}"></span>
+              <span class="rebel-reels-modal__compare-price" id="rebel-modal-compare-{{ sec_id }}"></span>
+              <span class="rebel-reels-modal__discount-tag" id="rebel-modal-discount-{{ sec_id }}"></span>
+            </div>
+          </div>
+
+          <a
+            href="#"
+            class="rebel-reels-modal__cta-btn"
+            id="rebel-modal-link-{{ sec_id }}"
+          >
+            <span>SHOP NOW</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </a>
         </div>
       </div>
 
-      <div class="rebel-wb__nav">
-        <button
-          type="button"
-          class="rebel-wb__arrow"
-          id="rebel-wb-prev-{{ sec_id }}"
-          aria-label="Previous Reel"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
+      {%- comment -%} Modal Prev / Next Arrows {%- endcomment -%}
+      <button type="button" class="rebel-reels-modal__arrow rebel-reels-modal__arrow--prev" id="rebel-modal-prev-{{ sec_id }}" aria-label="Previous Reel">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
 
-        <div class="rebel-wb__dots" id="rebel-wb-dots-{{ sec_id }}"></div>
-
-        <button
-          type="button"
-          class="rebel-wb__arrow"
-          id="rebel-wb-next-{{ sec_id }}"
-          aria-label="Next Reel"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </div>
+      <button type="button" class="rebel-reels-modal__arrow rebel-reels-modal__arrow--next" id="rebel-modal-next-{{ sec_id }}" aria-label="Next Reel">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
 
     </div>
-
   </div>
 </section>
 
 <script>
   (function() {
     const secId = "{{ sec_id }}";
-    const track = document.getElementById("rebel-wb-track-" + secId);
-    const prevBtn = document.getElementById("rebel-wb-prev-" + secId);
-    const nextBtn = document.getElementById("rebel-wb-next-" + secId);
-    const dotsContainer = document.getElementById("rebel-wb-dots-" + secId);
-    const slides = track ? Array.from(track.querySelectorAll(".rebel-wb__slide")) : [];
+    const track = document.getElementById("rebel-track-" + secId);
+    const prevBtn = document.getElementById("rebel-prev-" + secId);
+    const nextBtn = document.getElementById("rebel-next-" + secId);
+    if (!track) return;
 
-    if (!track || slides.length === 0) return;
+    const cards = Array.from(track.querySelectorAll(".rebel-reels__card"));
+    if (cards.length === 0) return;
 
-    let currentIndex = 0;
-    const totalSlides = slides.length;
-
-    function getVisibleCount() {
-      const w = window.innerWidth;
-      if (w <= 768) return 1;
-      if (w <= 1024) return {{ section.settings.columns_tablet | default: 2 }};
-      return {{ section.settings.columns_desktop | default: 4 }};
-    }
-
-    function getMaxIndex() {
-      return Math.max(0, totalSlides - getVisibleCount());
-    }
-
-    function buildDots() {
-      if (!dotsContainer) return;
-      dotsContainer.innerHTML = "";
-      const maxIdx = getMaxIndex();
-      for (let i = 0; i <= maxIdx; i++) {
-        const dot = document.createElement("button");
-        dot.className = "rebel-wb__dot" + (i === currentIndex ? " active" : "");
-        dot.setAttribute("aria-label", "Go to reel " + (i + 1));
-        dot.addEventListener("click", () => goToSlide(i));
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function updateDots() {
-      if (!dotsContainer) return;
-      const dots = dotsContainer.querySelectorAll(".rebel-wb__dot");
-      dots.forEach((dot, idx) => {
-        dot.classList.toggle("active", idx === currentIndex);
-      });
-    }
-
-    function updateArrows() {
-      const maxIdx = getMaxIndex();
-      if (prevBtn) prevBtn.disabled = currentIndex === 0;
-      if (nextBtn) nextBtn.disabled = currentIndex >= maxIdx;
-    }
-
-    function goToSlide(index) {
-      const maxIdx = getMaxIndex();
-      currentIndex = Math.min(Math.max(0, index), maxIdx);
-
-      const slide = slides[0];
-      if (!slide) return;
-      const rect = slide.getBoundingClientRect();
-      const style = window.getComputedStyle(track);
-      const gap = parseFloat(style.gap) || 20;
-      const step = rect.width + gap;
-
-      track.style.transform = "translateX(-" + (currentIndex * step) + "px)";
-      updateDots();
-      updateArrows();
+    /* Desktop Navigation Buttons */
+    function updateNavState() {
+      if (!prevBtn || !nextBtn) return;
+      prevBtn.disabled = track.scrollLeft <= 5;
+      nextBtn.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 10;
     }
 
     if (prevBtn) {
-      prevBtn.addEventListener("click", () => goToSlide(currentIndex - 1));
-    }
-    if (nextBtn) {
-      nextBtn.addEventListener("click", () => {
-        const maxIdx = getMaxIndex();
-        if (currentIndex >= maxIdx) {
-          goToSlide(0);
-        } else {
-          goToSlide(currentIndex + 1);
-        }
+      prevBtn.addEventListener("click", () => {
+        const step = track.clientWidth * 0.75;
+        track.scrollBy({ left: -step, behavior: "smooth" });
       });
     }
 
-    // Touch swipe
-    let startX = 0;
-    let isDragging = false;
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        const step = track.clientWidth * 0.75;
+        track.scrollBy({ left: step, behavior: "smooth" });
+      });
+    }
 
-    track.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-      isDragging = true;
-    }, { passive: true });
+    track.addEventListener("scroll", updateNavState, { passive: true });
+    updateNavState();
 
-    track.addEventListener("touchend", (e) => {
-      if (!isDragging) return;
-      isDragging = false;
-      const diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 40) {
-        if (diff > 0) goToSlide(currentIndex + 1);
-        else goToSlide(currentIndex - 1);
-      }
-    });
-
-    // Auto play videos when in viewport (IntersectionObserver)
-    const videos = track.querySelectorAll(".rebel-wb__video");
+    /* Auto Play Videos on Scroll (IntersectionObserver) */
+    const cardVideos = track.querySelectorAll(".rebel-reels__video");
     if ("IntersectionObserver" in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+      const videoObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
           const video = entry.target;
           if (entry.isIntersecting) {
             video.muted = true;
-            const promise = video.play();
-            if (promise !== undefined) {
-              promise.catch(() => {});
-            }
+            const playPromise = video.play();
+            if (playPromise !== undefined) playPromise.catch(() => {});
           } else {
             video.pause();
           }
         });
-      }, { threshold: 0.4 });
+      }, { threshold: 0.35 });
 
-      videos.forEach(v => observer.observe(v));
+      cardVideos.forEach((v) => videoObserver.observe(v));
     }
 
-    // Toggle mute/play on video click
-    videos.forEach(video => {
-      video.addEventListener("click", () => {
-        if (video.paused) {
-          video.play();
-        } else {
+    /* Sound Toggle on Individual Reel Card */
+    cards.forEach((card) => {
+      const audioBtn = card.querySelector(".rebel-reels__audio-btn");
+      const video = card.querySelector(".rebel-reels__video");
+      if (audioBtn && video) {
+        audioBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
           video.muted = !video.muted;
-        }
+          const iconMute = audioBtn.querySelector(".rebel-reels__icon-mute");
+          const iconUnmute = audioBtn.querySelector(".rebel-reels__icon-unmute");
+          if (iconMute) iconMute.style.display = video.muted ? "block" : "none";
+          if (iconUnmute) iconUnmute.style.display = video.muted ? "none" : "block";
+        });
+      }
+    });
+
+    /* Fullscreen Modal Controller */
+    const modal = document.getElementById("rebel-modal-" + secId);
+    const modalVideo = document.getElementById("rebel-modal-video-" + secId);
+    const modalClose = document.getElementById("rebel-modal-close-" + secId);
+    const modalSound = document.getElementById("rebel-modal-sound-" + secId);
+    const modalThumb = document.getElementById("rebel-modal-thumb-" + secId);
+    const modalTitle = document.getElementById("rebel-modal-title-" + secId);
+    const modalPrice = document.getElementById("rebel-modal-price-" + secId);
+    const modalCompare = document.getElementById("rebel-modal-compare-" + secId);
+    const modalDiscount = document.getElementById("rebel-modal-discount-" + secId);
+    const modalLink = document.getElementById("rebel-modal-link-" + secId);
+    const modalPrev = document.getElementById("rebel-modal-prev-" + secId);
+    const modalNext = document.getElementById("rebel-modal-next-" + secId);
+
+    let activeModalIndex = 0;
+
+    function openModal(index) {
+      if (!modal || !cards[index]) return;
+      activeModalIndex = index;
+      const card = cards[index];
+
+      // Pause inline videos
+      cardVideos.forEach((v) => v.pause());
+
+      // Set modal data
+      const src = card.dataset.videoSrc;
+      const title = card.dataset.title || "";
+      const url = card.dataset.url || "#";
+      const thumb = card.dataset.thumb || "";
+      const price = card.dataset.price || "";
+      const compare = card.dataset.compare || "";
+      const discount = card.dataset.discount || "";
+
+      modalTitle.textContent = title;
+      modalPrice.textContent = price;
+      modalCompare.textContent = compare;
+      modalDiscount.textContent = discount;
+      modalDiscount.style.display = discount ? "inline-block" : "none";
+      modalThumb.src = thumb;
+      modalThumb.alt = title;
+      modalLink.href = url;
+
+      modalVideo.src = src;
+      modalVideo.muted = false; // play with sound in modal
+      const playPromise = modalVideo.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          modalVideo.muted = true;
+          modalVideo.play().catch(() => {});
+        });
+      }
+
+      modal.classList.add("is-active");
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      if (!modal) return;
+      modal.classList.remove("is-active");
+      modal.setAttribute("aria-hidden", "true");
+      modalVideo.pause();
+      modalVideo.src = "";
+      document.body.style.overflow = "";
+
+      // Resume in-view videos
+      cardVideos.forEach((v) => {
+        v.muted = true;
+        v.play().catch(() => {});
       });
+    }
+
+    function stepModal(delta) {
+      let nextIdx = activeModalIndex + delta;
+      if (nextIdx < 0) nextIdx = cards.length - 1;
+      if (nextIdx >= cards.length) nextIdx = 0;
+      openModal(nextIdx);
+    }
+
+    // Bind triggers to open modal
+    cards.forEach((card, idx) => {
+      const mediaBox = card.querySelector(".rebel-reels__media-box");
+      const expandBtn = card.querySelector(".rebel-reels__expand-btn");
+
+      if (mediaBox) {
+        mediaBox.addEventListener("click", () => openModal(idx));
+      }
+      if (expandBtn) {
+        expandBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openModal(idx);
+        });
+      }
     });
 
-    buildDots();
-    goToSlide(0);
+    if (modalClose) modalClose.addEventListener("click", closeModal);
+    if (modalPrev) modalPrev.addEventListener("click", () => stepModal(-1));
+    if (modalNext) modalNext.addEventListener("click", () => stepModal(1));
 
-    let resizeTimer;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        buildDots();
-        goToSlide(currentIndex);
-      }, 150);
+    if (modalSound) {
+      modalSound.addEventListener("click", () => {
+        modalVideo.muted = !modalVideo.muted;
+        const muteIcon = modalSound.querySelector(".rebel-modal-mute-icon");
+        const unmuteIcon = modalSound.querySelector(".rebel-modal-unmute-icon");
+        if (muteIcon) muteIcon.style.display = modalVideo.muted ? "block" : "none";
+        if (unmuteIcon) unmuteIcon.style.display = modalVideo.muted ? "none" : "block";
+      });
+    }
+
+    // Close on backdrop click
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    // Keyboard support
+    window.addEventListener("keydown", (e) => {
+      if (!modal || !modal.classList.contains("is-active")) return;
+      if (e.key === "Escape") closeModal();
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") stepModal(-1);
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") stepModal(1);
     });
+
   })();
 </script>
 
 {% schema %}
 {
-  "name": "Watch & Buy (Mosambi)",
+  "name": "Shoppable Video Reels",
   "tag": "section",
-  "class": "rebel-watch-buy-section",
+  "class": "rebel-shoppable-reels-section",
   "settings": [
+    {
+      "type": "header",
+      "content": "Section Header"
+    },
     {
       "type": "text",
       "id": "kicker_text",
-      "label": "Top Badge",
-      "default": "Reels & Unboxing"
+      "label": "Top Badge Text",
+      "default": "Trending Reels ✨"
     },
     {
       "type": "text",
       "id": "title",
-      "label": "Section Title",
-      "default": "Watch & Buy"
+      "label": "Heading",
+      "default": "Show Your Hottest Products Here"
     },
     {
       "type": "text",
       "id": "subtitle",
-      "label": "Section Subtitle",
-      "default": "See real reactions & unboxing videos from happy customers"
+      "label": "Subtitle",
+      "default": "Watch customer unboxings & click Shop Now to get yours"
+    },
+    {
+      "type": "select",
+      "id": "header_alignment",
+      "label": "Header Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
     },
     {
       "type": "range",
       "id": "columns_desktop",
-      "label": "Visible Reels (Desktop)",
-      "min": 2,
-      "max": 5,
+      "label": "Cards Visible on Desktop",
+      "min": 3,
+      "max": 6,
       "step": 1,
-      "default": 4
+      "default": 5
     },
     {
       "type": "range",
       "id": "columns_tablet",
-      "label": "Visible Reels (Tablet)",
-      "min": 1,
-      "max": 3,
+      "label": "Cards Visible on Tablet",
+      "min": 2,
+      "max": 4,
       "step": 1,
-      "default": 2
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card Border Radius (px)",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price_in_bar",
+      "label": "Show Price in Shop Bar",
+      "default": false
     },
     {
       "type": "range",
@@ -669,85 +1227,101 @@
       "min": 1000,
       "max": 1600,
       "step": 50,
-      "default": 1350
+      "default": 1400
+    },
+    {
+      "type": "header",
+      "content": "Colors & Typography"
     },
     {
       "type": "color",
       "id": "bg_color",
-      "label": "Background Color",
+      "label": "Section Background",
       "default": "#ffffff"
     },
     {
       "type": "color",
-      "id": "card_bg",
-      "label": "Card Background",
-      "default": "#ffffff"
+      "id": "text_color",
+      "label": "Heading Color",
+      "default": "#111111"
     },
     {
       "type": "color",
-      "id": "title_color",
-      "label": "Title Color",
+      "id": "subtext_color",
+      "label": "Subtitle Color",
+      "default": "#666666"
+    },
+    {
+      "type": "color",
+      "id": "bar_bg",
+      "label": "Shop Bar Background",
       "default": "#000000"
     },
     {
       "type": "color",
-      "id": "button_bg",
-      "label": "Shop Button Background",
-      "default": "#000000"
+      "id": "bar_text_color",
+      "label": "Shop Bar Text Color",
+      "default": "#ffffff"
     },
     {
       "type": "color",
-      "id": "button_text_color",
-      "label": "Shop Button Text Color",
-      "default": "#ffffff"
+      "id": "bar_hover_bg",
+      "label": "Shop Bar Hover Color",
+      "default": "#1f1f1f"
     },
     {
       "type": "range",
       "id": "title_size_desktop",
-      "label": "Title Size Desktop (px)",
-      "min": 22,
-      "max": 48,
+      "label": "Title Font Size Desktop (px)",
+      "min": 20,
+      "max": 44,
       "step": 2,
-      "default": 30
+      "default": 28
     },
     {
       "type": "range",
       "id": "title_size_mobile",
-      "label": "Title Size Mobile (px)",
+      "label": "Title Font Size Mobile (px)",
       "min": 18,
-      "max": 34,
+      "max": 32,
       "step": 2,
-      "default": 24
+      "default": 22
     },
     {
       "type": "range",
       "id": "padding_top",
       "label": "Padding Top (px)",
-      "min": 20,
+      "min": 10,
       "max": 100,
       "step": 5,
-      "default": 45
+      "default": 40
     },
     {
       "type": "range",
       "id": "padding_bottom",
       "label": "Padding Bottom (px)",
-      "min": 20,
+      "min": 10,
       "max": 100,
       "step": 5,
-      "default": 45
+      "default": 50
     }
   ],
   "blocks": [
     {
       "type": "reel",
-      "name": "Video Reel Card",
+      "name": "Shoppable Reel",
       "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Tagged Product",
+          "info": "Automatically populates link, title, price and image"
+        },
         {
           "type": "text",
           "id": "video_url",
-          "label": "MP4 Video Direct URL",
-          "info": "Paste video CDN URL or use Shopify Video file below"
+          "label": "Video Direct URL (MP4)",
+          "info": "Paste an MP4 CDN URL or use Shopify Video file below"
         },
         {
           "type": "video",
@@ -760,90 +1334,112 @@
           "label": "Video Poster Thumbnail (optional)"
         },
         {
+          "type": "header",
+          "content": "Custom Product Overrides"
+        },
+        {
           "type": "text",
-          "id": "product_title",
-          "label": "Product Title",
-          "default": "POP UP FRAME"
+          "id": "custom_product_title",
+          "label": "Custom Title (Overrides Product)"
+        },
+        {
+          "type": "url",
+          "id": "custom_product_url",
+          "label": "Custom Product Link (Overrides Product)"
         },
         {
           "type": "image_picker",
           "id": "product_image",
-          "label": "Product Thumbnail Image"
+          "label": "Custom Product Thumbnail"
         },
         {
           "type": "text",
-          "id": "price",
-          "label": "Display Price",
-          "default": "Rs. 389.00"
+          "id": "custom_price",
+          "label": "Custom Display Price (e.g. Rs. 389.00)"
         },
         {
           "type": "text",
-          "id": "compare_price",
-          "label": "Compare At Price (optional)",
-          "default": "Rs. 550.00"
+          "id": "custom_compare_price",
+          "label": "Custom Compare At Price (e.g. Rs. 550.00)"
         },
         {
           "type": "text",
-          "id": "discount_text",
-          "label": "Discount Badge Text (optional)",
-          "default": "29% OFF"
-        },
-        {
-          "type": "url",
-          "id": "product_url",
-          "label": "Product Link"
+          "id": "badge_text",
+          "label": "Card Badge Text (optional)",
+          "info": "e.g. Hot Seller, Freebie, Viral"
         },
         {
           "type": "text",
           "id": "button_text",
           "label": "Button Label",
-          "default": "SHOP NOW"
+          "default": "Shop Now"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Watch & Buy (Mosambi Style)",
+      "name": "Shoppable Video Reels",
+      "settings": {
+        "title": "Show Your Hottest Products Here",
+        "subtitle": "Watch customer unboxings & click Shop Now to get yours",
+        "columns_desktop": 5,
+        "header_alignment": "center"
+      },
       "blocks": [
         {
           "type": "reel",
           "settings": {
             "video_url": "https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4",
-            "product_title": "Fairy Light Hamper",
-            "price": "Rs. 379.00",
-            "compare_price": "Rs. 550.00",
-            "discount_text": "31% OFF"
+            "custom_product_title": "Fairy Light Polaroid Hamper",
+            "custom_price": "Rs. 379.00",
+            "custom_compare_price": "Rs. 550.00",
+            "badge_text": "🔥 Best Seller",
+            "button_text": "Shop Now"
           }
         },
         {
           "type": "reel",
           "settings": {
             "video_url": "https://cdn.shopify.com/videos/c/o/v/18eed137211e43169fc77470c1117cdb.mp4",
-            "product_title": "Buy 10 Mini Memoroids (Get 5 Free)",
-            "price": "Rs. 219.00",
-            "compare_price": "Rs. 300.00",
-            "discount_text": "27% OFF"
+            "custom_product_title": "Mini Memoroids (Set of 10)",
+            "custom_price": "Rs. 219.00",
+            "custom_compare_price": "Rs. 300.00",
+            "badge_text": "⭐ Customer Fav",
+            "button_text": "Shop Now"
           }
         },
         {
           "type": "reel",
           "settings": {
             "video_url": "https://cdn.shopify.com/videos/c/o/v/036674109ebe45b8bb82a610718030c8.mp4",
-            "product_title": "Cute Memory Box Hamper",
-            "price": "Rs. 299.00",
-            "compare_price": "Rs. 369.00",
-            "discount_text": "18% OFF"
+            "custom_product_title": "Cute Memory Box Hamper",
+            "custom_price": "Rs. 299.00",
+            "custom_compare_price": "Rs. 369.00",
+            "badge_text": "🎁 Freebie",
+            "button_text": "Shop Now"
           }
         },
         {
           "type": "reel",
           "settings": {
             "video_url": "https://cdn.shopify.com/videos/c/o/v/af80f40495c748a0a18f76e3b9a37c10.mp4",
-            "product_title": "POP UP FRAME",
-            "price": "Rs. 389.00",
-            "compare_price": "Rs. 599.00",
-            "discount_text": "35% OFF"
+            "custom_product_title": "POP UP Birthday Frame",
+            "custom_price": "Rs. 389.00",
+            "custom_compare_price": "Rs. 599.00",
+            "badge_text": "⚡ Trending",
+            "button_text": "Shop Now"
+          }
+        },
+        {
+          "type": "reel",
+          "settings": {
+            "video_url": "https://cdn.shopify.com/videos/c/o/v/01fb7c2a1003416c9b1fee8433019a6c.mp4",
+            "custom_product_title": "Personalized Birthday Newspaper",
+            "custom_price": "Rs. 399.00",
+            "custom_compare_price": "Rs. 699.00",
+            "badge_text": "❤️ Most Loved",
+            "button_text": "Shop Now"
           }
         }
       ]
