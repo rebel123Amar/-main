@@ -80,25 +80,23 @@
 {% if section.settings.enable %}
 <style>
 #wa-bounce-{{ section.id }} {
-  position: fixed;
-  bottom: {{ section.settings.bottom_space }}px;
-  z-index: 99999999;
+  position: fixed !important;
+  bottom: {{ section.settings.bottom_space | default: 24 }}px !important;
+  left: {{ section.settings.side_space | default: 24 }}px !important;
+  right: auto !important;
+  z-index: 99999999 !important;
 }
 
+#wa-bounce-{{ section.id }}.left,
 #wa-bounce-{{ section.id }}.right {
-  right: {{ section.settings.side_space }}px;
-  left: auto;
-}
-
-#wa-bounce-{{ section.id }}.left {
-  left: {{ section.settings.side_space }}px;
-  right: auto;
+  left: {{ section.settings.side_space | default: 24 }}px !important;
+  right: auto !important;
 }
 
 #wa-bounce-{{ section.id }} a {
-  width: {{ section.settings.size }}px;
-  height: {{ section.settings.size }}px;
-  background: {{ section.settings.bg_color }};
+  width: {{ section.settings.size | default: 64 }}px;
+  height: {{ section.settings.size | default: 64 }}px;
+  background: {{ section.settings.bg_color | default: '#25D366' }};
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -136,12 +134,12 @@
 
 <div
   id="wa-bounce-{{ section.id }}"
-  class="{{ section.settings.position | default: 'left' }}"
+  class="left"
 >
   <a
     href="{{ section.settings.whatsapp_link }}"
     target="_blank"
-    class="{{ section.settings.animation }}"
+    class="{{ section.settings.animation | default: 'bounce' }}"
     aria-label="Chat on WhatsApp"
   >
     <img
