@@ -1,0 +1,153 @@
+{% schema %}
+{
+  "name": "Floating WhatsApp Bounce",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable",
+      "label": "Enable Button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "whatsapp_link",
+      "label": "WhatsApp Link",
+      "default": "https://wa.me/919999999999"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Button Position",
+      "options": [
+        { "value": "left", "label": "Bottom Left" },
+        { "value": "right", "label": "Bottom Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "bottom_space",
+      "label": "Bottom Spacing (px)",
+      "min": 10,
+      "max": 120,
+      "step": 2,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "side_space",
+      "label": "Side Spacing (px)",
+      "min": 10,
+      "max": 120,
+      "step": 2,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "size",
+      "label": "Button Size (px)",
+      "min": 44,
+      "max": 100,
+      "step": 2,
+      "default": 64
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Button Color",
+      "default": "#25D366"
+    },
+    {
+      "type": "select",
+      "id": "animation",
+      "label": "Animation Type",
+      "options": [
+        { "value": "bounce", "label": "Bounce (Up–Down)" },
+        { "value": "pop", "label": "Pop + Bounce" },
+        { "value": "none", "label": "None" }
+      ],
+      "default": "bounce"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating WhatsApp Bounce"
+    }
+  ]
+}
+{% endschema %}
+
+{% if section.settings.enable %}
+<style>
+#wa-bounce-{{ section.id }} {
+  position: fixed;
+  bottom: {{ section.settings.bottom_space }}px;
+  z-index: 99999999;
+}
+
+#wa-bounce-{{ section.id }}.right {
+  right: {{ section.settings.side_space }}px;
+  left: auto;
+}
+
+#wa-bounce-{{ section.id }}.left {
+  left: {{ section.settings.side_space }}px;
+  right: auto;
+}
+
+#wa-bounce-{{ section.id }} a {
+  width: {{ section.settings.size }}px;
+  height: {{ section.settings.size }}px;
+  background: {{ section.settings.bg_color }};
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+  text-decoration: none;
+}
+
+#wa-bounce-{{ section.id }} img {
+  width: 55%;
+  height: 55%;
+}
+
+/* Animations */
+.bounce {
+  animation: bounceUpDown 1.8s infinite;
+}
+
+.pop {
+  animation: popBounce 2.2s infinite;
+}
+
+@keyframes bounceUpDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes popBounce {
+  0% { transform: scale(1) translateY(0); }
+  30% { transform: scale(1.1) translateY(-16px); }
+  60% { transform: scale(1) translateY(0); }
+  100% { transform: scale(1); }
+}
+</style>
+
+<div
+  id="wa-bounce-{{ section.id }}"
+  class="{{ section.settings.position | default: 'left' }}"
+>
+  <a
+    href="{{ section.settings.whatsapp_link }}"
+    target="_blank"
+    class="{{ section.settings.animation }}"
+    aria-label="Chat on WhatsApp"
+  >
+    <img
+      src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+      alt="WhatsApp"
+    >
+  </a>
+</div>
+{% endif %}
