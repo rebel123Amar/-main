@@ -88,6 +88,13 @@
 
         cart-drawer:not(.is-empty) .drawer__header {
           display: flex !important;
+          padding: 10px 18px 4px !important;
+          align-items: center !important;
+        }
+
+        cart-drawer:not(.is-empty) .drawer__heading {
+          font-size: 18px !important;
+          margin: 0 !important;
         }
 
         cart-drawer:not(.is-empty) cart-drawer-items {
@@ -113,8 +120,8 @@
 
         .cart-reward-wrapper {
           background: #ffffff !important;
-          padding: 8px 10px 6px !important;
-          margin: 0 0 6px !important;
+          padding: 6px 10px 4px !important;
+          margin: 0 0 4px !important;
           border-bottom: 1px solid #ededed !important;
           position: relative !important;
           color: #111111 !important;
@@ -138,11 +145,11 @@
         /* Top Headline Message */
         .cart-reward-headline {
           text-align: center !important;
-          font-size: 13px !important;
+          font-size: 12.5px !important;
           font-weight: 600 !important;
           color: #111111 !important;
           line-height: 1.25 !important;
-          margin: 0 0 12px 0 !important;
+          margin: 0 0 6px 0 !important;
           letter-spacing: -0.01em !important;
           transition: all 0.3s ease !important;
         }
@@ -571,28 +578,31 @@
           white-space: nowrap !important;
         }
 
-        /* Maximize product visibility inside cart drawer footer */
+        /* Maximize product visibility inside cart drawer footer & lift price above WhatsApp widget */
         cart-drawer:not(.is-empty) .drawer__footer {
           padding-top: 4px !important;
-          padding-bottom: 8px !important;
+          padding-bottom: 10px !important;
         }
 
+        /* Lift Estimated Total price upwards so floating WhatsApp button does not overlap it */
         cart-drawer:not(.is-empty) .drawer__footer .totals {
-          margin: 4px 0 2px 0 !important;
+          margin: 6px 0 32px 0 !important; /* Elevated upwards to clear WhatsApp floating button */
+          padding-right: 40px !important; /* Extra clearance from right edge where WhatsApp icon floats */
         }
 
         cart-drawer:not(.is-empty) .drawer__footer .totals__total {
-          font-size: 14px !important;
+          font-size: 14.5px !important;
+          font-weight: 700 !important;
           margin: 0 !important;
         }
 
         cart-drawer:not(.is-empty) .drawer__footer .totals__total-value {
-          font-size: 14px !important;
+          font-size: 14.5px !important;
           margin: 0 !important;
         }
 
         cart-drawer:not(.is-empty) .drawer__footer .tax-note {
-          margin: 2px 0 4px 0 !important;
+          margin: 2px 0 6px 0 !important;
           font-size: 10.5px !important;
           line-height: 1.2 !important;
         }
@@ -610,17 +620,21 @@
 
         @media screen and (max-width: 749px) {
           .cart-unlocked-reward {
-            padding: 8px 10px !important;
-            margin: 10px 0 12px 0 !important;
+            padding: 7px 10px !important;
+            margin: 6px 0 8px 0 !important;
           }
           .cart-unlocked-reward__icon {
-            font-size: 19px !important;
+            font-size: 18px !important;
           }
           .cart-unlocked-reward__title {
-            font-size: 12.5px !important;
+            font-size: 12px !important;
           }
           .cart-unlocked-reward__sub {
-            font-size: 10.5px !important;
+            font-size: 10px !important;
+          }
+          cart-drawer:not(.is-empty) .drawer__footer .totals {
+            margin: 6px 0 30px 0 !important;
+            padding-right: 36px !important;
           }
         }
 
