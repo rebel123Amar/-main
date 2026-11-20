@@ -18,21 +18,40 @@ import {
 import { useState, useCallback } from "react";
 import { authenticate, prisma } from "../shopify.server";
 
+const DEFAULT_SETTINGS = {
+  instagramUrl: "https://www.instagram.com/rebelgifts_?igsh=MTh2OGlsNXlwbGRvOA==",
+  autoApproveReviews: false,
+  reviewsPerPage: 5,
+  allowMediaUploads: true,
+  maxUploadSizeMb: 10,
+};
+
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
 
-  let settings = await prisma.appSettings.findUnique({
-    where: { shopDomain: shop },
-  });
+  try {
+    let settings = await prisma.appSettings.findUnique({
+      where: { shopDomain: shop },
+    });
 
-  if (!settings) {
-    settings = await prisma.appSettings.create({
-      data: { shopDomain: shop },
+    if (!settings) {
+      settings = await prisma.appSettings.create({
+        data: {
+          shopDomain: shop,
+          ...DEFAULT_SETTINGS,
+        },
+      });
+    }
+
+    return json({ settings, dbError: null });
+  } catch (dbErr: any) {
+    console.error("[Settings DB Error]", dbErr.message);
+    return json({
+      settings: { ...DEFAULT_SETTINGS, id: "fallback", shopDomain: shop },
+      dbError: dbErr.message || "Database unreachable",
     });
   }
-
-  return json({ settings });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -51,30 +70,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return json({ error: "Instagram URL must start with https://" });
   }
 
-  await prisma.appSettings.upsert({
-    where: { shopDomain: shop },
-    update: {
-      instagramUrl,
-      autoApproveReviews,
-      reviewsPerPage,
-      allowMediaUploads,
-      maxUploadSizeMb,
-    },
-    create: {
-      shopDomain: shop,
-      instagramUrl,
-      autoApproveReviews,
-      reviewsPerPage,
-      allowMediaUploads,
-      maxUploadSizeMb,
-    },
-  });
+  try {
+    await prisma.appSettings.upsert({
+      where: { shopDomain: shop },
+      update: {
+        instagramUrl,
+        autoApproveReviews,
+        reviewsPerPage,
+        allowMediaUploads,
+        maxUploadSizeMb,
+      },
+      create: {
+        shopDomain: shop,
+        instagramUrl,
+        autoApproveReviews,
+        reviewsPerPage,
+        allowMediaUploads,
+        maxUploadSizeMb,
+      },
+    });
 
-  return json({ success: true, message: "Settings saved successfully!" });
+    return json({ success: true, message: "Settings saved successfully!", dbError: null });
+  } catch (err: any) {
+    return json({
+      error: "Could not save to database: " + (err.message || "Database paused"),
+      dbError: err.message,
+    });
+  }
 };
 
 export default function SettingsPage() {
-  const { settings } = useLoaderData<typeof loader>();
+  const { settings, dbError } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const submit = useSubmit();
   const isSaving = navigation.state === "submitting";
@@ -108,6 +134,25 @@ export default function SettingsPage() {
   return (
     <Page title="App Settings" subtitle="Configure the Rebel app behaviour">
       <Layout>
+        {dbError && (
+          <Layout.Section>
+            <Banner
+              title="Database Paused or Connecting"
+              tone="warning"
+              action={{
+                content: "Refresh",
+                onAction: () => window.location.reload(),
+              }}
+              secondaryAction={{
+                content: "Open Supabase Dashboard",
+                url: "https://supabase.com/dashboard",
+                external: true,
+              }}
+            >
+              <p>Your Supabase project might be paused due to inactivity. Default settings are currently loaded.</p>
+            </Banner>
+          </Layout.Section>
+        )}
         {saved && (
           <Layout.Section>
             <Banner tone="success" title="Settings saved successfully!" />

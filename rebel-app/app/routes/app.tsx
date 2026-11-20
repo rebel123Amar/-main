@@ -13,8 +13,15 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-  return json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
+  try {
+    await authenticate.admin(request);
+    return json({ apiKey: process.env.SHOPIFY_API_KEY || "", authError: null });
+  } catch (err: any) {
+    // If it's a Response (like redirect to auth), rethrow so Remix handles it
+    if (err instanceof Response) throw err;
+    console.error("[App Root Loader Error]", err);
+    return json({ apiKey: process.env.SHOPIFY_API_KEY || "", authError: err.message || "Authentication error" });
+  }
 };
 
 export default function App() {
@@ -39,33 +46,41 @@ export default function App() {
           box-shadow: 0 0 10px rgba(244, 63, 94, 0.7);
         }
 
-        /* Floating Loading Indicator Pill */
-        .rebel-global-pill {
+        /* Full Screen Animated Loading Overlay */
+        .rebel-loading-overlay {
           position: fixed;
-          top: 14px;
-          right: 20px;
-          background: #0f172a;
-          color: #ffffff;
-          padding: 8px 16px;
-          border-radius: 999px;
-          font-size: 13px;
-          font-weight: 700;
+          inset: 0;
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 8px;
+          justify-content: center;
           z-index: 99999999;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-          animation: rebelSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          animation: fadeIn 0.2s ease;
         }
 
-        .rebel-global-spinner {
-          width: 14px;
-          height: 14px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top-color: #f43f5e;
+        .rebel-loading-box {
+          background: #ffffff;
+          padding: 30px 42px;
+          border-radius: 18px;
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 16px;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          text-align: center;
+        }
+
+        .rebel-spin-circle {
+          width: 40px;
+          height: 40px;
+          border: 3.5px solid #f1f5f9;
+          border-top-color: #e11d48;
           border-radius: 50%;
-          animation: rebelSpin 0.7s linear infinite;
+          animation: spin 0.75s linear infinite;
         }
 
         @keyframes rebelSlide {
@@ -73,23 +88,32 @@ export default function App() {
           100% { background-position: -100% 0; }
         }
 
-        @keyframes rebelSpin {
+        @keyframes spin {
           to { transform: rotate(360deg); }
         }
 
-        @keyframes rebelSlideDown {
-          from { opacity: 0; transform: translateY(-8px); }
-          to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
 
-      {/* Global Loading Indicators */}
+      {/* Global Interactive Loading Screen */}
       {isLoading && (
         <>
           <div className="rebel-global-topbar" />
-          <div className="rebel-global-pill">
-            <span className="rebel-global-spinner" />
-            <span>Loading... please wait ⏳</span>
+          <div className="rebel-loading-overlay">
+            <div className="rebel-loading-box">
+              <div className="rebel-spin-circle" />
+              <div>
+                <h4 style={{ margin: "0 0 6px 0", fontSize: "16px", fontWeight: "700", color: "#0f172a" }}>
+                  Loading Rebel Custom App...
+                </h4>
+                <p style={{ margin: 0, fontSize: "13px", color: "#64748b" }}>
+                  Connecting to Shopify & fetching your data ⏳
+                </p>
+              </div>
+            </div>
           </div>
         </>
       )}
@@ -104,7 +128,7 @@ export default function App() {
 
       <div
         style={{
-          opacity: isLoading ? 0.6 : 1,
+          opacity: isLoading ? 0.35 : 1,
           transition: "opacity 0.2s ease",
           pointerEvents: isLoading ? "none" : "auto",
         }}
@@ -117,7 +141,46 @@ export default function App() {
 
 // Boundary handlers for Shopify app
 export function ErrorBoundary() {
-  return boundary.error(useRouteError());
+  const error = useRouteError();
+  const msg = error instanceof Error ? error.message : typeof error === "string" ? error : JSON.stringify(error);
+  const isDb = msg.toLowerCase().includes("database") || msg.toLowerCase().includes("supabase") || msg.toLowerCase().includes("pooler");
+
+  return (
+    <div style={{ padding: "40px 20px", maxWidth: "600px", margin: "40px auto", textAlign: "center" }}>
+      <div style={{ background: "#ffffff", padding: "32px", borderRadius: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0" }}>
+        <div style={{ fontSize: "32px", marginBottom: "12px" }}>{isDb ? "⚡" : "⚠️"}</div>
+        <h3 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px", color: "#0f172a" }}>
+          {isDb ? "Database Server is Paused or Connecting" : "Application Notice"}
+        </h3>
+        <p style={{ fontSize: "13.5px", color: "#64748b", lineHeight: "1.5", marginBottom: "18px" }}>
+          {isDb
+            ? "Your Supabase PostgreSQL project is sleeping or paused. Please click 'Restore project' in the Supabase Dashboard, then click Refresh below."
+            : "An unexpected error occurred while loading this view."}
+        </p>
+        <div style={{ background: "#f8fafc", padding: "10px", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "#475569", marginBottom: "20px", wordBreak: "break-all" }}>
+          {msg}
+        </div>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: "10px 20px", borderRadius: "8px", border: "none", background: "#0f172a", color: "#fff", fontWeight: "700", fontSize: "13px", cursor: "pointer" }}
+          >
+            🔄 Refresh App
+          </button>
+          {isDb && (
+            <a
+              href="https://supabase.com/dashboard"
+              target="_blank"
+              rel="noreferrer"
+              style={{ padding: "10px 20px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#fff", color: "#0f172a", fontWeight: "700", fontSize: "13px", textDecoration: "none" }}
+            >
+              Supabase Dashboard ➔
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export const headers = (headersArgs: any) => {

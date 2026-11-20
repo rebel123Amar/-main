@@ -27,38 +27,53 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const page = parseInt(url.searchParams.get("page") || "1");
   const statusFilter = url.searchParams.get("status") || "all";
 
-  // Match any Rebel Gifts domain variant so no review is missed
-  const knownDomains = Array.from(
-    new Set([
-      session.shop,
-      "f83czm-2f.myshopify.com",
-      "rebelgifts-india.myshopify.com",
-      "rebelgifts.in",
-    ])
-  );
+  const knownDomains = [
+    session.shop,
+    "rebelgifts-india.myshopify.com",
+    "rebel-gifts-dev.myshopify.com",
+    "rebelgifts.in",
+  ];
 
-  const where = {
-    shopDomain: { in: knownDomains },
-    ...(statusFilter !== "all" ? { status: statusFilter } : {}),
-  };
+  try {
+    const where: any = {
+      shopDomain: { in: knownDomains },
+    };
 
-  const [reviews, total] = await Promise.all([
-    prisma.review.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * REVIEWS_PER_PAGE,
-      take: REVIEWS_PER_PAGE,
-    }),
-    prisma.review.count({ where }),
-  ]);
+    if (statusFilter !== "all") {
+      where.status = statusFilter;
+    }
 
-  return json({
-    reviews,
-    total,
-    page,
-    totalPages: Math.ceil(total / REVIEWS_PER_PAGE),
-    statusFilter,
-  });
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * 15,
+        take: 15,
+      }),
+      prisma.review.count({ where }),
+    ]);
+
+    return json({
+      reviews,
+      total,
+      page,
+      totalPages: Math.ceil(total / 15) || 1,
+      statusFilter,
+      shop: session.shop,
+      dbError: null,
+    });
+  } catch (err: any) {
+    console.error("[Reviews Loader DB Error]", err.message);
+    return json({
+      reviews: [],
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      statusFilter,
+      shop: session.shop,
+      dbError: err.message,
+    });
+  }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {

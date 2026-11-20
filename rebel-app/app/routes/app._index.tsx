@@ -19,40 +19,52 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session } = await authenticate.admin(request);
   const shop = session.shop;
 
-  const [
-    totalReviews,
-    pendingReviews,
-    approvedReviews,
-    totalOrders,
-    recentReviews,
-    recentOrders,
-  ] = await Promise.all([
-    prisma.review.count({ where: { shopDomain: shop } }),
-    prisma.review.count({ where: { shopDomain: shop, status: "pending" } }),
-    prisma.review.count({ where: { shopDomain: shop, status: "approved" } }),
-    prisma.orderCustomization.count({ where: { shopDomain: shop } }),
-    prisma.review.findMany({
-      where: { shopDomain: shop },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    prisma.orderCustomization.findMany({
-      where: { shopDomain: shop },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-  ]);
+  try {
+    const [
+      totalReviews,
+      pendingReviews,
+      approvedReviews,
+      totalOrders,
+      recentReviews,
+      recentOrders,
+    ] = await Promise.all([
+      prisma.review.count({ where: { shopDomain: shop } }),
+      prisma.review.count({ where: { shopDomain: shop, status: "pending" } }),
+      prisma.review.count({ where: { shopDomain: shop, status: "approved" } }),
+      prisma.orderCustomization.count({ where: { shopDomain: shop } }),
+      prisma.review.findMany({
+        where: { shopDomain: shop },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      }),
+      prisma.orderCustomization.findMany({
+        where: { shopDomain: shop },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      }),
+    ]);
 
-  return json({
-    shop,
-    stats: { totalReviews, pendingReviews, approvedReviews, totalOrders },
-    recentReviews,
-    recentOrders,
-  });
+    return json({
+      shop,
+      stats: { totalReviews, pendingReviews, approvedReviews, totalOrders },
+      recentReviews,
+      recentOrders,
+      dbError: null,
+    });
+  } catch (dbErr: any) {
+    console.error("[Dashboard DB Error]", dbErr.message);
+    return json({
+      shop,
+      stats: { totalReviews: 0, pendingReviews: 0, approvedReviews: 0, totalOrders: 0 },
+      recentReviews: [],
+      recentOrders: [],
+      dbError: dbErr.message || "Database connection paused or unreachable",
+    });
+  }
 };
 
 export default function Index() {
-  const { stats, recentReviews, recentOrders } = useLoaderData<typeof loader>();
+  const { stats, recentReviews, recentOrders, dbError } = useLoaderData<typeof loader>();
 
   const starDisplay = (rating: number) =>
     "★".repeat(rating) + "☆".repeat(5 - rating);
@@ -60,6 +72,27 @@ export default function Index() {
   return (
     <Page title="Rebel App Dashboard">
       <Layout>
+        {dbError && (
+          <Layout.Section>
+            <Banner
+              title="Database Paused or Connecting (Supabase Notice)"
+              tone="warning"
+              action={{
+                content: "Refresh Dashboard",
+                onAction: () => window.location.reload(),
+              }}
+              secondaryAction={{
+                content: "Open Supabase Dashboard",
+                url: "https://supabase.com/dashboard",
+                external: true,
+              }}
+            >
+              <p>
+                Could not connect to the database server. If your free Supabase project was paused due to inactivity, please click <strong>Restore project</strong> in your Supabase dashboard, then refresh this page.
+              </p>
+            </Banner>
+          </Layout.Section>
+        )}
         {stats.pendingReviews > 0 && (
           <Layout.Section>
             <Banner

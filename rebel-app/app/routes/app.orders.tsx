@@ -166,30 +166,49 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const page = parseInt(url.searchParams.get("page") || "1");
   const shop = session.shop;
 
-  // Sync recent orders from Shopify on load
-  const shopifyOrders = await syncRecentOrdersFromShopify(admin, shop);
+  let shopifyOrders: any[] = [];
+  try {
+    shopifyOrders = await syncRecentOrdersFromShopify(admin, shop);
+  } catch (syncErr: any) {
+    console.warn("[Orders Sync Warning]", syncErr.message);
+  }
 
   const where = { shopDomain: shop };
 
-  const [customOrders, total] = await Promise.all([
-    prisma.orderCustomization.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (page - 1) * ORDERS_PER_PAGE,
-      take: ORDERS_PER_PAGE,
-    }),
-    prisma.orderCustomization.count({ where }),
-  ]);
+  try {
+    const [customOrders, total] = await Promise.all([
+      prisma.orderCustomization.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * 20,
+        take: 20,
+      }),
+      prisma.orderCustomization.count({ where }),
+    ]);
 
-  return json({
-    orders: customOrders,
-    shopifyOrders,
-    total,
-    page,
-    totalPages: Math.ceil(total / ORDERS_PER_PAGE) || 1,
-    shop,
-    appUrl: "https://main-pink-phi.vercel.app",
-  });
+    return json({
+      orders: customOrders,
+      shopifyOrders,
+      total,
+      page,
+      totalPages: Math.ceil(total / 20) || 1,
+      shop,
+      appUrl: "https://main-pink-phi.vercel.app",
+      dbError: null,
+    });
+  } catch (dbErr: any) {
+    console.error("[Orders Loader DB Error]", dbErr.message);
+    return json({
+      orders: [],
+      shopifyOrders,
+      total: shopifyOrders.length,
+      page: 1,
+      totalPages: 1,
+      shop,
+      appUrl: "https://main-pink-phi.vercel.app",
+      dbError: dbErr.message,
+    });
+  }
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
