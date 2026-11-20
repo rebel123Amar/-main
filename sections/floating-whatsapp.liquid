@@ -36,20 +36,38 @@
     {
       "type": "range",
       "id": "side_space",
-      "label": "Side Spacing (px)",
-      "min": 10,
+      "label": "Side Spacing Desktop (px)",
+      "min": 6,
       "max": 120,
       "step": 2,
-      "default": 24
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "side_space_mobile",
+      "label": "Side Spacing Mobile (px)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 8
     },
     {
       "type": "range",
       "id": "size",
-      "label": "Button Size (px)",
+      "label": "Button Size Desktop (px)",
       "min": 44,
       "max": 100,
       "step": 2,
-      "default": 64
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "size_mobile",
+      "label": "Button Size Mobile (px)",
+      "min": 38,
+      "max": 70,
+      "step": 2,
+      "default": 48
     },
     {
       "type": "color",
@@ -82,26 +100,26 @@
 #wa-bounce-{{ section.id }} {
   position: fixed !important;
   bottom: {{ section.settings.bottom_space | default: 24 }}px !important;
-  left: {{ section.settings.side_space | default: 24 }}px !important;
+  left: {{ section.settings.side_space | default: 16 }}px !important;
   right: auto !important;
   z-index: 99999999 !important;
 }
 
 #wa-bounce-{{ section.id }}.left,
 #wa-bounce-{{ section.id }}.right {
-  left: {{ section.settings.side_space | default: 24 }}px !important;
+  left: {{ section.settings.side_space | default: 16 }}px !important;
   right: auto !important;
 }
 
 #wa-bounce-{{ section.id }} a {
-  width: {{ section.settings.size | default: 64 }}px;
-  height: {{ section.settings.size | default: 64 }}px;
+  width: {{ section.settings.size | default: 60 }}px;
+  height: {{ section.settings.size | default: 60 }}px;
   background: {{ section.settings.bg_color | default: '#25D366' }};
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 14px 35px rgba(0,0,0,0.35);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.3);
   text-decoration: none;
 }
 
@@ -129,6 +147,23 @@
   30% { transform: scale(1.1) translateY(-16px); }
   60% { transform: scale(1) translateY(0); }
   100% { transform: scale(1); }
+}
+
+/* Mobile: Push all the way to extreme left edge & compact size so words are never blocked */
+@media screen and (max-width: 768px) {
+  #wa-bounce-{{ section.id }},
+  #wa-bounce-{{ section.id }}.left,
+  #wa-bounce-{{ section.id }}.right {
+    left: {{ section.settings.side_space_mobile | default: 8 }}px !important;
+    right: auto !important;
+    bottom: {{ section.settings.bottom_space | default: 20 }}px !important;
+  }
+
+  #wa-bounce-{{ section.id }} a {
+    width: {{ section.settings.size_mobile | default: 48 }}px !important;
+    height: {{ section.settings.size_mobile | default: 48 }}px !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.28) !important;
+  }
 }
 </style>
 
