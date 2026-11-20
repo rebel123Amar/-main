@@ -161,10 +161,31 @@ async function syncRecentOrdersFromShopify(admin: any, shop: string): Promise<En
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1");
-  const shop = session.shop;
+  let shop = "rebelgifts-india.myshopify.com";
+  let admin: any = null;
+  let session: any = null;
+
+  try {
+    const auth = await authenticate.admin(request);
+    admin = auth.admin;
+    session = auth.session;
+    shop = session.shop;
+  } catch (authErr: any) {
+    if (authErr instanceof Response) throw authErr;
+    console.error("[Orders Auth/DB Error]", authErr.message);
+    return json({
+      orders: [],
+      shopifyOrders: [],
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      shop,
+      appUrl: "https://main-pink-phi.vercel.app",
+      dbError: "Database paused at Supabase: " + (authErr.message || "Connection failed"),
+    });
+  }
 
   let shopifyOrders: any[] = [];
   try {

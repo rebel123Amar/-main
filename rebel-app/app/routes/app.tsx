@@ -142,41 +142,67 @@ export default function App() {
 // Boundary handlers for Shopify app
 export function ErrorBoundary() {
   const error = useRouteError();
-  const msg = error instanceof Error ? error.message : typeof error === "string" ? error : JSON.stringify(error);
-  const isDb = msg.toLowerCase().includes("database") || msg.toLowerCase().includes("supabase") || msg.toLowerCase().includes("pooler");
+  let msg = "Unexpected Server Error";
+  if (error instanceof Error) {
+    msg = error.message;
+  } else if (typeof error === "string") {
+    msg = error;
+  } else if (error && typeof error === "object") {
+    const anyErr = error as any;
+    msg = anyErr.data?.message || anyErr.data || anyErr.statusText || JSON.stringify(error);
+  }
 
   return (
     <div style={{ padding: "40px 20px", maxWidth: "600px", margin: "40px auto", textAlign: "center" }}>
-      <div style={{ background: "#ffffff", padding: "32px", borderRadius: "16px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0" }}>
-        <div style={{ fontSize: "32px", marginBottom: "12px" }}>{isDb ? "⚡" : "⚠️"}</div>
-        <h3 style={{ fontSize: "18px", fontWeight: "700", marginBottom: "8px", color: "#0f172a" }}>
-          {isDb ? "Database Server is Paused or Connecting" : "Application Notice"}
+      <div style={{ background: "#ffffff", padding: "36px 30px", borderRadius: "20px", boxShadow: "0 15px 35px rgba(0,0,0,0.08)", border: "1px solid #e2e8f0" }}>
+        <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#fef3c7", color: "#d97706", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: "30px", marginBottom: "16px" }}>
+          ⚡
+        </div>
+        <h3 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "10px", color: "#0f172a" }}>
+          Database Server Paused (Supabase)
         </h3>
-        <p style={{ fontSize: "13.5px", color: "#64748b", lineHeight: "1.5", marginBottom: "18px" }}>
-          {isDb
-            ? "Your Supabase PostgreSQL project is sleeping or paused. Please click 'Restore project' in the Supabase Dashboard, then click Refresh below."
-            : "An unexpected error occurred while loading this view."}
+        <p style={{ fontSize: "14px", color: "#475569", lineHeight: "1.6", marginBottom: "20px" }}>
+          Aapka Supabase database project free-tier inactivity ki wajah se <strong>Pause</strong> ho gaya hai. 
+          Kripya niche button par click karke Supabase me <strong>"Restore project"</strong> karein, phir Refresh App par click karein.
         </p>
-        <div style={{ background: "#f8fafc", padding: "10px", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "#475569", marginBottom: "20px", wordBreak: "break-all" }}>
+        <div style={{ background: "#f8fafc", padding: "12px", borderRadius: "8px", fontSize: "12px", fontFamily: "monospace", color: "#64748b", marginBottom: "24px", wordBreak: "break-all" }}>
           {msg}
         </div>
-        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+          <a
+            href="https://supabase.com/dashboard/project/nbdncdqteejymeitttzn"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              padding: "12px 22px",
+              borderRadius: "10px",
+              background: "#16a34a",
+              color: "#ffffff",
+              fontWeight: "700",
+              fontSize: "14px",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              boxShadow: "0 4px 12px rgba(22, 163, 74, 0.25)"
+            }}
+          >
+            🚀 Open Supabase & Restore Project ➔
+          </a>
           <button
             onClick={() => window.location.reload()}
-            style={{ padding: "10px 20px", borderRadius: "8px", border: "none", background: "#0f172a", color: "#fff", fontWeight: "700", fontSize: "13px", cursor: "pointer" }}
+            style={{
+              padding: "12px 22px",
+              borderRadius: "10px",
+              border: "1px solid #cbd5e1",
+              background: "#ffffff",
+              color: "#0f172a",
+              fontWeight: "700",
+              fontSize: "14px",
+              cursor: "pointer"
+            }}
           >
             🔄 Refresh App
           </button>
-          {isDb && (
-            <a
-              href="https://supabase.com/dashboard"
-              target="_blank"
-              rel="noreferrer"
-              style={{ padding: "10px 20px", borderRadius: "8px", border: "1px solid #cbd5e1", background: "#fff", color: "#0f172a", fontWeight: "700", fontSize: "13px", textDecoration: "none" }}
-            >
-              Supabase Dashboard ➔
-            </a>
-          )}
         </div>
       </div>
     </div>

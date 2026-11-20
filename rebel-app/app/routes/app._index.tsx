@@ -16,10 +16,12 @@ import {
 import { authenticate, prisma } from "../shopify.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
-  const shop = session.shop;
+  let shop = "rebelgifts-india.myshopify.com";
 
   try {
+    const auth = await authenticate.admin(request);
+    shop = auth.session.shop;
+
     const [
       totalReviews,
       pendingReviews,
@@ -51,14 +53,15 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       recentOrders,
       dbError: null,
     });
-  } catch (dbErr: any) {
-    console.error("[Dashboard DB Error]", dbErr.message);
+  } catch (err: any) {
+    if (err instanceof Response) throw err;
+    console.error("[Dashboard DB Error]", err.message);
     return json({
       shop,
       stats: { totalReviews: 0, pendingReviews: 0, approvedReviews: 0, totalOrders: 0 },
       recentReviews: [],
       recentOrders: [],
-      dbError: dbErr.message || "Database connection paused or unreachable",
+      dbError: "Database paused at Supabase or unreachable: " + (err.message || "Connection failed"),
     });
   }
 };
@@ -83,7 +86,7 @@ export default function Index() {
               }}
               secondaryAction={{
                 content: "Open Supabase Dashboard",
-                url: "https://supabase.com/dashboard",
+                url: "https://supabase.com/dashboard/project/nbdncdqteejymeitttzn",
                 external: true,
               }}
             >

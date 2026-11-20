@@ -27,8 +27,18 @@ const DEFAULT_SETTINGS = {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
-  const shop = session.shop;
+  let shop = "rebelgifts-india.myshopify.com";
+  try {
+    const auth = await authenticate.admin(request);
+    shop = auth.session.shop;
+  } catch (authErr: any) {
+    if (authErr instanceof Response) throw authErr;
+    console.error("[Settings Auth/DB Error]", authErr.message);
+    return json({
+      settings: { ...DEFAULT_SETTINGS, id: "fallback", shopDomain: shop },
+      dbError: "Database paused at Supabase: " + (authErr.message || "Connection failed"),
+    });
+  }
 
   try {
     let settings = await prisma.appSettings.findUnique({
@@ -145,7 +155,7 @@ export default function SettingsPage() {
               }}
               secondaryAction={{
                 content: "Open Supabase Dashboard",
-                url: "https://supabase.com/dashboard",
+                url: "https://supabase.com/dashboard/project/nbdncdqteejymeitttzn",
                 external: true,
               }}
             >

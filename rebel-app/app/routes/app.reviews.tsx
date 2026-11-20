@@ -22,7 +22,23 @@ import { authenticate, prisma } from "../shopify.server";
 const REVIEWS_PER_PAGE = 10;
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
+  let shop = "rebelgifts-india.myshopify.com";
+  try {
+    const auth = await authenticate.admin(request);
+    shop = auth.session.shop;
+  } catch (authErr: any) {
+    if (authErr instanceof Response) throw authErr;
+    console.error("[Reviews Auth/DB Error]", authErr.message);
+    return json({
+      reviews: [],
+      total: 0,
+      page: 1,
+      totalPages: 1,
+      statusFilter,
+      shop,
+      dbError: "Database paused at Supabase: " + (authErr.message || "Connection failed"),
+    });
+  }
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get("page") || "1");
   const statusFilter = url.searchParams.get("status") || "all";

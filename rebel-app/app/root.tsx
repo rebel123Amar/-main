@@ -27,26 +27,22 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
-  const errorMessage =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-      ? error
-      : JSON.stringify(error);
-
-  const isDbError =
-    errorMessage.toLowerCase().includes("database") ||
-    errorMessage.toLowerCase().includes("prisma") ||
-    errorMessage.toLowerCase().includes("supabase") ||
-    errorMessage.toLowerCase().includes("pooler") ||
-    errorMessage.toLowerCase().includes("can't reach database server");
+  let errorMessage = "Unexpected Server Error";
+  if (error instanceof Error) {
+    errorMessage = error.message;
+  } else if (typeof error === "string") {
+    errorMessage = error;
+  } else if (error && typeof error === "object") {
+    const anyErr = error as any;
+    errorMessage = anyErr.data?.message || anyErr.data || anyErr.statusText || JSON.stringify(error);
+  }
 
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Rebel Custom App — Notice</title>
+        <title>Rebel Custom App — Database Notice</title>
         <Links />
       </head>
       <body
@@ -79,8 +75,8 @@ export function ErrorBoundary() {
               width: "60px",
               height: "60px",
               borderRadius: "50%",
-              background: isDbError ? "#fef3c7" : "#fee2e2",
-              color: isDbError ? "#d97706" : "#dc2626",
+              background: "#fef3c7",
+              color: "#d97706",
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -88,17 +84,16 @@ export function ErrorBoundary() {
               marginBottom: "16px",
             }}
           >
-            {isDbError ? "⚡" : "⚠️"}
+            ⚡
           </div>
 
           <h2 style={{ fontSize: "20px", fontWeight: "800", margin: "0 0 10px 0", color: "#0f172a" }}>
-            {isDbError ? "Database Server Sleeping or Paused" : "Application Temporary Issue"}
+            Database Server Paused (Supabase)
           </h2>
 
           <p style={{ fontSize: "14px", color: "#64748b", lineHeight: "1.6", margin: "0 0 20px 0" }}>
-            {isDbError
-              ? "Your Supabase PostgreSQL database project appears to be paused due to free-tier inactivity or reconnecting. Please unpause/restore it in the Supabase Dashboard, then click Reload."
-              : "A temporary issue occurred while loading this view. Please click the button below to reload."}
+            Aapka Supabase PostgreSQL database project inactive hone ki wajah se <strong>Pause</strong> ho gaya hai. 
+            Niche button par click karke Supabase me <strong>"Restore project"</strong> karein, phir Refresh App dabayein.
           </p>
 
           <div
@@ -120,43 +115,39 @@ export function ErrorBoundary() {
           </div>
 
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <a
+              href="https://supabase.com/dashboard/project/nbdncdqteejymeitttzn"
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: "12px 22px",
+                borderRadius: "8px",
+                background: "#16a34a",
+                color: "#ffffff",
+                fontWeight: "700",
+                fontSize: "14px",
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+            >
+              🚀 Open Supabase & Restore Project ➔
+            </a>
             <button
               onClick={() => window.location.reload()}
               style={{
                 padding: "12px 22px",
                 borderRadius: "8px",
-                border: "none",
-                background: "#0f172a",
-                color: "#ffffff",
+                border: "1px solid #cbd5e1",
+                background: "#ffffff",
+                color: "#0f172a",
                 fontWeight: "700",
                 fontSize: "14px",
                 cursor: "pointer",
-                transition: "opacity 0.2s",
               }}
             >
-              🔄 Reload App
+              🔄 Refresh App
             </button>
-            {isDbError && (
-              <a
-                href="https://supabase.com/dashboard"
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  padding: "12px 22px",
-                  borderRadius: "8px",
-                  border: "1px solid #cbd5e1",
-                  background: "#ffffff",
-                  color: "#0f172a",
-                  fontWeight: "700",
-                  fontSize: "14px",
-                  textDecoration: "none",
-                  display: "inline-flex",
-                  alignItems: "center",
-                }}
-              >
-                Go to Supabase Dashboard ➔
-              </a>
-            )}
           </div>
         </div>
         <Scripts />
