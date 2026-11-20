@@ -77,6 +77,18 @@
 
       <!-- ================= CART TIERED REWARDS PROGRESS BAR (BLACK TIMELINE UI WITH CELEBRATION) ================= -->
       <style>
+        /* Hide floating WhatsApp icon whenever cart drawer is open */
+        body:has(cart-drawer.active) [id^="wa-bounce-"],
+        body:has(.drawer.active) [id^="wa-bounce-"],
+        body:has(#CartDrawer.active) [id^="wa-bounce-"],
+        body.overflow-hidden [id^="wa-bounce-"],
+        body.cart-drawer-open [id^="wa-bounce-"] {
+          display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
+        }
+
         /* Ensure cart drawer content layout is always properly structured when not empty */
         cart-drawer:not(.is-empty) .drawer__inner,
         .drawer__inner:not(.is-empty) {

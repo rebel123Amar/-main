@@ -103,12 +103,27 @@
   left: {{ section.settings.side_space | default: 16 }}px !important;
   right: auto !important;
   z-index: 99999999 !important;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 #wa-bounce-{{ section.id }}.left,
 #wa-bounce-{{ section.id }}.right {
   left: {{ section.settings.side_space | default: 16 }}px !important;
   right: auto !important;
+}
+
+/* HIDE WHATSAPP BUTTON INSTANTLY WHEN CART DRAWER IS OPEN */
+body:has(cart-drawer.active) #wa-bounce-{{ section.id }},
+body:has(.drawer.active) #wa-bounce-{{ section.id }},
+body:has(#CartDrawer.active) #wa-bounce-{{ section.id }},
+body.overflow-hidden #wa-bounce-{{ section.id }},
+body.cart-drawer-open #wa-bounce-{{ section.id }},
+body.is-drawer-open #wa-bounce-{{ section.id }},
+#wa-bounce-{{ section.id }}.cart-open-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 #wa-bounce-{{ section.id }} a {
@@ -183,4 +198,50 @@
     >
   </a>
 </div>
+
+<script>
+  (function() {
+    var waBtn = document.getElementById("wa-bounce-{{ section.id }}");
+    if (!waBtn) return;
+
+    function checkDrawerState() {
+      var drawer = document.querySelector("cart-drawer, #CartDrawer, .drawer");
+      var isBodyOverflow = document.body.classList.contains("overflow-hidden") || document.body.classList.contains("cart-drawer-open");
+      var isDrawerActive = drawer && (drawer.classList.contains("active") || (drawer.getAttribute("aria-hidden") === "false" && drawer.classList.contains("animate")));
+
+      if (isDrawerActive || isBodyOverflow) {
+        waBtn.classList.add("cart-open-hidden");
+        waBtn.style.display = "none";
+      } else {
+        waBtn.classList.remove("cart-open-hidden");
+        waBtn.style.display = "";
+      }
+    }
+
+    var observer = new MutationObserver(checkDrawerState);
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+    var drawerEl = document.querySelector("cart-drawer, #CartDrawer");
+    if (drawerEl) {
+      observer.observe(drawerEl, { attributes: true, attributeFilter: ["class", "aria-hidden"] });
+    }
+
+    ["cart-drawer:open", "cart:updated", "cart:refresh"].forEach(function(ev) {
+      document.addEventListener(ev, function() {
+        setTimeout(checkDrawerState, 50);
+      });
+    });
+
+    document.addEventListener("click", function(e) {
+      if (e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon")) {
+        setTimeout(checkDrawerState, 60);
+      }
+      if (e.target.closest(".drawer__close, #CartDrawer-Overlay, [data-drawer-close]")) {
+        setTimeout(checkDrawerState, 100);
+      }
+    });
+
+    checkDrawerState();
+  })();
+</script>
 {% endif %}
