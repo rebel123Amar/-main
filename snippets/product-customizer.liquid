@@ -638,10 +638,24 @@
   function setupHeaderCartInterceptor() {
     document.addEventListener("click", function(e) {
       const cartTrigger = e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon");
-      if (!cartTrigger) return;
+      if (!cartTrigger || cartTrigger.closest(".rebel-slide-drawer, cart-drawer, #CartDrawer, .drawer__footer")) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
       const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
-      if (!dawnDrawer) {
-        e.preventDefault(); e.stopPropagation();
+      if (dawnDrawer) {
+        if (typeof dawnDrawer.open === "function") {
+          dawnDrawer.open(cartTrigger);
+        } else {
+          dawnDrawer.classList.add("animate", "active");
+          dawnDrawer.classList.remove("is-empty");
+          document.body.classList.add("overflow-hidden");
+        }
+        document.dispatchEvent(new CustomEvent("cart:updated"));
+        document.dispatchEvent(new CustomEvent("cart-drawer:open"));
+        if (typeof window.__CartPBRefresh === "function") window.__CartPBRefresh();
+      } else {
         renderRebelSlideDrawer();
       }
     }, true);
@@ -901,11 +915,24 @@
   function setupHeaderCartInterceptor() {
     document.addEventListener("click", function(e) {
       const cartTrigger = e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon");
-      if (!cartTrigger || cartTrigger.closest(".rebel-slide-drawer")) return;
+      if (!cartTrigger || cartTrigger.closest(".rebel-slide-drawer, cart-drawer, #CartDrawer, .drawer__footer")) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
       const dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
-      if (!dawnDrawer) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (dawnDrawer) {
+        if (typeof dawnDrawer.open === "function") {
+          dawnDrawer.open(cartTrigger);
+        } else {
+          dawnDrawer.classList.add("animate", "active");
+          dawnDrawer.classList.remove("is-empty");
+          document.body.classList.add("overflow-hidden");
+        }
+        document.dispatchEvent(new CustomEvent("cart:updated"));
+        document.dispatchEvent(new CustomEvent("cart-drawer:open"));
+        if (typeof window.__CartPBRefresh === "function") window.__CartPBRefresh();
+      } else {
         renderRebelSlideDrawer();
       }
     }, true);

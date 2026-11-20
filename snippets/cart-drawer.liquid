@@ -2933,6 +2933,31 @@
         }
       }, true);
 
+      // Bulletproof cart icon click handler: Force cart drawer to open instead of navigating to /cart page
+      document.addEventListener("click", function (e) {
+        var cartTrigger = e.target.closest("#cart-icon-bubble, a[href*='/cart'], .header__icon--cart, .cart-icon, [data-cart-drawer-trigger]");
+        if (!cartTrigger) return;
+        if (cartTrigger.closest("cart-drawer, #CartDrawer, .drawer__footer, .rebel-pre-checkout-overlay")) return;
+
+        var dawnDrawer = document.querySelector("cart-drawer, #CartDrawer");
+        if (dawnDrawer) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (typeof dawnDrawer.open === "function") {
+            dawnDrawer.open(cartTrigger);
+          } else {
+            dawnDrawer.classList.add("animate", "active");
+            dawnDrawer.classList.remove("is-empty");
+            document.body.classList.add("overflow-hidden");
+            var inner = dawnDrawer.querySelector(".drawer__inner");
+            if (inner) inner.classList.remove("is-empty");
+          }
+          document.dispatchEvent(new CustomEvent("cart:updated"));
+          document.dispatchEvent(new CustomEvent("cart-drawer:open"));
+          if (typeof window.__CartPBRefresh === "function") window.__CartPBRefresh();
+        }
+      }, true);
+
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", setupModalEvents);
       } else {
